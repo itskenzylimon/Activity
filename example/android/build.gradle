@@ -23,7 +23,7 @@ subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
-    project.evaluationDependsOn(':tasks')
+    project.evaluationDependsOn(':app')
 }
 
 task clean(type: Delete) {

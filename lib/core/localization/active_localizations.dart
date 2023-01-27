@@ -1,6 +1,7 @@
 part of 'localizations.dart';
 
 
+
 class ActiveLocalization {
   final Locale locale;
 

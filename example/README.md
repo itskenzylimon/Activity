@@ -1,6 +1,6 @@
 # example
 
-Example App based on Activity.
+A new Flutter project.
 
 ## Getting Started
 

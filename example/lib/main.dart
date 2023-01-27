@@ -1,4 +1,5 @@
 import 'package:example/controller.dart';
+import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:activity/activity.dart';
@@ -7,7 +8,46 @@ import 'model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // try {
+  //
+  //   ActiveSocket activeSocket = WebSocket();
+  //   activeSocket.open('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
+  //   activeSocket.onSuccess(() {
+  //     print("onSuccess");
+  //   });
+  //   activeSocket.onFailure(() {
+  //     print("onFailure");
+  //   });
+  //   activeSocket.onMessage((data) {
+  //     print('onMessage @@@');
+  //     print(data);
+  //     if(data == 'Wewe ni'){
+  //       activeSocket.send('Fala....');
+  //     }
+  //     print('onMessage');
+  //   });
+  //   activeSocket.onClose(() {
+  //     print('onClose');
+  //   });
+  //
+  //   ActiveRequest activeRequest =  ActiveRequest();
+  //   activeRequest.setUp = RequestSetUp(
+  //       idleTimeout: 10,
+  //       connectionTimeout: 10,
+  //       logResponse: true,
+  //       withTrustedRoots: true,
+  //   );
+  //
+  //   ActiveResponse activeResponse = await activeRequest
+  //       .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
+  //
+  // } catch (error){
+  //   printError(error);
+  // }
+
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
@@ -18,26 +58,26 @@ class MyApp extends StatelessWidget {
       title: 'Activity Task App',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Activity(
-        BaseController(),
+        MainController(),
         onActivityStateChanged: ()=>
             DateTime.now().microsecondsSinceEpoch.toString(),
         child: TaskView(
-          activeController: BaseController(),
+          activeController: TaskController(),
         ),
       ),
     );
   }
 }
 
-class TaskView extends ActiveView<BaseController> {
+class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
   @override
-  ActiveState<ActiveView<ActiveController>, BaseController> createActivity() =>
+  ActiveState<ActiveView<ActiveController>, TaskController> createActivity() =>
       _TaskViewState(activeController);
 }
 
-class _TaskViewState extends ActiveState<TaskView, BaseController> {
+class _TaskViewState extends ActiveState<TaskView, TaskController> {
   _TaskViewState(super.activeController);
 
   @override
@@ -45,27 +85,29 @@ class _TaskViewState extends ActiveState<TaskView, BaseController> {
     // TODO: implement initState
     super.initState();
     activeController.initCalculations();
+    activeController.validateJSON();
   }
 
+  // late MainController mainController;
   // @override
   // void didChangeDependencies() {
-  //   Activity.getActivity<BaseController>(context).totalTaskLevels();
+  //   mainController = Activity.getActivity<MainController>(context);
   //   super.didChangeDependencies();
   // }
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       debugShowCheckedModeBanner: true,
-      title: 'This is Activity',
+      title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
       theme: ThemeData(
         primarySwatch: activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: Scaffold(
+        backgroundColor: activeController.appBackgroundColor.value,
         appBar: AppBar(
-          title: const Text('Activity App'),
+          title: Text(activeController.appTitle.value),
         ),
         body: SafeArea(
             child: Column(

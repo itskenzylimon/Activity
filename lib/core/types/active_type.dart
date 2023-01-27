@@ -43,6 +43,9 @@ class ActiveType<T> implements ActiveTypeValue<T> {
   late T _originalValue;
   T get originalValue => _originalValue;
 
+  late T _mockValue;
+  T get mockValue => _mockValue;
+
   T _value;
 
   @override
