@@ -31,16 +31,16 @@ void main() async {
   //     print('onClose');
   //   });
   //
-  //   ActiveRequest activeRequest =  ActiveRequest();
-  //   activeRequest.setUp = RequestSetUp(
-  //       idleTimeout: 10,
-  //       connectionTimeout: 10,
-  //       logResponse: true,
-  //       withTrustedRoots: true,
-  //   );
-  //
-  //   ActiveResponse activeResponse = await activeRequest
-  //       .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
+    ActiveRequest activeRequest =  ActiveRequest();
+    activeRequest.setUp = RequestSetUp(
+        idleTimeout: 10,
+        connectionTimeout: 10,
+        logResponse: true,
+        withTrustedRoots: true,
+    );
+
+    ActiveResponse activeResponse = await activeRequest
+        .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
   //
   // } catch (error){
   //   printError(error);

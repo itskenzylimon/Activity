@@ -44,10 +44,11 @@ class MainController extends ActiveController {
   /// This is a simple Object that we use against our schema to validate
   /// data type and our desired setup.
   var sampleJSON = {
-    "email": "johndoe@gmail.com",
-    "phone": "254-123-45678",
+    "email": "johndoegmail.com",
+    "phone": "2541234567",
     "birthdate": "2020-01-01",
-    "address": "Area 254"
+    "address": "Area 254",
+    "name": "Test"
   };
 
   /// This is the schema definition.

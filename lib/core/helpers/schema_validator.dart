@@ -101,7 +101,7 @@ class SchemaValidator {
       }
 
       if (validations['phone'] != null && validations['phone']) {
-        final phoneRegex = RegExp(r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$');
+        final phoneRegex = RegExp(r'^(?:[+0]9)?[0-9]{10}$');
         if (!phoneRegex.hasMatch(value)) {
           errorSchema.putIfAbsent(key, () => customErrors == null ?
           "$key field is not a valid phone number" :
