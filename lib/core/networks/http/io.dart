@@ -81,11 +81,12 @@ class HttpActiveRequest {
         bool saveResponse = false,
       }) async {
     final endpoint = Uri.parse(params.endpoint);
+
     Uri uri = Uri(
-      scheme: setUp.schemePath,
+      scheme: endpoint.scheme,
       queryParameters: params.queryParameters,
-      path: '/fact',
-      host: 'catfact.ninja',
+      path: endpoint.path,
+      host: endpoint.host,
     );
 
     final io.HttpClient apiRequest = _httpClientSetup(
@@ -133,11 +134,13 @@ class HttpActiveRequest {
         bool saveResponse = false,
       }) async {
     final endpoint = Uri.parse(params.endpoint);
+    final endpoint = Uri.parse(params.endpoint);
+
     Uri uri = Uri(
-      scheme: setUp.schemePath,
+      scheme: endpoint.scheme,
       queryParameters: params.queryParameters,
-      path: '/fact',
-      host: 'catfact.ninja',
+      path: endpoint.path,
+      host: endpoint.host,
     );
 
     final io.HttpClient apiRequest = _httpClientSetup(
@@ -185,11 +188,12 @@ class HttpActiveRequest {
         bool saveResponse = false,
       }) async {
     final endpoint = Uri.parse(params.endpoint);
+
     Uri uri = Uri(
-      scheme: setUp.schemePath,
+      scheme: endpoint.scheme,
       queryParameters: params.queryParameters,
-      path: '/fact',
-      host: 'catfact.ninja',
+      path: endpoint.path,
+      host: endpoint.host,
     );
 
     final io.HttpClient apiRequest = _httpClientSetup(
