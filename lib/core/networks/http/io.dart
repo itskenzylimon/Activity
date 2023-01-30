@@ -8,7 +8,7 @@ class HttpActiveRequest {
     final io.HttpClient apiRequest = io.HttpClient();
     io.SecurityContext securityContext =
         io.SecurityContext(withTrustedRoots: withTrustedRoots);
-    securityContext.allowLegacyUnsafeRenegotiation == true;
+    // securityContext.allowLegacyUnsafeRenegotiation == true;
     if (privateKey != null) {
       if (privateKeyPassword != null) {
         securityContext.usePrivateKey(privateKey, password: privateKeyPassword);

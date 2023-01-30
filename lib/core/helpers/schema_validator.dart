@@ -1,5 +1,3 @@
-import 'logger.dart';
-
 class SchemaResponse {
   bool valid;
   Map<String, dynamic> schema;
