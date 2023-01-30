@@ -16,3 +16,7 @@
 
 * Fixed HTTP request uri problem.
 * Fixed Schema validation on phone types.
+
+## 1.5.2+4
+* Pub dev warnings fix
+* Post, Put and Delete Http Requests Minor bug fix

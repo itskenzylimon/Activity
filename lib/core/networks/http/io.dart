@@ -134,7 +134,6 @@ class HttpActiveRequest {
         bool saveResponse = false,
       }) async {
     final endpoint = Uri.parse(params.endpoint);
-    final endpoint = Uri.parse(params.endpoint);
 
     Uri uri = Uri(
       scheme: endpoint.scheme,

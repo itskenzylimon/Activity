@@ -58,7 +58,7 @@ Open `pubspec.yaml` and add activity package to your dependencies
 
 ```yaml  
   dependencies:  
-    activity: ^1.5.1+3  
+    activity: ^1.5.2+4 
 ```  
 
 ## Example app
