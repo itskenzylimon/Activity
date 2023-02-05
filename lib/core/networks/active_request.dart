@@ -54,17 +54,19 @@ class Params {
 class ActiveResponse {
   int statusCode;
   String endpoint = '';
-  dynamic data;
+  String? errors;
+  String? data;
 
   ActiveResponse({
     required this.statusCode,
     required this.endpoint,
+    this.errors,
     this.data,
   });
 
   @override
   String toString() {
-    return "( $statusCode ) : $endpoint \n $data";
+    return "( $statusCode ) : $endpoint \n $data \n $errors";
   }
 }
 

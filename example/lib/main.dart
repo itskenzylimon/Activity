@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:example/controller.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +11,11 @@ import 'model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  ENVSetup envSetup = ENVSetup();
+  var currentPath = Directory.current.path;
+  print(currentPath);
+  // print(envSetup.readENVFile('.env'));
 
   // try {
   //
@@ -31,16 +39,19 @@ void main() async {
   //     print('onClose');
   //   });
   //
-    ActiveRequest activeRequest =  ActiveRequest();
-    activeRequest.setUp = RequestSetUp(
-        idleTimeout: 10,
-        connectionTimeout: 10,
-        logResponse: true,
-        withTrustedRoots: true,
-    );
+  //   ActiveRequest activeRequest =  ActiveRequest();
+  //   activeRequest.setUp = RequestSetUp(
+  //       idleTimeout: 10,
+  //       connectionTimeout: 10,
+  //       logResponse: true,
+  //       withTrustedRoots: true,
+  //   );
+  //
+  //   ActiveResponse activeResponse = await activeRequest
+  //       .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
+  //        final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
+  //   printError(activeResponse.data);
 
-    ActiveResponse activeResponse = await activeRequest
-        .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
   //
   // } catch (error){
   //   printError(error);
@@ -84,6 +95,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // activeController.memory.stageMemory();
+    // activeController.syncMemory();
     activeController.initCalculations();
     activeController.validateJSON();
   }
@@ -97,6 +110,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
@@ -138,6 +152,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                     activeController.taskName.text.isNotEmpty &&
                                     activeController.taskBody.text.isNotEmpty) {
                                   activeController.saveEntry();
+                                  // activeController.syncMemory();
                                 }
                               },
                               child: const Text('OK'),
@@ -239,6 +254,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                                         activeController.taskLevel.text.isNotEmpty &&
                                                         activeController.taskBody.text.isNotEmpty) {
                                                       activeController.editUserTask(activeController.tasks[i], i);
+                                                      // activeController.syncMemory();
                                                     }
                                                     Navigator.pop(context, 'Cancel');
                                                   },
@@ -267,6 +283,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                               onPressed: () {
                                                 Navigator.pop(context, 'OK');
                                                 activeController.deleteUserTask(activeController.tasks[i]);
+                                                // activeController.syncMemory();
                                               },
                                               child: const Text('OK'),
                                             ),
@@ -386,5 +403,49 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         ));
   }
 
+}
 
+class MiniBrowser extends StatefulWidget {
+  final String url;
+
+  MiniBrowser({required this.url});
+
+  @override
+  _MiniBrowserState createState() => _MiniBrowserState();
+}
+
+class _MiniBrowserState extends State<MiniBrowser> {
+  final HttpClient _client = HttpClient();
+  String _html = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPage();
+  }
+
+  void _fetchPage() async {
+    try {
+      HttpClientRequest request =
+      await _client.getUrl(Uri.parse(widget.url));
+      HttpClientResponse response = await request.close();
+      response.transform(utf8.decoder).listen((html) {
+        setState(() {
+          _html = html;
+        });
+      });
+    } catch (e) {
+      // Handle any errors
+      print(e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        // child: Html(data: _html),
+      ),
+    );
+  }
 }

@@ -13,6 +13,7 @@ export 'core/src/view.dart';
 export 'core/helpers/strings.dart';
 export 'core/helpers/logger.dart';
 export 'core/helpers/schema_validator.dart';
+export 'core/helpers/env.dart';
 
 //Memory
 export 'core/memory/memory.dart';

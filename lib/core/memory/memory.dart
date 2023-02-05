@@ -1,10 +1,17 @@
-import '../types/active_memory.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import '../helpers/logger.dart';
 
 class Memory {
-  Memory._();
-  static final Memory memory = Memory._();
+  Memory({String? filename}) :
+        _filename = filename;
+  final String? _filename;
 
-  final Map<String, ActiveMemory> _data = {};
+  static final Memory memory = Memory();
+
+  Map<String, dynamic> _data = {};
 
   bool get isDataEmpty {
     _data.removeWhere((key, value) => _isMemoryActive(value));
@@ -13,7 +20,38 @@ class Memory {
 
   bool get isMemoryEmpty => !isDataEmpty;
 
-  /// Get all data from [ActiveMemory].
+  // /// Get all data from [Memory].
+  // ///
+  // /// Will return empty list if entries are not found
+  // stageMemory() async {
+  //   if (_filename != null) {
+  //     FileStorage fileStorage = FileStorage(_filename!);
+  //     _data = await fileStorage.read();
+  //   }
+  // }
+  //
+  //
+  // /// Get all data from [Memory].
+  // ///
+  // /// Will return empty list if entries are not found
+  // syncMemory() async {
+  //   if (_filename == null) {
+  //     throw Exception('Add filePath where you\'ve init Memory(filename: Directory.current.path)');
+  //   } else {
+  //     printInfo('{{{{{text}}}}}');
+  //     printInfo(_data);
+  //     printInfo('{{{{{text}}}}}');
+  //     FileStorage fileStorage = FileStorage(_filename!);
+  //     _data = await fileStorage.read();
+  //     printInfo('{{{{{text}}}}}');
+  //     printInfo(_data);
+  //     printInfo('{{{{{text}}}}}');
+  //
+  //   }
+  // }
+
+
+  /// Get all data from [Memory].
   ///
   /// Will return empty list if entries are not found
   List readMemories() {
@@ -21,18 +59,18 @@ class Memory {
   }
 
 
-  /// Get data from [ActiveMemory].
+  /// Get data from [Memory].
   ///
   /// Will return null if entry is not found
-  ActiveMemory? readMemory<ActiveMemory>(String key) {
+  readMemory(String key) {
     if (_validateMemory(key)) {
       final item = _data[key]!;
-      return item.activeType;
+      return item.mem;
     }
     return null;
   }
 
-  /// It creates an entry in [ActiveMemory] if the value does not exist.
+  /// It creates an entry in [Memory] if the value does not exist.
   ///
   /// If the [key] is not found it returns [true].
   ///
@@ -41,33 +79,32 @@ class Memory {
   /// Use this in situations where you are uncertain if a [key] exists and
   /// your not planning to update the current value.
   bool createMemory<T>(String key,
-      T activeType, {Duration? duration}) {
+      T mem, {Duration? duration}) {
     if (!_validateMemory(key)) {
-      createMemory(key, activeType, duration: duration);
+      createMemory(key, mem, duration: duration);
       return true;
     }
     return false;
   }
 
-  /// Creates new entry in [ActiveMemory].
+  /// Creates new entry in [Memory].
   ///
   /// If a value exist it does an update in initialize.
   void upsertMemory<T>(String key,
-      T activeType, {Duration? duration}) {
-    _data[key] = ActiveMemory<T>.create(activeType,
-        dateTime: _setMemoryExpiry(duration));
+      T mem, {Duration? duration}) {
+    _data[key] = mem;
   }
 
-  /// Updates a [key] value in [ActiveMemory] with the new value.
+  /// Updates a [key] value in [Memory] with the new value.
   ///
   /// If the [key] is not found it returns [false].
   ///
   /// If the [key] is found it returns [true].
   bool updateMemory<T>(String key,
-      T activeType, {Duration? duration}) {
+      T mem, {Duration? duration}) {
     if (_validateMemory(key)) {
       _data[key] = _data[key]!.copyWith(
-        activeType: activeType,
+        mem: mem,
         expiresAt: _setMemoryExpiry(duration),
       );
       return true;
@@ -75,21 +112,23 @@ class Memory {
     return false;
   }
 
-  /// Removes entry from [ActiveMemory].
+  /// Removes entry from [Memory].
   ///
-  /// Checks if a key exists in [ActiveMemory] before removing entry
+  /// Checks if a key exists in [Memory] before removing entry
   void deleteMemory(String key) {
     if(_validateMemory(key) == true){
       _data.remove(key);
     }
   }
 
-  /// Removes all values stored on [ActiveMemory]
+  /// Removes all values stored on [Memory]
   ///
   /// Clears every entry
   void resetMemory() {
     _data.clear();
   }
+
+
 
   /// Checks if a key exists in Active Memory
   ///
@@ -106,23 +145,51 @@ class Memory {
 
   /// Checks Active Memory entry expiry date
   /// returns [false] if entry has not expired and [true] if its before expiry
-  bool _isMemoryActive(ActiveMemory activeMemory) {
+  bool _isMemoryActive(dynamic activeMemory) {
     if (activeMemory.expiresAt != null && activeMemory.expiresAt!.isBefore(DateTime.now())) {
       return true;
     }
     return false;
   }
 
-  /// This func validates if activeMemory key is expired, if so it removes the
+  /// This func validates if Memory key is expired, if so it removes the
   /// data and returns [false], if not it returns true
   bool _validateMemory(String key) {
     final entry = _data[key];
     if (entry == null) {
       return false;
-    } else if (_isMemoryActive(entry)) {
-      deleteMemory(key);
-      return false;
     }
+    // else if (_isMemoryActive(entry)) {
+    //   deleteMemory(key);
+    //   return false;
+    // }
     return true;
   }
 }
+//
+// class FileStorage {
+//   final File _file;
+//   FileStorage(String filename) : _file = File(filename);
+//
+//   Future<void> save(Map<String, dynamic> data) async {
+//     printError('{created_at}');
+//     printError(data);
+//     printError('{created_at}');
+//     var encodedData = utf8.encode(jsonEncode(data));
+//     var byteData = Uint8List.fromList(encodedData);
+//     await _file.writeAsBytes(byteData);
+//   }
+//
+//   Future<Map<String, dynamic>> read() async {
+//     if (!_file.existsSync()) {
+//       save({'created_at': DateTime.now().toIso8601String()});
+//     }
+//     var encodedData = await _file.readAsBytes();
+//     var decodedData = utf8.decode(encodedData);
+//     return jsonDecode(decodedData) as Map<String, dynamic>;
+//   }
+//
+//   Future<FileSystemEntity> delete() async {
+//     return _file.delete();
+//   }
+// }

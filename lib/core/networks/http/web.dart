@@ -8,8 +8,6 @@ class HttpActiveRequest {
       int? idleTimeout, bool? withTrustedRoots, int? connectionTimeout,
       String? privateKey, String? privateKeyPassword) {
 
-    print('@#@#@#@# 99999999 ');
-
     html.HttpRequest apiRequest = html.HttpRequest();
     apiRequest.timeout = idleTimeout;
     return apiRequest;
@@ -29,6 +27,7 @@ class HttpActiveRequest {
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: apiRequest.status ?? 404,
         data: apiRequest.response,
+        errors: null,
         endpoint: params.endpoint
     );
 
@@ -58,6 +57,7 @@ class HttpActiveRequest {
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: apiRequest.status ?? 404,
         data: apiRequest.response,
+        errors: null,
         endpoint: params.endpoint
     );
 
@@ -87,6 +87,7 @@ class HttpActiveRequest {
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: apiRequest.status ?? 404,
         data: apiRequest.response,
+        errors: null,
         endpoint: params.endpoint
     );
 
@@ -116,6 +117,7 @@ class HttpActiveRequest {
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: apiRequest.status ?? 404,
         data: apiRequest.response,
+        errors: null,
         endpoint: params.endpoint
     );
 

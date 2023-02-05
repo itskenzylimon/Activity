@@ -661,6 +661,10 @@ activeRequest.setUp = RequestSetUp(
 /// String endpoint = '';  
 /// dynamic data;
 
+/// Dynamic data will be an Objecjt with the following format
+///  data: {'error': '',   // will be an empty string when no error is detected.
+///  'response': dynamic } // can be of any nature.
+
 ActiveResponse activeResponse = await activeRequest  
   .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
 

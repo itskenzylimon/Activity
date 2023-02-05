@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'model.dart';
@@ -7,6 +8,7 @@ class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
 
   /// Initialise area
+  // Memory memory = Memory(filename: '${Directory.current.path}/data3.json');
   Memory memory = Memory.memory;
 
   /// Assign Active values
@@ -93,7 +95,7 @@ class MainController extends ActiveController {
     'birthdate': 'Enter a valid date',
   };
 
-  validateJSON(){
+  validateJSON() async{
     SchemaValidator schemaValidator = SchemaValidator(registerSchema);
     // schemaValidator.customErrors = customErrorMessage;
 
@@ -326,7 +328,9 @@ class MainController extends ActiveController {
     activeMap.value;
   }
 
-
+  // syncMemory() async{
+  //   await memory.syncMemory();
+  // }
 
 
 }

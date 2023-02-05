@@ -51,14 +51,19 @@ class HttpActiveRequest {
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
       // The network may be only temporarily unavailable
+      ActiveResponse activeResponse = ActiveResponse(
+          statusCode: response.statusCode,
+          endpoint: params.endpoint,
+          errors: response.toString(),
+          data: await response.transform(utf8.decoder).join());
       await response.drain<List<int>>(<int>[]);
-      return ActiveResponse(
-          statusCode: response.statusCode, endpoint: params.endpoint);
+      return activeResponse;
     }
 
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: response.statusCode,
-        data: response.transform(utf8.decoder).join(),
+        errors: null,
+        data: await response.transform(utf8.decoder).join(),
         endpoint: params.endpoint);
 
     if (setUp.logResponse == true) {
@@ -104,14 +109,20 @@ class HttpActiveRequest {
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
       // The network may be only temporarily unavailable
-      await response.drain<List<int>>(<int>[]);
-      return ActiveResponse(
-          statusCode: response.statusCode, endpoint: params.endpoint);
+      ActiveResponse activeResponse = ActiveResponse(
+          statusCode: response.statusCode,
+          endpoint: params.endpoint,
+          errors: response.toString(),
+          data: await response.transform(utf8.decoder).join());
+      // await response.drain<List<int>>(<int>[]);
+      return activeResponse;
+
     }
 
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: response.statusCode,
-        data: response.transform(utf8.decoder).join(),
+        errors: null,
+        data: await response.transform(utf8.decoder).join(),
         endpoint: params.endpoint);
 
     if (setUp.logResponse == true) {
@@ -157,15 +168,20 @@ class HttpActiveRequest {
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
       // The network may be only temporarily unavailable
-      await response.drain<List<int>>(<int>[]);
-      return ActiveResponse(
-          statusCode: response.statusCode, endpoint: params.endpoint);
+      ActiveResponse activeResponse = ActiveResponse(
+          statusCode: response.statusCode,
+          endpoint: params.endpoint,
+          errors: response.toString(),
+          data: await response.transform(utf8.decoder).join());
+      // await response.drain<List<int>>(<int>[]);
+      return activeResponse;
     }
 
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: response.statusCode,
-        data: response.transform(utf8.decoder).join(),
-        endpoint: params.endpoint);
+    errors: null,
+    data: await response.transform(utf8.decoder).join(),
+    endpoint: params.endpoint);
 
     if (setUp.logResponse == true) {
       await _logApiRequests(activeResponse);
@@ -210,14 +226,19 @@ class HttpActiveRequest {
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
       // The network may be only temporarily unavailable
-      await response.drain<List<int>>(<int>[]);
-      return ActiveResponse(
-          statusCode: response.statusCode, endpoint: params.endpoint);
+      ActiveResponse activeResponse = ActiveResponse(
+          statusCode: response.statusCode,
+          endpoint: params.endpoint,
+          errors: response.toString(),
+          data: await response.transform(utf8.decoder).join());
+      // await response.drain<List<int>>(<int>[]);
+      return activeResponse;
     }
 
     ActiveResponse activeResponse = ActiveResponse(
         statusCode: response.statusCode,
-        data: response.transform(utf8.decoder).join(),
+        errors: null,
+        data: await response.transform(utf8.decoder).join(),
         endpoint: params.endpoint);
 
     if (setUp.logResponse == true) {
