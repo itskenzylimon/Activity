@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:example/controller.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +9,9 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ENVSetup envSetup = ENVSetup();
-  var currentPath = Directory.current.path;
-  print(currentPath);
+  // ENVSetup envSetup = ENVSetup();
+  // var currentPath = Directory.current.path;
+  // print(currentPath);
   // print(envSetup.readENVFile('.env'));
 
   // try {
@@ -70,6 +67,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Activity(
         MainController(),
+        // developerMode: true,
         onActivityStateChanged: ()=>
             DateTime.now().microsecondsSinceEpoch.toString(),
         child: TaskView(
@@ -205,10 +203,16 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                           child: ListView.builder(
                             reverse: true,
                             shrinkWrap: true,
-                            itemCount: activeController.tasks.length,
+                            itemCount: activeController.tasks.paginate(
+                                pageNumber: activeController.pageNumber.value,
+                                pageSize: activeController.pageSize.value
+                            ).length,
                             itemBuilder: (context, i) {
                               ActiveModel<Task> taskModel =
-                              activeController.tasks[i];
+                              activeController.tasks.paginate(
+                                  pageNumber: activeController.pageNumber.value,
+                                  pageSize: activeController.pageSize.value
+                              )[i];
                               return ListTile(
                                 title: Text(taskModel.value.name),
                                 subtitle: Text(taskModel.value.body),
@@ -299,7 +303,22 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                             },
                           ),
                         ))
-                )
+                ),
+                // SizedBox(
+                //   height: 70,
+                //   child: Center(
+                //     child: GestureDetector(
+                //       onTap: (){
+                //         /// you can avoid writing boiler plate code pagination by
+                //         activeController.pageNumber.set(1);
+                //         activeController.pageSize.set(3);
+                //         printInfo(activeController.pageNumber.set(1));
+                //         printInfo(activeController.pageSize.set(4));
+                //       },
+                //       child: const Text('Load More'),
+                //     ),
+                //   ),
+                // )
               ],
             )),
       ),
@@ -403,49 +422,4 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         ));
   }
 
-}
-
-class MiniBrowser extends StatefulWidget {
-  final String url;
-
-  MiniBrowser({required this.url});
-
-  @override
-  _MiniBrowserState createState() => _MiniBrowserState();
-}
-
-class _MiniBrowserState extends State<MiniBrowser> {
-  final HttpClient _client = HttpClient();
-  String _html = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPage();
-  }
-
-  void _fetchPage() async {
-    try {
-      HttpClientRequest request =
-      await _client.getUrl(Uri.parse(widget.url));
-      HttpClientResponse response = await request.close();
-      response.transform(utf8.decoder).listen((html) {
-        setState(() {
-          _html = html;
-        });
-      });
-    } catch (e) {
-      // Handle any errors
-      print(e);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        // child: Html(data: _html),
-      ),
-    );
-  }
 }

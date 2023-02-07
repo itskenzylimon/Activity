@@ -18,12 +18,15 @@ class MainController extends ActiveController {
 
   /// Active int extend the normal int Type with activity helper functions
   ActiveInt appBarSize = ActiveInt(45);
+  ActiveInt pageNumber = ActiveInt(1);
+  ActiveInt pageSize = ActiveInt(2);
 
-  /// Active int extend the normal int Type with activity helper functions
+  /// Active bool extend the normal int Type with activity helper functions
   ActiveBool dataLoaded = ActiveBool(false);
 
   /// ActiveType is a Type any with activity helper functions
   ActiveType appBackgroundColor = ActiveType(Colors.white);
+
 
   ActiveList<ActiveModel<Task>> tasks = ActiveList([ActiveModel(Task(
       name: 'Test Task',
@@ -328,9 +331,11 @@ class MainController extends ActiveController {
     activeMap.value;
   }
 
-  // syncMemory() async{
-  //   await memory.syncMemory();
-  // }
+
+  syncMemory() async{
+    // await memory.syncMemory();
+  }
+
 
 
 }

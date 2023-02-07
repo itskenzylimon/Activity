@@ -367,6 +367,31 @@ class ActiveList<T> extends ActiveType<List<T>> {
     return value.indexWhere(test, start);
   }
 
+  /// Returns a new [List] with all elements that satisfy the
+  /// predicate [paginate].
+  ///
+  /// Example:
+  /// ```dart
+  /// final numbers = ActiveList[1, 2, 3, 5, 6, 7];
+  /// var result = numbers.paginate(pageNumber: 1,pageSize: 3 ); // (1, 2, 3)
+  /// ```
+  List<T> paginate({int pageNumber = 1, int pageSize = 2}) {
+    // check if inputs are valid
+    if (pageNumber < 1 || pageSize < 1) {
+      throw ArgumentError("pageNumber which is $pageNumber and pageSize which is $pageSize must be both greater than 0");
+    }
+    try{
+      int startIndex = (pageNumber - 1) * pageSize;
+      int endIndex = startIndex + pageSize;
+      if (endIndex > _value.length) {
+        endIndex = _value.length;
+      }
+      return _value.sublist(startIndex, endIndex);
+    } catch(e){
+      return _value.sublist(0, 10);
+    }
+  }
+
   /// The object at the given [index] in the list.
   ///
   /// The [index] must be a valid index of this list,
