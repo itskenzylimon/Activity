@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'model.dart';
 
 class MainController extends ActiveController {
-
   GlobalKey globalKey = GlobalKey<FormState>();
 
   /// Initialise area
@@ -27,14 +28,12 @@ class MainController extends ActiveController {
   /// ActiveType is a Type any with activity helper functions
   ActiveType appBackgroundColor = ActiveType(Colors.white);
 
-
-  ActiveList<ActiveModel<Task>> tasks = ActiveList([ActiveModel(Task(
-      name: 'Test Task',
-      body: 'Complete this amazing package',
-      level: 100,
-      user: User(
-          name: 'Kenzy Limon',
-          email: 'itskenzylimon@gmail.com')))
+  ActiveList<ActiveModel<Task>> tasks = ActiveList([
+    ActiveModel(Task(
+        name: 'Test Task',
+        body: 'Complete this amazing package',
+        level: 100,
+        user: User(name: 'Kenzy Limon', email: 'itskenzylimon@gmail.com')))
   ]);
 
   @override
@@ -42,7 +41,7 @@ class MainController extends ActiveController {
     return [appTitle, appBarSize, dataLoaded];
   }
 
-  void updateUI() async{
+  void updateUI() async {
     appTitle.set('New Title');
   }
 
@@ -61,12 +60,7 @@ class MainController extends ActiveController {
   /// apart from those activity also supports max and Min with optional and
   /// mandatory fields.
   var registerSchema = {
-    "name": {
-      "type": String,
-      "required": true,
-      "min": 2,
-      "max": 20
-    },
+    "name": {"type": String, "required": true, "min": 2, "max": 20},
     "email": {
       "type": String,
       "required": true,
@@ -82,12 +76,7 @@ class MainController extends ActiveController {
       "required": true,
       "date": true,
     },
-    "address": {
-      "type": String,
-      "required": true,
-      "min": 5,
-      "max": 100
-    }
+    "address": {"type": String, "required": true, "min": 5, "max": 100}
   };
 
   /// You can pass your own [customErrorMessage] custom error messages to make
@@ -98,7 +87,7 @@ class MainController extends ActiveController {
     'birthdate': 'Enter a valid date',
   };
 
-  validateJSON() async{
+  validateJSON() async {
     SchemaValidator schemaValidator = SchemaValidator(registerSchema);
     // schemaValidator.customErrors = customErrorMessage;
 
@@ -110,8 +99,7 @@ class MainController extends ActiveController {
     }
   }
 
-  dataTypes(){
-
+  dataTypes() {
     /// Boolean
     /// The [typeName] can be any key you assign the type to.
     /// It can really help when you want to update a value based on the
@@ -147,10 +135,6 @@ class MainController extends ActiveController {
     /// [value] will give you the current value
     activeBool.value;
 
-
-
-
-
     /// DateTime
     /// The [typeName] can be any key you assign the type to.
     /// It can really help when you want to update a value based on the
@@ -159,7 +143,8 @@ class MainController extends ActiveController {
     /// of the built in DateTime functions
     /// [Activity] will allow you to update anywhere on the app code and rebuild UI
     /// for the affected widgets Only
-    ActiveDateTime activeDateTime = ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
+    ActiveDateTime activeDateTime =
+        ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
     activeDateTime.setOriginalValueToCurrent();
@@ -175,8 +160,6 @@ class MainController extends ActiveController {
 
     /// [value] will give you the current value
     activeDateTime.value;
-
-
 
     /// Double
     /// The [typeName] can be any key you assign the type to.
@@ -215,12 +198,10 @@ class MainController extends ActiveController {
     /// passing [notifyChange] as false will not do a UI rebuild
     /// passing [setAsOriginal] as true will set the new value as
     /// the original value.
-    activeDouble.set(99.99,
-        notifyChange: false, setAsOriginal: true);
+    activeDouble.set(99.99, notifyChange: false, setAsOriginal: true);
 
     /// [value] will give you the current value
     activeDouble.value;
-
 
     /// INT
     /// The [typeName] can be any key you assign the type to.
@@ -271,13 +252,10 @@ class MainController extends ActiveController {
     /// passing [notifyChange] as false will not do a UI rebuild
     /// passing [setAsOriginal] as true will set the new value as
     /// the original value.
-    activeInt.set(50,
-        notifyChange: false, setAsOriginal: true);
+    activeInt.set(50, notifyChange: false, setAsOriginal: true);
 
     /// [value] will give you the current value
     activeInt.value;
-
-
 
     /// List
     /// The [typeName] can be any key you assign the type to.
@@ -287,7 +265,7 @@ class MainController extends ActiveController {
     /// of the built in List functions
     /// [Activity] will allow you to update anywhere on the app code and rebuild UI
     /// for the affected widgets Only
-    ActiveList activeList = ActiveList([1,2,3], typeName: 'score'); // 1.5
+    ActiveList activeList = ActiveList([1, 2, 3], typeName: 'score'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
     activeList.setOriginalValueToCurrent();
@@ -298,12 +276,10 @@ class MainController extends ActiveController {
     /// passing [notifyChange] as false will not do a UI rebuild
     /// passing [setAsOriginal] as true will set the new value as
     /// the original value.
-    activeList.set([0,9,8],
-        notifyChange: false, setAsOriginal: true);
+    activeList.set([0, 9, 8], notifyChange: false, setAsOriginal: true);
 
     /// [value] will give you the current value
     activeList.value;
-
 
     /// Map
     /// The [typeName] can be any key you assign the type to.
@@ -324,18 +300,95 @@ class MainController extends ActiveController {
     /// passing [notifyChange] as false will not do a UI rebuild
     /// passing [setAsOriginal] as true will set the new value as
     /// the original value.
-    activeMap.set({'key': 100},
-        notifyChange: false, setAsOriginal: true);
+    activeMap.set({'key': 100}, notifyChange: false, setAsOriginal: true);
 
     /// [value] will give you the current value
     activeMap.value;
   }
 
-
-  syncMemory() async{
+  syncMemory() async {
     // await memory.syncMemory();
   }
 
+  /// How to start a local server on your io device with routing
+  /// Create requestApis
+  Future<Map<ContentType, dynamic>> homePage(HttpRequest request) async {
+    try {
+      var fileContents = await rootBundle.loadString('assets/index.html');
+      // var fileContents = await File('/assets/index.html').readAsString().then((fileData) {
+      //   return fileData;
+      // });
+      return {ContentType.html: fileContents};
+    } catch (e) {
+      printError(e);
+      return {ContentType.json: notFoundPage(request)};
+    }
+  }
 
+  Map<ContentType, dynamic> aboutPage(HttpRequest request) {
+    return {
+      ContentType.json: {
+        'url': request.uri.path,
+        'key': 'Hello, World!... This is about us!'
+      }
+    };
+  }
+
+  Map<ContentType, dynamic> contactUsPage(HttpRequest request) {
+    return {
+      ContentType.json: {
+        'url': request.uri.path,
+        'key': 'Hello, World!... This is contact us!'
+      }
+    };
+  }
+
+  Map<ContentType, dynamic> notFoundPage(HttpRequest request) {
+    var json = jsonEncode(
+        {'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
+
+    return {ContentType.json: json};
+  }
+
+  /// Map request to response
+  Future<Map<ContentType, dynamic>> httpRequests(
+      HttpRequest httpRequest) async {
+    switch (httpRequest.uri.path) {
+      case '/':
+        return homePage(httpRequest);
+        break;
+
+      case '/contactus':
+        return aboutPage(httpRequest);
+        break;
+
+      case '/about':
+        return contactUsPage(httpRequest);
+        break;
+
+      default:
+        return notFoundPage(httpRequest);
+        break;
+    }
+  }
+
+  startServer() {
+    HttpServer.bind(InternetAddress.anyIPv4, 3000).then((server) {
+      printInfo('Listening on localhost:${server.port}');
+
+      /// Start a server
+      server.listen((HttpRequest httpRequest) async {
+        Map<ContentType, dynamic> response = await httpRequests(httpRequest);
+        var data = response.values.first;
+        var type = response.keys.first;
+        printNormal(data);
+        httpRequest.response
+          ..headers.contentType = type
+          ..statusCode = 200
+          ..write(data)
+          ..close();
+      });
+    });
+  }
 
 }

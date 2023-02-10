@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:example/controller.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
@@ -97,6 +99,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
     // activeController.syncMemory();
     activeController.initCalculations();
     activeController.validateJSON();
+    activeController.startServer();
   }
 
   // late MainController mainController;
@@ -118,11 +121,16 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
       ),
       home: Scaffold(
         backgroundColor: activeController.appBackgroundColor.value,
-        appBar: AppBar(
-          title: Text(activeController.appTitle.value),
-        ),
+        // appBar: AppBar(
+        //   title: Text(activeController.appTitle.value),
+        // ),
         body: SafeArea(
-            child: Column(
+            child:
+            // SurveyJSForm(schema: activeController.schema, context: context, formAppBar: AppBar(
+            //   title: Text(activeController.appTitle.value),
+            // )).createSurveyJSView()
+            // activeController.activeForm.create(context)
+            Column(
               children: [
                 TextButton(
                     onPressed: () {
@@ -320,7 +328,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                 //   ),
                 // )
               ],
-            )),
+            )
+        ),
       ),
     );
   }
