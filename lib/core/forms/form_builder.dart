@@ -14,11 +14,11 @@ class FormBuilder{
     required this.elements,
     required this.context,
     this.results,
-});
+  });
 
   Center create(){
 
-      // Key / value for the form
+    // Key / value for the form
     Map<String, dynamic> newResults = {};
 
     /// List results
@@ -247,49 +247,49 @@ class FormBuilder{
         // } else {
         // }
         return Visibility(
-          visible: visibleIf(element),
-          child: Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.only(bottom: 12, left: 16),
+            visible: visibleIf(element),
+            child: Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.grey)),
                     ),
-                    onChanged: (value) {
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: 'Search',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.only(bottom: 12, left: 16),
+                      ),
+                      onChanged: (value) {
 
-                    },
+                      },
+                    ),
                   ),
-                ),
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    key: dropdownKey,
-                    hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
-                    value: element['title'],
-                    items: choices.map((String val){
-                      return DropdownMenuItem<String>(
-                        value: val,
-                        child: Text(val),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      key: dropdownKey,
+                      hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
+                      value: element['title'],
+                      items: choices.map((String val){
+                        return DropdownMenuItem<String>(
+                          value: val,
+                          child: Text(val),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
 
-                    },
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-          )
+                ],
+              ),
+            )
         );
       } else {
         return Visibility(
@@ -434,13 +434,13 @@ class FormBuilder{
             Wrap(
               children: [
                 for(var choice in element['choices'])
-                ChoiceChip(
-                  label: Text(choice),
-                  selected: selectedChoice == choice ? true : false,
-                  onSelected: (bool selected) {
+                  ChoiceChip(
+                    label: Text(choice),
+                    selected: selectedChoice == choice ? true : false,
+                    onSelected: (bool selected) {
 
-                  },
-                )
+                    },
+                  )
               ],
             ),
             Text("${element['title']}: $selectedChoice")
@@ -451,46 +451,45 @@ class FormBuilder{
 
     Widget getElement(Map<String, dynamic> element){
       switch(element['type']) {
-          case 'text':
+        case 'text':
           return textField(element);
-          break;
-          case 'comment':
+
+        case 'comment':
           return textField(element);
-          break;
-          case 'dropdown':
+
+        case 'dropdown':
           return dropdownChoices(element);
-          break;
-          case 'genericquestion':
+
+        case 'genericquestion':
           return htmlText(element);
-          break;
-          case 'httplookup':
-            httpLookUpUrl(element);
+
+        case 'httplookup':
+          httpLookUpUrl(element);
           return Container();
-          break;
-          case 'bsdatepicker':
+
+        case 'bsdatepicker':
           return datepicker(element);
-          break;
-          case 'radiogroup':
+
+        case 'radiogroup':
           return radiogroup(element);
-          break;
-          case 'file':
+
+        case 'file':
           return file(element);
-          break;
-          case 'checkbox':
+
+        case 'checkbox':
           return checkbox(element);
-          break;
-          case 'signaturepad':
+
+        case 'signaturepad':
           return signaturepad(element);
-          break;
-          case 'html':
+
+        case 'html':
           return signaturepad(element);
-          break;
       // case '':
       //   return aboutPage(httpRequest);
       //   break;
         default:
           return container(element);
-          break;
+
       }
     }
 
@@ -504,30 +503,30 @@ class FormBuilder{
         );
 
         return Card(
-              margin: const EdgeInsets.all(20),
-              elevation: 1,
-              child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 10, bottom: 10),
-                        child: Text(
-                          element['title'] ?? '',
-                          style: const TextStyle(
-                            color: Color(0xff0f1728),
-                            fontSize: 18,
-                            fontFamily: "Inter",
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+          margin: const EdgeInsets.all(20),
+          elevation: 1,
+          child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 10),
+                    child: Text(
+                      element['title'] ?? '',
+                      style: const TextStyle(
+                        color: Color(0xff0f1728),
+                        fontSize: 18,
+                        fontFamily: "Inter",
+                        fontWeight: FontWeight.w600,
                       ),
-                      children,
-                    ],
-                  )
-              ),
-            );
+                    ),
+                  ),
+                  children,
+                ],
+              )
+          ),
+        );
       } else {
         return getElement(element);
       }
