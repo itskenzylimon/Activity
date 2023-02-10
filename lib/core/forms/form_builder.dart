@@ -507,48 +507,47 @@ class FormBuilder {
       );
     }
 
-    Widget getElement(Map<String, dynamic> element) {
-      switch (element['type']) {
+    Widget getElement(Map<String, dynamic> element){
+      switch(element['type']) {
         case 'text':
           return textField(element);
-          break;
+
         case 'comment':
           return textField(element);
-          break;
+
         case 'dropdown':
           return dropdownChoices(element);
-          break;
+
         case 'genericquestion':
           return htmlText(element);
-          break;
+
         case 'httplookup':
-        // httpLookUpUrl(element);
+          httpLookUpUrl(element);
           return Container();
-          break;
+
         case 'bsdatepicker':
           return datepicker(element);
-          break;
+
         case 'radiogroup':
           return radiogroup(element);
-          break;
+
         case 'file':
           return file(element);
-          break;
+
         case 'checkbox':
           return checkbox(element);
-          break;
+
         case 'signaturepad':
           return signaturepad(element);
-          break;
+
         case 'html':
           return signaturepad(element);
-          break;
       // case '':
       //   return aboutPage(httpRequest);
       //   break;
         default:
           return container(element);
-          break;
+
       }
     }
 
