@@ -22,7 +22,14 @@ class FormBuilder{
     Map<String, dynamic> newResults = {};
 
     /// List results
-    Object widgetKey = {};
+    /// key : {
+    ///  key: dynamic,
+    /// }
+    ///
+    /// key Element name
+    /// Controller
+    ///
+    Map<String, Map<String, dynamic>> widgetKey = {};
 
     /// Validation func
 
@@ -175,23 +182,36 @@ class FormBuilder{
 
     Visibility textField(Map<String, dynamic> element){
       Key textFieldKey = Key(element['name']);
+      TextEditingController textEditingController = TextEditingController();
       bool isRequired = element['isRequired'] ?? false;
       String labelText = element['title'] + (isRequired == true ?
       ' * ' : '');
 
+      Map<String, dynamic> valueObject = newResults[element['name']] ?? {};
+      if(valueObject.isEmpty){
+        newResults[element['name']] = {
+          'key': textFieldKey,
+          'controller': textEditingController,
+          'value': textEditingController.text,
+          'label': labelText,
+          'type': 'text',
+          'extras': {}
+        };
+      }
+
       return Visibility(
         visible: visibleIf(element),
         child: TextFormField(
+          controller: textEditingController,
           keyboardType: checkInputType(element),
           key: textFieldKey,
-          readOnly: enableIf(element),
+          // readOnly: enableIf(element),
           maxLines: element['type'] == 'comment' ? 5 : 1,
           decoration: InputDecoration(
             labelText: labelText,
             hintText: element['placeholder'] ?? '',
           ),
           validator: (value) {
-
             /// check if value is required
             if(element['isRequired'] == true){
               /// input validator for numbers
@@ -220,6 +240,11 @@ class FormBuilder{
             }
             return null;
           },
+          onChanged: (value) {
+            newResults[element['name']]['value'] = value;
+            printInfo(newResults[element['name']]);
+            printInfo(newResults[element['name']]['value']);
+          },
         ),
       );
     }
@@ -235,7 +260,7 @@ class FormBuilder{
         /// check if its a choicesByUrl
         /// Make a httpRequest
 
-        ActiveRequest activeRequest = ActiveRequest();
+        // ActiveRequest activeRequest = ActiveRequest();
 
       } else {
         choices.addAll(element['choices']);
@@ -464,7 +489,7 @@ class FormBuilder{
           return htmlText(element);
           break;
           case 'httplookup':
-            httpLookUpUrl(element);
+            // httpLookUpUrl(element);
           return Container();
           break;
           case 'bsdatepicker':
