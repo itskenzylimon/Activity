@@ -4,7 +4,6 @@ export 'core/active.dart';
 export 'core/types/active_type.dart';
 export 'core/types/active_models.dart';
 export 'core/types/active_memory.dart';
-export 'core/types/active_form.dart';
 
 export 'core/src/controller.dart';
 export 'core/src/view.dart';
