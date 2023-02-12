@@ -56,7 +56,8 @@ class HttpActiveRequest {
           endpoint: params.endpoint,
           errors: response.toString(),
           data: await response.transform(utf8.decoder).join());
-      await response.drain<List<int>>(<int>[]);
+      // await response.drain<List<int>>(<int>[]);
+      apiRequest.close(force: true);
       return activeResponse;
     }
 
@@ -75,6 +76,7 @@ class HttpActiveRequest {
           savedResponseName == '' ? uri.path : savedResponseName;
       await _saveApiRequests(activeResponse, savedResponseName);
     }
+
 
     return activeResponse;
   }
@@ -115,6 +117,7 @@ class HttpActiveRequest {
           errors: response.toString(),
           data: await response.transform(utf8.decoder).join());
       // await response.drain<List<int>>(<int>[]);
+      apiRequest.close(force: true);
       return activeResponse;
 
     }
@@ -173,7 +176,9 @@ class HttpActiveRequest {
           endpoint: params.endpoint,
           errors: response.toString(),
           data: await response.transform(utf8.decoder).join());
+      await response.detachSocket();
       // await response.drain<List<int>>(<int>[]);
+      apiRequest.close(force: true);
       return activeResponse;
     }
 
@@ -232,6 +237,7 @@ class HttpActiveRequest {
           errors: response.toString(),
           data: await response.transform(utf8.decoder).join());
       // await response.drain<List<int>>(<int>[]);
+      apiRequest.close(force: true);
       return activeResponse;
     }
 
