@@ -22,10 +22,10 @@ class FormBuilder extends StatefulWidget{
 }
 
 class _FormBuilderState extends State<FormBuilder> {
-  List<String> choices = [];
-  var vl ;
   Center create() {
     // Key / value for the form
+
+    Map formValues = widget.formResults.value;
 
     /// List results
     /// key : {
@@ -477,19 +477,21 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility dropdownChoicesIPRS(Map<String, dynamic> element) {
 
       Key dropdownKey = Key(element['name']);
-      printSuccess(element['name']);
-      widget.formResults.add(element['name'], {
-        'controller': element['name'],
-        'value': element['label'].toString(),
-        'label': element['label'],
-        'type': 'text',
-        'extras': {}
-      }, notifyActivities: false);
 
-      printError(widget.formResults);
+      /// Add to the widget.formResults
+      if(widget.formResults.containsKey(element['name']) == false){
+        printInfo('{{{element}}}');
+        printInfo(element['name']);
 
-      /// TODO: showOtherItem ???
-
+        widget.formResults.add(element['name'], {
+          'controller': element['name'],
+          'value': element['label'].toString(),
+          'label': element['label'],
+          'type': 'text',
+          'options': element['options'],
+          'extras': {}
+        }, notifyActivities: false);
+      }
 
       if (element['options'] == null) {
         /// check if its a choicesByUrl
@@ -498,15 +500,29 @@ class _FormBuilderState extends State<FormBuilder> {
         // ActiveRequest activeRequest = ActiveRequest();
 
       } else {
-        choices.add(element['label'].toString());
-        for(var choice in element['options']){
-          choices.add(choice['label']);
-        }
+        // choices.add(element['label'].toString());
+
       }
-      vl = widget.formResults.containsKey(element['name']) ? widget.formResults[element['name']]!['value']:widget.formResults[element['name']]!['value'];
-      printError("SUccessssjsj?????");
-      print(element['name']);
-      printWarning(vl);
+
+
+      final List<DropdownMenuItem> choiceList = [
+        DropdownMenuItem(
+          value: element['label'].toString(),
+          child: const Text('Select choices'),
+        ),
+        for(var i = 0; i < element['options'].length; i++)
+          DropdownMenuItem(
+            value: widget.formResults[element['name']]!['options'][i]['value'],
+            child: Text(widget.formResults[element['name']]!['options'][i]['label']),
+          )
+      ];
+
+      if(formValues.containsKey(element['name']) == false){
+        formValues['${element['name']}'] = widget.formResults[element['name']]!['value'];
+      }
+
+      String vl = formValues[element['name']];
+
       return Visibility(
           visible: visibleIf(element),
           child: Container(
@@ -516,35 +532,30 @@ class _FormBuilderState extends State<FormBuilder> {
               borderRadius: BorderRadius.circular(5.0),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
+              child: DropdownButton(
                 key: dropdownKey,
-                hint: Text(
-                    widget.formResults.containsKey(element['name']) ? widget.formResults[element['name']]!['label']:widget.formResults['id_type']!['label']),
+                hint: const Text('Select choices'),
                 value: vl,
-                items: choices.map((String val) {
-                  printError(val);
-                  return DropdownMenuItem<String>(
-                    value: val,
-                    child: Text(val),
-                  );
-                }).toList(),
+                items: choiceList,
                 onChanged: (value) {
                     printSuccess("Value Selected");
                     printSuccess(value);
                     printSuccess(element['name']);
-                    setState(() {
-                      vl = value!;
-                    });
                     print("????? VALUE");
-                    print(vl);
                     widget.formResults.remove(element['name'], notifyActivities: false);
                     widget.formResults.add(element['name'], {
                       'controller': element['name'],
                       'value': value,
                       'label': element['label'],
                       'type': 'text',
+                      'options': element['options'],
                       'extras': {}
                     }, notifyActivities: false);
+
+                    setState(() {
+                      formValues['${element['name']}'] = value;
+                    });
+
                     printWarning("????? FormResults");
                     printWarning(widget.formResults);
                 },
