@@ -75,6 +75,7 @@ abstract class ActiveController {
     if (_stateController.isClosed) {
       return;
     }
+    print(events);
     _stateController.add(events);
   }
 
