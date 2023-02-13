@@ -518,10 +518,10 @@ class _FormBuilderState extends State<FormBuilder> {
       ];
 
       if(formValues.containsKey(element['name']) == false){
-        formValues['${element['name']}'] = widget.formResults[element['name']]!['value'];
+        formValues['${element['name']}'] = widget.formResults[element['name']];
       }
 
-      String vl = formValues[element['name']];
+      String vl = formValues[element['name']]['value'];
 
       return Visibility(
           visible: visibleIf(element),
@@ -553,7 +553,14 @@ class _FormBuilderState extends State<FormBuilder> {
                     }, notifyActivities: false);
 
                     setState(() {
-                      formValues['${element['name']}'] = value;
+                      formValues['${element['name']}'] = {
+                        'controller': element['name'],
+                        'value': value,
+                        'label': element['label'],
+                        'type': 'text',
+                        'options': element['options'],
+                        'extras': {}
+                      };
                     });
 
                     printWarning("????? FormResults");
