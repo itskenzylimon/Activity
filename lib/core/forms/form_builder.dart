@@ -21,7 +21,8 @@ class FormBuilder extends StatefulWidget{
 }
 
 class _FormBuilderState extends State<FormBuilder> {
-
+  List<String> choices = [];
+  var vl ;
   Center create() {
     // Key / value for the form
 
@@ -488,7 +489,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// TODO: showOtherItem ???
 
-      List<String> choices = [];
+
       if (element['options'] == null) {
         /// check if its a choicesByUrl
         /// Make a httpRequest
@@ -501,7 +502,7 @@ class _FormBuilderState extends State<FormBuilder> {
           choices.add(choice['label']);
         }
       }
-      String vl = widget.formResults.containsKey(element['name']) ? widget.formResults[element['name']]!['value']:widget.formResults[element['name']]!['value'];
+      vl = widget.formResults.containsKey(element['name']) ? widget.formResults[element['name']]!['value']:widget.formResults[element['name']]!['value'];
       printError("SUccessssjsj?????");
       print(element['name']);
       printWarning(vl);
