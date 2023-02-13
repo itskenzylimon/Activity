@@ -119,16 +119,16 @@ class _FormBuilderState extends State<FormBuilder> {
         printInfo(element['name']);
 
         /// Handle anyof conditions
-        /// it should overwrite enabled state from above
+        /// it should overwrite visible state from above
         if (element['visibleIf'].toString().contains('anyof')) {
           /// Here we handle the many conditions in the visibleIf
           List visibleIfConditions = splitStringList(element['visibleIf']);
           for (String search in visibleIfConditions) {
-            if (widget.formResults[trimCurly(element['visibleIf'])] != null) {
+            if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
-              visible = trimListString(element['visibleIf']).contains(
-                  trimCurly(element['visibleIf']))
+              visible = trimListString(search).contains(
+                  trimCurly(search))
                   ? true : false;
             }
           }
@@ -141,7 +141,7 @@ class _FormBuilderState extends State<FormBuilder> {
           /// Here we handle the many conditions in the visibleIf
           List visibleIfConditions = splitStringList(element['visibleIf']);
           for (String search in visibleIfConditions) {
-            if (widget.formResults[trimCurly(element['visibleIf'])] != null) {
+            if (widget.formResults[trimCurly(search)] != null) {
               return true;
             }
           }
@@ -848,9 +848,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return create(); UnimplementedError();
+    return create();
   }
-
 
 }
