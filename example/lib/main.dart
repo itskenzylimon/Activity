@@ -113,7 +113,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
 
   @override
   Widget build(BuildContext context) {
-
+    activeController.reOrganizeData();
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
@@ -128,9 +128,14 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         // ),
         body: SafeArea(
             child:
-            SurveyJSForm(schema: schema, context: context, formAppBar: AppBar(
+              SurveyJSForm(schema: activeController.schema2, context: context, formAppBar: AppBar(
               title: Text(activeController.appTitle.value),
-            )).createSurveyJSView()
+            ), formResults: activeController.formResults,
+                onFormSubmit: () {
+                  /// At this point, the form has been submitted and the
+                  /// results are available in the formResults variable
+                  /// handle the results here
+                }).createSurveyJSView()
             // activeController.activeForm.create(context)
             // Column(
             //   children: [
