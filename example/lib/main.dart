@@ -90,7 +90,7 @@ class TaskView extends ActiveView<TaskController> {
 
 class _TaskViewState extends ActiveState<TaskView, TaskController> {
   _TaskViewState(super.activeController);
-  SchemaData schema = SchemaData();
+  // SchemaData schema = SchemaData();
 
   @override
   void initState() {

@@ -7,6 +7,7 @@ import 'model.dart';
 
 class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
+
   /// Initialise area
   // Memory memory = Memory(filename: '${Directory.current.path}/data3.json');
   Memory memory = Memory.memory;
@@ -143,8 +144,7 @@ class MainController extends ActiveController {
     /// of the built in DateTime functions
     /// [Activity] will allow you to update anywhere on the app code and rebuild UI
     /// for the affected widgets Only
-    ActiveDateTime activeDateTime =
-        ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
+    ActiveDateTime activeDateTime = ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
     activeDateTime.setOriginalValueToCurrent();
@@ -327,32 +327,24 @@ class MainController extends ActiveController {
 
   Map<ContentType, dynamic> aboutPage(HttpRequest request) {
     return {
-      ContentType.json: {
-        'url': request.uri.path,
-        'key': 'Hello, World!... This is about us!'
-      }
+      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is about us!'}
     };
   }
 
   Map<ContentType, dynamic> contactUsPage(HttpRequest request) {
     return {
-      ContentType.json: {
-        'url': request.uri.path,
-        'key': 'Hello, World!... This is contact us!'
-      }
+      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is contact us!'}
     };
   }
 
   Map<ContentType, dynamic> notFoundPage(HttpRequest request) {
-    var json = jsonEncode(
-        {'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
+    var json = jsonEncode({'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
 
     return {ContentType.json: json};
   }
 
   /// Map request to response
-  Future<Map<ContentType, dynamic>> httpRequests(
-      HttpRequest httpRequest) async {
+  Future<Map<ContentType, dynamic>> httpRequests(HttpRequest httpRequest) async {
     switch (httpRequest.uri.path) {
       case '/':
         return homePage(httpRequest);
@@ -393,41 +385,36 @@ class MainController extends ActiveController {
 
   reOrganizeData() {
     print("Start reOrganizeData");
-    for(var i in schema2['service']['schema']['pages']) {
-      for(var j in i['elements']) {
-        if(j['elements'] != null){
-          for(var k in j['elements']) {
-            if(k['type'] == 'httplookup') {
+    for (var i in schema2['service']['schema']['pages']) {
+      for (var j in i['elements']) {
+        if (j['elements'] != null) {
+          for (var k in j['elements']) {
+            if (k['type'] == 'httplookup') {
               k['lookup'] = [];
-              for(var l in schema2['lookup_services']) {
-                if(l['id'] == k['lookupServiceId']) {
+              for (var l in schema2['lookup_services']) {
+                if (l['id'] == k['lookupServiceId']) {
                   k['lookup'].add(l);
                 }
                 print("?????K");
                 print(k);
-
               }
             }
           }
           print("?????J");
           print(j);
         }
-
-
       }
-
-
     }
 
   }
+
   //create an object of ActiveMap<String, Map<String, dynamic>> to store the form results
 
-  ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap( {
+  ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({
     "data": {
       "data": "data",
       "data1": "data",
       "data2": "data",
     }
   });
-
 }
