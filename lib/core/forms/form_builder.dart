@@ -38,9 +38,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
     /// Validation func
 
-
     /// Logic fun
-
 
     /// Helper func
     String trimCurly(String value) {
@@ -53,8 +51,10 @@ class _FormBuilderState extends State<FormBuilder> {
       int start = value.indexOf("[") + 1;
       int end = value.indexOf("]");
       String listString = value.substring(start, end);
-      return listString.split(",")
-          .map((str) => str.replaceAll("'", "")).toList();
+      return listString
+          .split(",")
+          .map((str) => str.replaceAll("'", ""))
+          .toList();
     }
 
     /// Use this to split the string by [and, or]
@@ -62,9 +62,15 @@ class _FormBuilderState extends State<FormBuilder> {
     /// returns a list of strings
     List splitStringList(String value) {
       List splits = [];
+
       /// separate a string by [and, or] and remove the ' from values
-      splits = value.split("and")
-          .map((str) => str.replaceAll("'", "")).toList();
+      value.contains(" or ")
+          ? splits =
+              value.split(" or ").map((str) => str.replaceAll("'", "")).toList()
+          : splits =
+              value.split("and").map((str) => str.replaceAll("'", "")).toList();
+      // splits = value.split("and")
+      //     .map((str) => str.replaceAll("'", "")).toList();
       // for (var split in splits) {
       //   if (split.contains("or")) {
       //     splits.addAll(split.split("or")
@@ -87,14 +93,17 @@ class _FormBuilderState extends State<FormBuilder> {
         /// it should overwrite enabled state from above
 
         /// Here we handle the many conditions in the visibleIf
-        List enableIfConditions = splitStringList(element['enableIf']);
-        for (String search in enableIfConditions) {
-          if (widget.formResults[trimCurly(element['enableIf'])] != null) {
-            /// TODO: Handel for OR conditions
-            //data found, now check if trimCurly is in getListString
-            enabled = trimListString(element['enableIf']).contains(
-                trimCurly(element['enableIf']))
-                ? true : false;
+        if(element['enableIf'].toString().contains('anyof')){
+          List enableIfConditions = splitStringList(element['enableIf']);
+          for (String search in enableIfConditions) {
+            if (formResults[trimCurly(search)] != null) {
+              /// TODO: Handel for OR conditions
+              //data found, now check if trimCurly is in getListString
+              enabled = trimListString(search)
+                  .contains(trimCurly(search))
+                  ? true
+                  : false;
+            }
           }
         }
       }
@@ -105,7 +114,7 @@ class _FormBuilderState extends State<FormBuilder> {
         /// Here we handle the many conditions in the visibleIf
         List enableIfConditions = splitStringList(element['enableIf']);
         for (String search in enableIfConditions) {
-          if (widget.formResults[trimCurly(element['enableIf'])] != null) {
+          if (formResults[trimCurly(search)] != null) {
             return true;
           }
         }
@@ -124,12 +133,12 @@ class _FormBuilderState extends State<FormBuilder> {
           /// Here we handle the many conditions in the visibleIf
           List visibleIfConditions = splitStringList(element['visibleIf']);
           for (String search in visibleIfConditions) {
-            if (widget.formResults[trimCurly(search)] != null) {
+            if (formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
-              visible = trimListString(search).contains(
-                  trimCurly(search))
-                  ? true : false;
+              visible = trimListString(search).contains(trimCurly(search))
+                  ? true
+                  : false;
             }
           }
         }
@@ -141,7 +150,7 @@ class _FormBuilderState extends State<FormBuilder> {
           /// Here we handle the many conditions in the visibleIf
           List visibleIfConditions = splitStringList(element['visibleIf']);
           for (String search in visibleIfConditions) {
-            if (widget.formResults[trimCurly(search)] != null) {
+            if (formResults[trimCurly(search)] != null) {
               return true;
             }
           }
@@ -172,12 +181,12 @@ class _FormBuilderState extends State<FormBuilder> {
 
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
-      ActiveResponse activeResponse = await activeRequest
-          .getApi(Params(endpoint: request['url'], queryParameters: {"number":"31474175"}));
+      ActiveResponse activeResponse =
+          await activeRequest.getApi(Params(endpoint: request['url'], queryParameters: {"number":"31474175"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
-      final Map<String, dynamic> convertedData = jsonDecode(
-          activeResponse.data!);
+      final Map<String, dynamic> convertedData =
+          jsonDecode(activeResponse.data!);
       return convertedData;
     }
 
@@ -192,7 +201,6 @@ class _FormBuilderState extends State<FormBuilder> {
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
       return choices;
     }
-
 
     TextInputType checkInputType(Map element) {
       TextInputType type = TextInputType.text;
@@ -220,27 +228,33 @@ class _FormBuilderState extends State<FormBuilder> {
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
       bool isRequired = element['isRequired'] ?? false;
-      String labelText = element['title'] + (isRequired == true ?
-      ' * ' : '');
+      String labelText = element['title'] + (isRequired == true ? ' * ' : '');
 
       /// Add to the widget.formResults
-      if(widget.formResults.containsKey(element['name'])){
-        textEditingController.text = widget.formResults[element['name']]!['value'] ?? '';
-        widget.formResults.update(element['name'], (value) => {
-          'controller': textEditingController,
-          'value': textEditingController.text,
-          'label': labelText,
-          'type': 'text',
-          'extras': widget.formResults[element['name']]!['extras'] ?? {}
-        }, notifyActivities: false);
-      } else{
-        widget.formResults.add(element['name'], {
-          'controller': textEditingController,
-          'value': textEditingController.text,
-          'label': labelText,
-          'type': 'text',
-          'extras': {}
-        }, notifyActivities: false);
+      if (widget.formResults.containsKey(element['name'])) {
+        textEditingController.text =
+            widget.formResults[element['name']]!['value'] ?? '';
+        widget.formResults.update(
+            element['name'],
+            (value) => {
+                  'controller': textEditingController,
+                  'value': textEditingController.text,
+                  'label': labelText,
+                  'type': 'text',
+                  'extras': widget.formResults[element['name']]!['extras'] ?? {}
+                },
+            notifyActivities: false);
+      } else {
+        widget.formResults.add(
+            element['name'],
+            {
+              'controller': textEditingController,
+              'value': textEditingController.text,
+              'label': labelText,
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
       }
 
       /// return the widget to be displayed
@@ -286,7 +300,6 @@ class _FormBuilderState extends State<FormBuilder> {
             return null;
           },
           onChanged: (value) {
-
             widget.formResults.remove(element['name'], notifyActivities: false);
             widget.formResults.add(element['name'], {
               'controller': textEditingController,
@@ -373,13 +386,16 @@ class _FormBuilderState extends State<FormBuilder> {
           onChanged: (value) {
 
             widget.formResults.remove(element['name'], notifyActivities: false);
-            widget.formResults.add(element['name'], {
-              'controller': textEditingController,
-              'value': value,
-              'label': labelText,
-              'type': 'text',
-              'extras': {}
-            }, notifyActivities: false);
+            widget.formResults.add(
+                element['name'],
+                {
+                  'controller': textEditingController,
+                  'value': value,
+                  'label': labelText,
+                  'type': 'text',
+                  'extras': {}
+                },
+                notifyActivities: false);
 
             printError(widget.formResults);
           },
@@ -414,7 +430,6 @@ class _FormBuilderState extends State<FormBuilder> {
         /// Make a httpRequest
 
         // ActiveRequest activeRequest = ActiveRequest();
-
       } else {
         printWarning('Choicessssssss????');
         printWarning(element['choices']);
@@ -431,7 +446,6 @@ class _FormBuilderState extends State<FormBuilder> {
             )
         ];
       }
-
 
 
 
@@ -471,9 +485,7 @@ class _FormBuilderState extends State<FormBuilder> {
                           (element['description'] ?? '')),
                       value: element['title'],
                       items: choiceList,
-                      onChanged: (value) {
-
-                      },
+                      onChanged: (value) {},
                     ),
                   ),
                 ],
@@ -501,9 +513,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     child: Text(val),
                   );
                 }).toList(),
-                onChanged: (value) {
-
-                },
+                onChanged: (value) {},
               ),
             ),
           ),
@@ -614,15 +624,15 @@ class _FormBuilderState extends State<FormBuilder> {
       printError(' **** ' + element['name']);
       return Visibility(
           child: Text(
-            element['displayTemplate'],
-            style: const TextStyle(
-              color: Color(0xff6b7280),
-              fontSize: 12,
-              fontFamily: "Inter",
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.60,
-            ),
-          ));
+        element['displayTemplate'],
+        style: const TextStyle(
+          color: Color(0xff6b7280),
+          fontSize: 12,
+          fontFamily: "Inter",
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.60,
+        ),
+      ));
     }
 
     Visibility httpLookUp(Map<String, dynamic> element) {
@@ -710,6 +720,7 @@ class _FormBuilderState extends State<FormBuilder> {
           selectedDate = picked;
         }
       }
+
       return Ink(
         child: GestureDetector(
           onTap: () {
@@ -784,13 +795,11 @@ class _FormBuilderState extends State<FormBuilder> {
           children: [
             Wrap(
               children: [
-                for(var choice in element['choices'])
+                for (var choice in element['choices'])
                   ChoiceChip(
                     label: Text(choice),
                     selected: selectedChoice == choice ? true : false,
-                    onSelected: (bool selected) {
-
-                    },
+                    onSelected: (bool selected) {},
                   )
               ],
             ),
@@ -834,12 +843,13 @@ class _FormBuilderState extends State<FormBuilder> {
 
         case 'html':
           return signaturepad(element);
-      // case '':
-      //   return aboutPage(httpRequest);
-      //   break;
+
+        // case '':
+        //   return aboutPage(httpRequest);
+        //   break;
         default:
           return container(element);
-
+          break;
       }
     }
 
@@ -847,8 +857,7 @@ class _FormBuilderState extends State<FormBuilder> {
       if (element['type'] == 'panel') {
         Column children = Column(
           children: [
-            for(var element in element['elements'])
-              checkElement(element)
+            for (var element in element['elements']) checkElement(element)
           ],
         );
 
@@ -874,8 +883,7 @@ class _FormBuilderState extends State<FormBuilder> {
                   ),
                   children,
                 ],
-              )
-          ),
+              )),
         );
       } else {
         return getElement(element);
@@ -884,10 +892,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
     Widget buildForm() {
       return ListView(
-        children: [
-          for(var element in widget.elements)
-            checkElement(element)
-        ],
+        children: [for (var element in widget.elements) checkElement(element)],
       );
     }
 

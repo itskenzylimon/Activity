@@ -58,7 +58,6 @@ void main() async {
   // }
 
   runApp(const MyApp());
-
 }
 
 class MyApp extends StatelessWidget {
@@ -71,7 +70,7 @@ class MyApp extends StatelessWidget {
       home: Activity(
         MainController(),
         // developerMode: true,
-        onActivityStateChanged: ()=>
+        onActivityStateChanged: () =>
             DateTime.now().microsecondsSinceEpoch.toString(),
         child: TaskView(
           activeController: TaskController(),
@@ -118,7 +117,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
       debugShowCheckedModeBanner: true,
       title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
       theme: ThemeData(
-        primarySwatch: activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
+        primarySwatch:
+            activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: Scaffold(
@@ -436,10 +436,4 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
           ),
         ));
   }
-
 }
-
-
-
-
-
