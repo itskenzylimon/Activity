@@ -241,6 +241,8 @@ TextEditingController textCont = TextEditingController();
       printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
           endpoint: request['url'], queryParameters: {"number": "31474175"}));
+      ActiveResponse activeResponse = await activeRequest
+          .getApi(Params(endpoint: request['url'], queryParameters: {"number":"${request['id']}"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
       final Map<String, dynamic> convertedData =
@@ -257,6 +259,8 @@ TextEditingController textCont = TextEditingController();
       printError(choicesByUrl);
 
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
+      printInfo("choices ???");
+      printInfo(choices);
       return choices;
     }
 
@@ -873,34 +877,35 @@ TextEditingController textCont = TextEditingController();
                           child: parameters['type'] == 'dropdown'
                               ? dropdownChoicesIPRS(parameters)
                               : textFieldIPRS(parameters),
-                        );
-                      },
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {
-                      print(widget.formResults);
-                      print(widget.formResults['id_number']);
-                      print(widget.formResults['id_number']);
-                      var idType;
-                      if (widget.formResults.containsKey('id_type')) {
-                        if (widget.formResults['id_type'] != null) {
-                          idType = widget.formResults['id_type']!['value'];
-                          if (idType == 'NationalIdentification') {
-                            printSuccess('NationalIdentification');
-                            httpLookUpUrl({
-                              "url":
-                                  "http://197.248.4.134/iprs/databyid?number=${widget.formResults['id_number']!['value']}"
-                            });
-                          } else if (idType == 'AlienIdentification') {
-                            printSuccess('AlienIdentification');
-                            httpLookUpUrl({
-                              "url":
-                                  "http://197.248.4.134/iprs/databyalienid?number=${widget.formResults['id_number']!['value']}"
-                            });
+                            );
+                          },
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: () {
+                          print(widget.formResults);
+                          print(widget.formResults['id_number']);
+                          print(widget.formResults['id_number']);
+                          var idType;
+                          if(widget.formResults.containsKey('id_type')){
+                            if(widget.formResults['id_type'] != null){
+                              idType = widget.formResults['id_type']!['value'];
+                              if(idType == 'NationalIdentification'){
+                                printSuccess('NationalIdentification');
+                                var data = httpLookUpUrl({"url":"http://197.248.4.134/iprs/databyid",
+                                  "id":'${widget.formResults['id_number']!['value']}'});
+                                printInfo("data ???");
+                                printInfo(data);
+                            } else if(idType == 'AlienIdentification'){
+                                printSuccess('AlienIdentification');
+                                var data = httpLookUpUrl({
+                                  "url":"http://197.248.4.134/iprs/databyalienid",
+                                  "id":'${widget.formResults['id_number']!['value']}'});
+                                printInfo("data ???");
+                                printInfo(data);
+                            }
+                            }
                           }
-                        }
-                      }
 
                       // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
                       ScaffoldMessenger.of(context).showSnackBar(
