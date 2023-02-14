@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:activity/activity.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 import '../helpers/logger.dart';
 
-class FormBuilder extends StatefulWidget{
+class FormBuilder extends StatefulWidget {
   final List elements;
   final ActiveMap<String, Map<String, dynamic>> formResults;
   final BuildContext context;
@@ -16,7 +20,6 @@ class FormBuilder extends StatefulWidget{
     required this.formResults,
   });
 
-
   @override
   _FormBuilderState createState() => _FormBuilderState();
 }
@@ -26,6 +29,28 @@ class _FormBuilderState extends State<FormBuilder> {
     // Key / value for the form
 
     Map formValues = widget.formResults.value;
+    Timer? _debounce;
+    ActiveRequest activeRequest = ActiveRequest();
+    getListItems(query, url) async {
+      activeRequest.setUp = RequestSetUp(
+        idleTimeout: 10,
+        connectionTimeout: 10,
+        logResponse: true,
+        withTrustedRoots: true,
+      );
+      printNormal(url);
+      ActiveResponse userDataRes =
+          await activeRequest.getApi(Params(endpoint: url, queryParameters: {
+        '': "",
+      }));
+
+      if (userDataRes.statusCode == 200) {
+        printWarning("dropdown data here");
+        printSuccess(userDataRes.data);
+      } else {
+        // printError(response['error_description']);
+      }
+    }
 
     /// List results
     /// key : {
@@ -39,6 +64,23 @@ class _FormBuilderState extends State<FormBuilder> {
     /// Validation func
 
     /// Logic fun
+    String? path;
+
+    String getBase64FormateFile(String path) {
+      File file = File(path);
+      print('File is = ' + file.toString());
+      List<int> fileInByte = file.readAsBytesSync();
+      String fileInBase64 = base64Encode(fileInByte);
+      return fileInBase64;
+    }
+
+    //upload file
+    Future<String> getFile() async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false);
+      if (result == null) return "";
+      path = result.files.single.path!;
+      return getBase64FormateFile(path!);
+    }
 
     /// Helper func
     String trimCurly(String value) {
@@ -216,8 +258,7 @@ class _FormBuilderState extends State<FormBuilder> {
         }
 
         /// Email
-        if (element.containsValue(" Email") ||
-            element.containsValue(" abc@xyz.com")) {
+        if (element.containsValue(" Email") || element.containsValue(" abc@xyz.com")) {
           type = TextInputType.emailAddress;
         }
       }
@@ -301,13 +342,16 @@ class _FormBuilderState extends State<FormBuilder> {
           },
           onChanged: (value) {
             widget.formResults.remove(element['name'], notifyActivities: false);
-            widget.formResults.add(element['name'], {
-              'controller': textEditingController,
-              'value': value,
-              'label': labelText,
-              'type': 'text',
-              'extras': {}
-            }, notifyActivities: false);
+            widget.formResults.add(
+                element['name'],
+                {
+                  'controller': textEditingController,
+                  'value': value,
+                  'label': labelText,
+                  'type': 'text',
+                  'extras': {}
+                },
+                notifyActivities: false);
 
             printError(widget.formResults);
           },
@@ -319,27 +363,32 @@ class _FormBuilderState extends State<FormBuilder> {
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
       bool isRequired = true;
-      String labelText = element['label'] + (isRequired == true ?
-      ' * ' : '');
+      String labelText = element['label'] + (isRequired == true ? ' * ' : '');
 
       /// Add to the widget.formResults
-      if(widget.formResults.containsKey(element['name'])){
+      if (widget.formResults.containsKey(element['name'])) {
         textEditingController.text = widget.formResults[element['name']]!['value'] ?? '';
-        widget.formResults.update(element['name'], (value) => {
-          'controller': textEditingController,
-          'value': textEditingController.text,
-          'label': labelText,
-          'type': 'text',
-          'extras': widget.formResults[element['name']]!['extras'] ?? {}
-        }, notifyActivities: false);
-      } else{
-        widget.formResults.add(element['name'], {
-          'controller': textEditingController,
-          'value': textEditingController.text,
-          'label': labelText,
-          'type': 'text',
-          'extras': {}
-        }, notifyActivities: false);
+        widget.formResults.update(
+            element['name'],
+            (value) => {
+                  'controller': textEditingController,
+                  'value': textEditingController.text,
+                  'label': labelText,
+                  'type': 'text',
+                  'extras': widget.formResults[element['name']]!['extras'] ?? {}
+                },
+            notifyActivities: false);
+      } else {
+        widget.formResults.add(
+            element['name'],
+            {
+              'controller': textEditingController,
+              'value': textEditingController.text,
+              'label': labelText,
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
       }
 
       /// return the widget to be displayed
@@ -357,24 +406,23 @@ class _FormBuilderState extends State<FormBuilder> {
           ),
           validator: (value) {
             /// always  required
-              /// input validator for numbers
-              if (element['type'] == 'number') {
-                int intValue = int.parse(value ?? '0');
-                //check if max exist
-                if (element['max'] != null) {
-                  if (intValue > element['max']) {
-                    return '${element['max']} is the max ${element['title']}';
-                  }
+            /// input validator for numbers
+            if (element['type'] == 'number') {
+              int intValue = int.parse(value ?? '0');
+              //check if max exist
+              if (element['max'] != null) {
+                if (intValue > element['max']) {
+                  return '${element['max']} is the max ${element['title']}';
                 }
-                //check if min exist
-                if (element['min'] != null) {
-                  if (element['min'] > intValue) {
-                    return '${element['min']} is the min ${element['title']}';
-                  }
-                }
-                //
               }
-
+              //check if min exist
+              if (element['min'] != null) {
+                if (element['min'] > intValue) {
+                  return '${element['min']} is the min ${element['title']}';
+                }
+              }
+              //
+            }
 
             if (value == null || value.isEmpty) {
               return (element['label'] + ' is required');
@@ -384,7 +432,6 @@ class _FormBuilderState extends State<FormBuilder> {
             return null;
           },
           onChanged: (value) {
-
             widget.formResults.remove(element['name'], notifyActivities: false);
             widget.formResults.add(
                 element['name'],
@@ -449,10 +496,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
 
 
-      if (element['renderAs'] != null) {
-        // if(element['renderAs'] == 'select2'){
-        // } else {
-        // }
+      if (element['renderAs'] != null && element['renderAs'] == 'select2') {
         return Visibility(
             visible: visibleIf(element),
             child: Container(
@@ -462,6 +506,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 borderRadius: BorderRadius.circular(5.0),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     decoration: const BoxDecoration(
@@ -474,7 +519,10 @@ class _FormBuilderState extends State<FormBuilder> {
                         contentPadding: EdgeInsets.only(bottom: 12, left: 16),
                       ),
                       onChanged: (value) {
-
+                        if (_debounce?.isActive ?? false) _debounce?.cancel();
+                        _debounce = Timer(const Duration(milliseconds: 4000), () async {
+                          await getListItems(value,element['choicesByUrl']['url'] );
+                        });
                       },
                     ),
                   ),
@@ -504,8 +552,7 @@ class _FormBuilderState extends State<FormBuilder> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 key: dropdownKey,
-                hint: Text(
-                    element['title'] + ' ' + (element['description'] ?? '')),
+                hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
                 value: element['title'],
                 items: choices.map((String val) {
                   return DropdownMenuItem<String>(
@@ -522,22 +569,24 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility dropdownChoicesIPRS(Map<String, dynamic> element) {
-
       Key dropdownKey = Key(element['name']);
 
       /// Add to the widget.formResults
-      if(widget.formResults.containsKey(element['name']) == false){
+      if (widget.formResults.containsKey(element['name']) == false) {
         printInfo('{{{element}}}');
         printInfo(element['name']);
 
-        widget.formResults.add(element['name'], {
-          'controller': element['name'],
-          'value': element['label'].toString(),
-          'label': element['label'],
-          'type': 'text',
-          'options': element['options'],
-          'extras': {}
-        }, notifyActivities: false);
+        widget.formResults.add(
+            element['name'],
+            {
+              'controller': element['name'],
+              'value': element['label'].toString(),
+              'label': element['label'],
+              'type': 'text',
+              'options': element['options'],
+              'extras': {}
+            },
+            notifyActivities: false);
       }
 
       if (element['options'] == null) {
@@ -545,94 +594,124 @@ class _FormBuilderState extends State<FormBuilder> {
         /// Make a httpRequest
 
         // ActiveRequest activeRequest = ActiveRequest();
-
       } else {
         // choices.add(element['label'].toString());
-
       }
-
 
       final List<DropdownMenuItem> choiceList = [
         DropdownMenuItem(
           value: element['label'].toString(),
           child: const Text('Select choices'),
         ),
-        for(var i = 0; i < element['options'].length; i++)
+        for (var i = 0; i < element['options'].length; i++)
           DropdownMenuItem(
             value: widget.formResults[element['name']]!['options'][i]['value'],
             child: Text(widget.formResults[element['name']]!['options'][i]['label']),
           )
       ];
 
-      if(formValues.containsKey(element['name']) == false){
+      if (formValues.containsKey(element['name']) == false) {
         formValues['${element['name']}'] = widget.formResults[element['name']];
       }
 
       String vl = formValues[element['name']]['value'];
 
       return Visibility(
-          visible: visibleIf(element),
-          child: Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton(
-                key: dropdownKey,
-                hint: const Text('Select choices'),
-                value: vl,
-                items: choiceList,
-                onChanged: (value) {
-                    printSuccess("Value Selected");
-                    printSuccess(value);
-                    printSuccess(element['name']);
-                    print("????? VALUE");
-                    widget.formResults.remove(element['name'], notifyActivities: false);
-                    widget.formResults.add(element['name'], {
+        visible: visibleIf(element),
+        child: Container(
+          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton(
+              key: dropdownKey,
+              hint: const Text('Select choices'),
+              value: vl,
+              items: choiceList,
+              onChanged: (value) {
+                printSuccess("Value Selected");
+                printSuccess(value);
+                printSuccess(element['name']);
+                print("????? VALUE");
+                widget.formResults.remove(element['name'], notifyActivities: false);
+                widget.formResults.add(
+                    element['name'],
+                    {
                       'controller': element['name'],
                       'value': value,
                       'label': element['label'],
                       'type': 'text',
                       'options': element['options'],
                       'extras': {}
-                    }, notifyActivities: false);
+                    },
+                    notifyActivities: false);
 
-                    setState(() {
-                      formValues['${element['name']}'] = {
-                        'controller': element['name'],
-                        'value': value,
-                        'label': element['label'],
-                        'type': 'text',
-                        'options': element['options'],
-                        'extras': {}
-                      };
-                    });
+                setState(() {
+                  formValues['${element['name']}'] = {
+                    'controller': element['name'],
+                    'value': value,
+                    'label': element['label'],
+                    'type': 'text',
+                    'options': element['options'],
+                    'extras': {}
+                  };
+                });
 
-                    printWarning("????? FormResults");
-                    printWarning(widget.formResults);
-                },
-              ),
+                printWarning("????? FormResults");
+                printWarning(widget.formResults);
+              },
             ),
           ),
-        );
+        ),
+      );
+    }
 
+    Visibility ageCalc(Map<String, dynamic> element) {
+      Key textFieldKey = Key(element['name']);
+      TextEditingController textEditingController = TextEditingController();
+      TextEditingController agecalcEditingController = TextEditingController();
+      String labelText = element['title'];
+
+      /// return the widget to be displayed
+      return Visibility(
+        visible: visibleIf(element),
+        child: TextFormField(
+          controller: widget.formResults[element['name']]!['controller'],
+          keyboardType: checkInputType(element),
+          key: textFieldKey,
+          readOnly: enableIf(element),
+          decoration: InputDecoration(
+            labelText: labelText,
+            hintText: element['placeholder'] ?? '',
+          ),
+          validator: (value) {},
+          onChanged: (value) {
+            widget.formResults.remove(element['name'], notifyActivities: false);
+            widget.formResults.add(
+                element['name'],
+                {
+                  'controller': agecalcEditingController,
+                  'value': value,
+                  'label': labelText,
+                  'type': 'agecalc',
+                  'extras': {}
+                },
+                notifyActivities: false);
+            ;
+          },
+        ),
+      );
     }
 
     Visibility htmlText(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
-          child: Text(
-        element['displayTemplate'],
-        style: const TextStyle(
-          color: Color(0xff6b7280),
-          fontSize: 12,
-          fontFamily: "Inter",
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.60,
-        ),
-      ));
+          visible: visibleIf(element),
+          child: Html(
+            data: element['displayTemplate'],
+          ));
     }
 
     Visibility httpLookUp(Map<String, dynamic> element) {
@@ -641,28 +720,28 @@ class _FormBuilderState extends State<FormBuilder> {
       /// after loading update the data forms
       return Visibility(
           child: SizedBox(
-            height: 300,
-            child: ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: element['lookup'].length,
-                itemBuilder: (BuildContext context, int index) {
-                  final item = element['lookup'][index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Text('${item['name']}', style: TextStyle(color: Colors.green)),
-                      ),
-                      SizedBox(
-                        height: 200,
-                        child: ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: item['parameters'].length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final parameters = item['parameters'][index];
-                            return Container(
-                              child: parameters['type'] == 'dropdown'?
-                              dropdownChoicesIPRS(parameters)
+        height: 300,
+        child: ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: element['lookup'].length,
+            itemBuilder: (BuildContext context, int index) {
+              final item = element['lookup'][index];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    child: Text('${item['name']}', style: TextStyle(color: Colors.green)),
+                  ),
+                  SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: item['parameters'].length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final parameters = item['parameters'][index];
+                        return Container(
+                          child: parameters['type'] == 'dropdown'
+                              ? dropdownChoicesIPRS(parameters)
                               : textFieldIPRS(parameters),
                             );
                           },
@@ -700,8 +779,6 @@ class _FormBuilderState extends State<FormBuilder> {
                 }),
           ));
     }
-
-
 
     Ink datepicker(Map<String, dynamic> element) {
       DateTime selectedDate = DateTime.now();
@@ -776,16 +853,56 @@ class _FormBuilderState extends State<FormBuilder> {
       return Container();
     }
 
-    Container file(Map<String, dynamic> element) {
-      return Container();
+    Visibility filePicker(Map<String, dynamic> element) {
+      printError(' **** ' + element['name']);
+      return Visibility(
+        visible: visibleIf(element),
+        child: Padding(
+          padding: const EdgeInsets.only(
+            top: 20,
+          ),
+          child: InkWell(
+            onTap: () async {
+              //upload file
+              String base64 = await getFile();
+              widget.formResults.add(
+                  element['name'],
+                  {
+                    'controller': element['name'],
+                    'value': element['label'].toString(),
+                    'label': element['label'],
+                    'type': 'file',
+                    'file': base64,
+                    'extras': {}
+                  },
+                  notifyActivities: false);
+            },
+            child: Container(
+              color: Colors.blue,
+              height: 40,
+              child: Center(
+                child: Text(
+                  "Pick file",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     Container signaturepad(Map<String, dynamic> element) {
       return Container();
     }
 
-    Container html(Map<String, dynamic> element) {
-      return Container();
+    Visibility html(Map<String, dynamic> element) {
+      printError(' **** ' + element['name']);
+      return Visibility(
+          visible: visibleIf(element),
+          child: Html(
+            data: element['html'],
+          ));
     }
 
     Container checkbox(Map<String, dynamic> element) {
@@ -809,8 +926,8 @@ class _FormBuilderState extends State<FormBuilder> {
       );
     }
 
-    Widget getElement(Map<String, dynamic> element){
-      switch(element['type']) {
+    Widget getElement(Map<String, dynamic> element) {
+      switch (element['type']) {
         case 'text':
           return textField(element);
 
@@ -833,7 +950,7 @@ class _FormBuilderState extends State<FormBuilder> {
           return radiogroup(element);
 
         case 'file':
-          return file(element);
+          return filePicker(element);
 
         case 'checkbox':
           return checkbox(element);
@@ -842,23 +959,22 @@ class _FormBuilderState extends State<FormBuilder> {
           return signaturepad(element);
 
         case 'html':
-          return signaturepad(element);
-
+          return html(element);
+        case 'agecalc':
+          printError("agecalc");
+          return ageCalc(element);
         // case '':
         //   return aboutPage(httpRequest);
         //   break;
         default:
           return container(element);
-          break;
       }
     }
 
     Widget checkElement(Map<String, dynamic> element) {
       if (element['type'] == 'panel') {
         Column children = Column(
-          children: [
-            for (var element in element['elements']) checkElement(element)
-          ],
+          children: [for (var element in element['elements']) checkElement(element)],
         );
 
         return Card(
@@ -905,5 +1021,4 @@ class _FormBuilderState extends State<FormBuilder> {
   Widget build(BuildContext context) {
     return create();
   }
-
 }

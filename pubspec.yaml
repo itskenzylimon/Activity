@@ -9,6 +9,8 @@ environment:
   sdk: '>=2.18.2 <3.0.0'
 
 dependencies:
+  file_picker: ^5.2.5
+  flutter_html: ^2.2.1
   flutter:
     sdk: flutter
 
