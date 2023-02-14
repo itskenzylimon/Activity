@@ -7,7 +7,7 @@ class SurveyJSForm {
   final Map schema;
   final ActiveMap<String, Map<String, dynamic>> formResults;
   final BuildContext context;
-  final  VoidCallback onFormSubmit;
+  final VoidCallback onFormSubmit;
 
   const SurveyJSForm({
     required this.schema,
@@ -16,8 +16,7 @@ class SurveyJSForm {
     required this.onFormSubmit,
   });
 
-   DefaultTabController createSurveyJSView(){
-
+  DefaultTabController createSurveyJSView() {
     List pages = schema['service']['schema']['pages'];
     final _formKey = GlobalKey<FormState>();
     printError('Schema Data');
@@ -33,11 +32,18 @@ class SurveyJSForm {
               SizedBox(
                 height: 50,
                 child: AppBar(
+                  elevation: 0,
+                  backgroundColor: Colors.white,
                   bottom: TabBar(
+                    unselectedLabelStyle: const TextStyle(fontSize: 16.0, color: Color(0xff0062E1)),
+                    labelStyle: const TextStyle(fontSize: 16.0, color: Color(0xff101828)),
+                    labelColor: const Color(0xff0062E1),
+                    unselectedLabelColor: const Color(0xff101828),
+                    isScrollable: true,
                     tabs: [
                       //// TODO: Some pages could be invisible
 
-                      for(var page in schema['service']['schema']['pages'])
+                      for (var page in schema['service']['schema']['pages'])
                         Tab(
                           text: page['title'],
                         ),
@@ -51,8 +57,9 @@ class SurveyJSForm {
                 child: TabBarView(
                   children: [
                     // first tab bar view widget
-                    for(var page in schema['service']['schema']['pages'])
-                    FormBuilder(elements: page['elements'], context: context, formResults: formResults)
+                    for (var page in schema['service']['schema']['pages'])
+                      FormBuilder(
+                          elements: page['elements'], context: context, formResults: formResults)
                   ],
                 ),
               ),
@@ -79,5 +86,4 @@ class SurveyJSForm {
       ),
     );
   }
-
 }
