@@ -96,7 +96,7 @@ class _FormBuilderState extends State<FormBuilder> {
         if(element['enableIf'].toString().contains('anyof')){
           List enableIfConditions = splitStringList(element['enableIf']);
           for (String search in enableIfConditions) {
-            if (formResults[trimCurly(search)] != null) {
+            if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
               enabled = trimListString(search)
@@ -114,7 +114,7 @@ class _FormBuilderState extends State<FormBuilder> {
         /// Here we handle the many conditions in the visibleIf
         List enableIfConditions = splitStringList(element['enableIf']);
         for (String search in enableIfConditions) {
-          if (formResults[trimCurly(search)] != null) {
+          if (widget.formResults[trimCurly(search)] != null) {
             return true;
           }
         }
@@ -133,7 +133,7 @@ class _FormBuilderState extends State<FormBuilder> {
           /// Here we handle the many conditions in the visibleIf
           List visibleIfConditions = splitStringList(element['visibleIf']);
           for (String search in visibleIfConditions) {
-            if (formResults[trimCurly(search)] != null) {
+            if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
               visible = trimListString(search).contains(trimCurly(search))
@@ -150,7 +150,7 @@ class _FormBuilderState extends State<FormBuilder> {
           /// Here we handle the many conditions in the visibleIf
           List visibleIfConditions = splitStringList(element['visibleIf']);
           for (String search in visibleIfConditions) {
-            if (formResults[trimCurly(search)] != null) {
+            if (widget.formResults[trimCurly(search)] != null) {
               return true;
             }
           }
