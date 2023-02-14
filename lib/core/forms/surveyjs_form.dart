@@ -20,9 +20,10 @@ class SurveyJSForm {
 
    DefaultTabController createSurveyJSView(){
 
-    List pages = schema['pages'];
+    List pages = schema['service']['schema']['pages'];
     final _formKey = GlobalKey<FormState>();
-
+    printError('Schema Data');
+    printError(schema['service']['schema']['pages'][1]);
     return DefaultTabController(
       length: pages.length,
       child: Scaffold(
@@ -38,7 +39,8 @@ class SurveyJSForm {
                   bottom: TabBar(
                     tabs: [
                       //// TODO: Some pages could be invisible
-                      for(var page in schema['pages'])
+
+                      for(var page in schema['service']['schema']['pages'])
                         Tab(
                           text: page['title'],
                         ),
@@ -52,8 +54,8 @@ class SurveyJSForm {
                 child: TabBarView(
                   children: [
                     // first tab bar view widget
-                    for(var page in schema['pages'])
-                    FormBuilder(elements: page['elements'], context: context, formResults: formResults).create()
+                    for(var page in schema['service']['schema']['pages'])
+                    FormBuilder(elements: page['elements'], context: context, formResults: formResults)
                   ],
                 ),
               ),
