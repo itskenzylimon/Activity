@@ -7,13 +7,11 @@ class SurveyJSForm {
   final Map schema;
   final ActiveMap<String, Map<String, dynamic>> formResults;
   final BuildContext context;
-  final AppBar formAppBar;
   final  VoidCallback onFormSubmit;
 
   const SurveyJSForm({
     required this.schema,
     required this.context,
-    required this.formAppBar,
     required this.formResults,
     required this.onFormSubmit,
   });
@@ -27,7 +25,6 @@ class SurveyJSForm {
     return DefaultTabController(
       length: pages.length,
       child: Scaffold(
-        appBar: formAppBar,
         body: Form(
           key: _formKey,
           child: Column(

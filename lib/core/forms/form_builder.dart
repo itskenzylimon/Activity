@@ -151,19 +151,30 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Future<Map<String, dynamic>> formRequest(Map request) async {
+      String username = 'mrmiddleman';
+      String password = '6I2-u?=W';
+      String basicAuth = base64Encode(utf8.encode('$username:$password'));
+      print(basicAuth);
       ActiveRequest activeRequest = ActiveRequest();
       activeRequest.setUp = RequestSetUp(
         idleTimeout: 10,
         connectionTimeout: 10,
         logResponse: true,
         withTrustedRoots: true,
+        httpHeaders: {
+          'Authorization': 'Basic ${basicAuth.replaceAll(' ', '')}',
+        }
       );
+
 
       /// Handle httplookup
       /// Handle choicesByUrl
 
+      printWarning(request['url']);
+      printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest
-          .getApi(Params(endpoint: request['url']));
+          .getApi(Params(endpoint: request['url'], queryParameters: {"number":"31474175"}));
+      printError("Active Respobse ??????");
       printError(activeResponse);
       final Map<String, dynamic> convertedData = jsonDecode(
           activeResponse.data!);
@@ -175,8 +186,9 @@ class _FormBuilderState extends State<FormBuilder> {
       return choices;
     }
 
-    Future<Map<String, dynamic>> httpLookUpUrl(choicesByUrl) async {
+    Future<Map<String, dynamic>> httpLookUpUrl(Map choicesByUrl) async {
       printError(choicesByUrl);
+
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
       return choices;
     }
@@ -378,7 +390,22 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility dropdownChoices(Map<String, dynamic> element) {
       Key dropdownKey = Key(element['name']);
       printSuccess(element['name']);
+      List<DropdownMenuItem> choiceList = [];
 
+      /// Add to the widget.formResults
+      if(widget.formResults.containsKey(element['name']) == false){
+        printInfo('{{{element}}}');
+        printInfo(element['name']);
+
+        widget.formResults.add(element['name'], {
+          'controller': element['name'],
+          'value': element['title'].toString(),
+          'label': element['title'],
+          'type': 'text',
+          'options': element['choices'],
+          'extras': {}
+        }, notifyActivities: false);
+      }
       /// TODO: showOtherItem ???
 
       List<String> choices = [element['title']];
@@ -389,8 +416,23 @@ class _FormBuilderState extends State<FormBuilder> {
         // ActiveRequest activeRequest = ActiveRequest();
 
       } else {
-        choices.addAll(element['choices']);
+        printWarning('Choicessssssss????');
+        printWarning(element['choices']);
+        // choices.addAll(element['choices']);
+        choiceList = [
+          DropdownMenuItem(
+            value: element['title'].toString(),
+            child: const Text('Select choices'),
+          ),
+          for(var i = 0; i < element['choices'].length; i++)
+            DropdownMenuItem(
+              value: widget.formResults[element['name']]!['options'][i],
+              child: Text(widget.formResults[element['name']]!['options'][i]),
+            )
+        ];
       }
+
+
 
 
       if (element['renderAs'] != null) {
@@ -423,17 +465,12 @@ class _FormBuilderState extends State<FormBuilder> {
                     ),
                   ),
                   DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
+                    child: DropdownButton(
                       key: dropdownKey,
                       hint: Text(element['title'] + ' ' +
                           (element['description'] ?? '')),
                       value: element['title'],
-                      items: choices.map((String val) {
-                        return DropdownMenuItem<String>(
-                          value: val,
-                          child: Text(val),
-                        );
-                      }).toList(),
+                      items: choiceList,
                       onChanged: (value) {
 
                       },
@@ -626,7 +663,20 @@ class _FormBuilderState extends State<FormBuilder> {
                           print(widget.formResults);
                           print(widget.formResults['id_number']);
                           print(widget.formResults['id_number']);
-                          httpLookUpUrl('http://197.248.4.134/iprs/databyid?number=123456789');
+                          var idType;
+                          if(widget.formResults.containsKey('id_type')){
+                            if(widget.formResults['id_type'] != null){
+                              idType = widget.formResults['id_type']!['value'];
+                              if(idType == 'NationalIdentification'){
+                                printSuccess('NationalIdentification');
+                                httpLookUpUrl({"url":"http://197.248.4.134/iprs/databyid?number=${widget.formResults['id_number']!['value']}"});
+                            } else if(idType == 'AlienIdentification'){
+                                printSuccess('AlienIdentification');
+                                httpLookUpUrl({"url":"http://197.248.4.134/iprs/databyalienid?number=${widget.formResults['id_number']!['value']}"});
+                            }
+                            }
+                          }
+
                           // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(content: Text('Processing Data')));

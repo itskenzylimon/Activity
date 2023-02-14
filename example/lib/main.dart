@@ -128,9 +128,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         // ),
         body: SafeArea(
             child:
-              SurveyJSForm(schema: activeController.schema2, context: context, formAppBar: AppBar(
-              title: Text(activeController.appTitle.value),
-            ), formResults: activeController.formResults,
+              SurveyJSForm(schema: activeController.schema2, context: context
+                  , formResults: activeController.formResults,
                 onFormSubmit: () {
                   /// At this point, the form has been submitted and the
                   /// results are available in the formResults variable
