@@ -51,12 +51,12 @@ class _FormBuilderState extends State<FormBuilder> {
       if (userDataRes.statusCode == 200) {
         printWarning("dropdown data here");
         printSuccess(userDataRes.data);
-      var   data = json.decode(userDataRes.data!);
-      list = data .where((elem) =>
-            elem['value'].toString().toLowerCase().contains(query.toLowerCase()) ||
-            elem['text'].toString().toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
+        var data = json.decode(userDataRes.data!);
+        list = data
+            .where((elem) =>
+                elem['value'].toString().toLowerCase().contains(query.toLowerCase()) ||
+                elem['text'].toString().toLowerCase().contains(query.toLowerCase()))
+            .toList();
       } else {
         // printError(response['error_description']);
       }
@@ -565,6 +565,17 @@ class _FormBuilderState extends State<FormBuilder> {
                           onChanged: (value) {
                             currentSelectedValue = value;
                             _listNotifier.notifyListeners();
+                            widget.formResults.add(
+                                element['name'],
+                                {
+                                  'controller': element['name'],
+                                  'value': value,
+                                  'label': element['label'],
+                                  'type': 'select2',
+                                  'options': element['options'],
+                                  'extras': {}
+                                },
+                                notifyActivities: false);
                           },
                         ),
                       ),
