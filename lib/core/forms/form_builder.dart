@@ -31,7 +31,11 @@ class _FormBuilderState extends State<FormBuilder> {
     Map formValues = widget.formResults.value;
     Timer? _debounce;
     ActiveRequest activeRequest = ActiveRequest();
-    getListItems(query, url) async {
+    Future<List> getListItems(
+      query,
+      url,
+    ) async {
+      var list = [];
       activeRequest.setUp = RequestSetUp(
         idleTimeout: 10,
         connectionTimeout: 10,
@@ -47,9 +51,16 @@ class _FormBuilderState extends State<FormBuilder> {
       if (userDataRes.statusCode == 200) {
         printWarning("dropdown data here");
         printSuccess(userDataRes.data);
+      var   data = json.decode(userDataRes.data!);
+      list = data .where((elem) =>
+            elem['value'].toString().toLowerCase().contains(query.toLowerCase()) ||
+            elem['text'].toString().toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
       } else {
         // printError(response['error_description']);
       }
+      return list;
     }
 
     /// List results
@@ -208,27 +219,24 @@ class _FormBuilderState extends State<FormBuilder> {
       print(basicAuth);
       ActiveRequest activeRequest = ActiveRequest();
       activeRequest.setUp = RequestSetUp(
-        idleTimeout: 10,
-        connectionTimeout: 10,
-        logResponse: true,
-        withTrustedRoots: true,
-        httpHeaders: {
-          'Authorization': 'Basic ${basicAuth.replaceAll(' ', '')}',
-        }
-      );
-
+          idleTimeout: 10,
+          connectionTimeout: 10,
+          logResponse: true,
+          withTrustedRoots: true,
+          httpHeaders: {
+            'Authorization': 'Basic ${basicAuth.replaceAll(' ', '')}',
+          });
 
       /// Handle httplookup
       /// Handle choicesByUrl
 
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
-      ActiveResponse activeResponse =
-          await activeRequest.getApi(Params(endpoint: request['url'], queryParameters: {"number":"31474175"}));
+      ActiveResponse activeResponse = await activeRequest
+          .getApi(Params(endpoint: request['url'], queryParameters: {"number": "31474175"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
-      final Map<String, dynamic> convertedData =
-          jsonDecode(activeResponse.data!);
+      final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
       return convertedData;
     }
 
@@ -452,23 +460,33 @@ class _FormBuilderState extends State<FormBuilder> {
 
     Visibility dropdownChoices(Map<String, dynamic> element) {
       Key dropdownKey = Key(element['name']);
+      Key key = Key("123");
       printSuccess(element['name']);
-      List<DropdownMenuItem> choiceList = [];
+
+      List<DropdownMenuItem> choicesDynamic = [];
+      String? currentSelectedValue = 'Select';
+
+      final ValueNotifier<List<String>> _listNotifier = ValueNotifier<List<String>>(["Select"]);
+      List<String> choiceList = [..._listNotifier.value];
 
       /// Add to the widget.formResults
-      if(widget.formResults.containsKey(element['name']) == false){
+      if (widget.formResults.containsKey(element['name']) == false) {
         printInfo('{{{element}}}');
         printInfo(element['name']);
 
-        widget.formResults.add(element['name'], {
-          'controller': element['name'],
-          'value': element['title'].toString(),
-          'label': element['title'],
-          'type': 'text',
-          'options': element['choices'],
-          'extras': {}
-        }, notifyActivities: false);
+        widget.formResults.add(
+            element['name'],
+            {
+              'controller': element['name'],
+              'value': element['title'].toString(),
+              'label': element['title'],
+              'type': 'text',
+              'options': element['choices'],
+              'extras': {}
+            },
+            notifyActivities: false);
       }
+
       /// TODO: showOtherItem ???
 
       List<String> choices = [element['title']];
@@ -480,66 +498,81 @@ class _FormBuilderState extends State<FormBuilder> {
       } else {
         printWarning('Choicessssssss????');
         printWarning(element['choices']);
+
         // choices.addAll(element['choices']);
-        choiceList = [
-          DropdownMenuItem(
-            value: element['title'].toString(),
-            child: const Text('Select choices'),
-          ),
-          for(var i = 0; i < element['choices'].length; i++)
-            DropdownMenuItem(
-              value: widget.formResults[element['name']]!['options'][i],
-              child: Text(widget.formResults[element['name']]!['options'][i]),
-            )
-        ];
       }
-
-
 
       if (element['renderAs'] != null && element['renderAs'] == 'select2') {
         return Visibility(
-            visible: visibleIf(element),
+            // visible: visibleIf(element),
             child: Container(
-              margin: const EdgeInsets.only(top: 10, bottom: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(5.0),
+          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
+                ),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Search',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(bottom: 12, left: 16),
+                  ),
+                  onChanged: (value) {
+                    if (_debounce?.isActive ?? false) _debounce?.cancel();
+                    _debounce = Timer(const Duration(milliseconds: 100), () async {
+                      var list = await getListItems(
+                        value,
+                        element['choicesByUrl']['url'],
+                      );
+                      for (var l in list) {
+                        choiceList.add(
+                          l['value'].toString(),
+                        );
+                        _listNotifier.value = choiceList;
+                      }
+
+                      printSuccess("after query");
+                      printSuccess(choiceList);
+                    });
+                  },
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(color: Colors.grey)),
-                    ),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Search',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.only(bottom: 12, left: 16),
+              ValueListenableBuilder(
+                  valueListenable: _listNotifier,
+                  builder: (BuildContext context, choiceList, Widget? child) {
+                    return Container(
+                      width: double.infinity,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          key: key,
+                          isDense: true,
+                          hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
+                          value: currentSelectedValue,
+                          items: choiceList.map((String val) {
+                            return DropdownMenuItem<String>(
+                              value: val,
+                              child: Text(val),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            currentSelectedValue = value;
+                            _listNotifier.notifyListeners();
+                          },
+                        ),
                       ),
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce?.cancel();
-                        _debounce = Timer(const Duration(milliseconds: 4000), () async {
-                          await getListItems(value,element['choicesByUrl']['url'] );
-                        });
-                      },
-                    ),
-                  ),
-                  DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                      key: dropdownKey,
-                      hint: Text(element['title'] + ' ' +
-                          (element['description'] ?? '')),
-                      value: element['title'],
-                      items: choiceList,
-                      onChanged: (value) {},
-                    ),
-                  ),
-                ],
-              ),
-            )
-        );
+                    );
+                  }),
+            ],
+          ),
+        ));
       } else {
         return Visibility(
           visible: visibleIf(element),
@@ -678,7 +711,6 @@ class _FormBuilderState extends State<FormBuilder> {
       return Visibility(
         visible: visibleIf(element),
         child: TextFormField(
-          controller: widget.formResults[element['name']]!['controller'],
           keyboardType: checkInputType(element),
           key: textFieldKey,
           readOnly: enableIf(element),
@@ -743,41 +775,45 @@ class _FormBuilderState extends State<FormBuilder> {
                           child: parameters['type'] == 'dropdown'
                               ? dropdownChoicesIPRS(parameters)
                               : textFieldIPRS(parameters),
-                            );
-                          },
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: () {
-                          print(widget.formResults);
-                          print(widget.formResults['id_number']);
-                          print(widget.formResults['id_number']);
-                          var idType;
-                          if(widget.formResults.containsKey('id_type')){
-                            if(widget.formResults['id_type'] != null){
-                              idType = widget.formResults['id_type']!['value'];
-                              if(idType == 'NationalIdentification'){
-                                printSuccess('NationalIdentification');
-                                httpLookUpUrl({"url":"http://197.248.4.134/iprs/databyid?number=${widget.formResults['id_number']!['value']}"});
-                            } else if(idType == 'AlienIdentification'){
-                                printSuccess('AlienIdentification');
-                                httpLookUpUrl({"url":"http://197.248.4.134/iprs/databyalienid?number=${widget.formResults['id_number']!['value']}"});
-                            }
-                            }
+                        );
+                      },
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () {
+                      print(widget.formResults);
+                      print(widget.formResults['id_number']);
+                      print(widget.formResults['id_number']);
+                      var idType;
+                      if (widget.formResults.containsKey('id_type')) {
+                        if (widget.formResults['id_type'] != null) {
+                          idType = widget.formResults['id_type']!['value'];
+                          if (idType == 'NationalIdentification') {
+                            printSuccess('NationalIdentification');
+                            httpLookUpUrl({
+                              "url":
+                                  "http://197.248.4.134/iprs/databyid?number=${widget.formResults['id_number']!['value']}"
+                            });
+                          } else if (idType == 'AlienIdentification') {
+                            printSuccess('AlienIdentification');
+                            httpLookUpUrl({
+                              "url":
+                                  "http://197.248.4.134/iprs/databyalienid?number=${widget.formResults['id_number']!['value']}"
+                            });
                           }
+                        }
+                      }
 
-                          // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(content: Text('Processing Data')));
-
-                        },
-                        child: const Text('Search'),
-                      ),
-
-                    ],
-                  );
-                }),
-          ));
+                      // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text('Processing Data')));
+                    },
+                    child: const Text('Search'),
+                  ),
+                ],
+              );
+            }),
+      ));
     }
 
     Ink datepicker(Map<String, dynamic> element) {
@@ -856,7 +892,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility filePicker(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
-        visible: visibleIf(element),
+        // visible: visibleIf(element),
         child: Padding(
           padding: const EdgeInsets.only(
             top: 20,
@@ -899,10 +935,10 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility html(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
-          visible: visibleIf(element),
+          // visible: visibleIf(element),
           child: Html(
-            data: element['html'],
-          ));
+        data: element['html'],
+      ));
     }
 
     Container checkbox(Map<String, dynamic> element) {
