@@ -608,6 +608,7 @@ class _FormBuilderState extends State<FormBuilder> {
         return Visibility(
           visible: visibleIf(element),
           child: Container(
+            width: double.infinity,
             margin: const EdgeInsets.only(top: 10, bottom: 10),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
