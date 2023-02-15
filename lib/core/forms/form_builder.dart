@@ -52,11 +52,18 @@ class _FormBuilderState extends State<FormBuilder> {
         printWarning("dropdown data here");
         printSuccess(userDataRes.data);
         var data = json.decode(userDataRes.data!);
-        list = data
+        var filteredList = data
             .where((elem) =>
-                elem['value'].toString().toLowerCase().contains(query.toLowerCase()) ||
-                elem['text'].toString().toLowerCase().contains(query.toLowerCase()))
+                elem['value']
+                    .toString()
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                elem['text']
+                    .toString()
+                    .toLowerCase()
+                    .contains(query.toLowerCase()))
             .toList();
+        list = filteredList.toSet().toList();
       } else {
         // printError(response['error_description']);
       }
@@ -87,7 +94,8 @@ class _FormBuilderState extends State<FormBuilder> {
 
     //upload file
     Future<String> getFile() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false);
+      FilePickerResult? result =
+          await FilePicker.platform.pickFiles(allowMultiple: false);
       if (result == null) return "";
       path = result.files.single.path!;
       return getBase64FormateFile(path!);
@@ -146,14 +154,13 @@ class _FormBuilderState extends State<FormBuilder> {
         /// it should overwrite enabled state from above
 
         /// Here we handle the many conditions in the visibleIf
-        if(element['enableIf'].toString().contains('anyof')){
+        if (element['enableIf'].toString().contains('anyof')) {
           List enableIfConditions = splitStringList(element['enableIf']);
           for (String search in enableIfConditions) {
             if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
-              enabled = trimListString(search)
-                  .contains(trimCurly(search))
+              enabled = trimListString(search).contains(trimCurly(search))
                   ? true
                   : false;
             }
@@ -232,11 +239,12 @@ class _FormBuilderState extends State<FormBuilder> {
 
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
-      ActiveResponse activeResponse = await activeRequest
-          .getApi(Params(endpoint: request['url'], queryParameters: {"number": "31474175"}));
+      ActiveResponse activeResponse = await activeRequest.getApi(Params(
+          endpoint: request['url'], queryParameters: {"number": "31474175"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
-      final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
+      final Map<String, dynamic> convertedData =
+          jsonDecode(activeResponse.data!);
       return convertedData;
     }
 
@@ -266,7 +274,8 @@ class _FormBuilderState extends State<FormBuilder> {
         }
 
         /// Email
-        if (element.containsValue(" Email") || element.containsValue(" abc@xyz.com")) {
+        if (element.containsValue(" Email") ||
+            element.containsValue(" abc@xyz.com")) {
           type = TextInputType.emailAddress;
         }
       }
@@ -375,7 +384,8 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// Add to the widget.formResults
       if (widget.formResults.containsKey(element['name'])) {
-        textEditingController.text = widget.formResults[element['name']]!['value'] ?? '';
+        textEditingController.text =
+            widget.formResults[element['name']]!['value'] ?? '';
         widget.formResults.update(
             element['name'],
             (value) => {
@@ -462,11 +472,10 @@ class _FormBuilderState extends State<FormBuilder> {
       Key dropdownKey = Key(element['name']);
       Key key = Key("123");
       printSuccess(element['name']);
-
-      List<DropdownMenuItem> choicesDynamic = [];
       String? currentSelectedValue = 'Select';
 
-      final ValueNotifier<List<String>> _listNotifier = ValueNotifier<List<String>>(["Select"]);
+      final ValueNotifier<List<String>> _listNotifier =
+          ValueNotifier<List<String>>(["Select"]);
       List<String> choiceList = [..._listNotifier.value];
 
       /// Add to the widget.formResults
@@ -480,28 +489,36 @@ class _FormBuilderState extends State<FormBuilder> {
               'controller': element['name'],
               'value': element['title'].toString(),
               'label': element['title'],
-              'type': 'text',
+              'type': 'dropdown',
               'options': element['choices'],
               'extras': {}
             },
             notifyActivities: false);
       }
+      printSuccess("-------==-=-=-=--");
+      List<DropdownMenuItem> choices = [];
+      if (element['renderAs'] == null && element['choices']!=null) {
 
-      /// TODO: showOtherItem ???
-
-      List<String> choices = [element['title']];
-      if (element['choices'] == null) {
-        /// check if its a choicesByUrl
-        /// Make a httpRequest
-
-        // ActiveRequest activeRequest = ActiveRequest();
-      } else {
-        printWarning('Choicessssssss????');
-        printWarning(element['choices']);
-
-        // choices.addAll(element['choices']);
+        printSuccess("-------==-=-=${element['choices']}-=--");
+        printWarning(widget.formResults[element['name']]!['options']);
+        choices = [
+          DropdownMenuItem(
+            value: element['title'].toString(),
+            child: const Text('Select choices'),
+          ),
+          for (var i = 0; i < element['choices'].length; i++)
+            DropdownMenuItem(
+              value: widget.formResults[element['name']]!['options'][i] ?? "na",
+              child: Text(
+                  widget.formResults[element['name']]!['options'][i] ?? ""),
+            )
+        ];
+      }
+      if (formValues.containsKey(element['name']) == false) {
+        formValues['${element['name']}'] = widget.formResults[element['name']];
       }
 
+      String vl = formValues[element['name']]['value'];
       if (element['renderAs'] != null && element['renderAs'] == 'select2') {
         return Visibility(
             // visible: visibleIf(element),
@@ -527,7 +544,8 @@ class _FormBuilderState extends State<FormBuilder> {
                   ),
                   onChanged: (value) {
                     if (_debounce?.isActive ?? false) _debounce?.cancel();
-                    _debounce = Timer(const Duration(milliseconds: 100), () async {
+                    _debounce =
+                        Timer(const Duration(milliseconds: 1000), () async {
                       var list = await getListItems(
                         value,
                         element['choicesByUrl']['url'],
@@ -554,7 +572,9 @@ class _FormBuilderState extends State<FormBuilder> {
                         child: DropdownButton(
                           key: key,
                           isDense: true,
-                          hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
+                          hint: Text(element['title'] +
+                              ' ' +
+                              (element['description'] ?? '')),
                           value: currentSelectedValue,
                           items: choiceList.map((String val) {
                             return DropdownMenuItem<String>(
@@ -570,9 +590,9 @@ class _FormBuilderState extends State<FormBuilder> {
                                 {
                                   'controller': element['name'],
                                   'value': value,
-                                  'label': element['label'],
+                                  'label': element['title'],
                                   'type': 'select2',
-                                  'options': element['options'],
+                                  'options': "",
                                   'extras': {}
                                 },
                                 notifyActivities: false);
@@ -594,17 +614,38 @@ class _FormBuilderState extends State<FormBuilder> {
               borderRadius: BorderRadius.circular(5.0),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
+              child: DropdownButton(
                 key: dropdownKey,
-                hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
-                value: element['title'],
-                items: choices.map((String val) {
-                  return DropdownMenuItem<String>(
-                    value: val,
-                    child: Text(val),
-                  );
-                }).toList(),
-                onChanged: (value) {},
+                hint: Text(
+                    element['title'] + ' ' + (element['description'] ?? '')),
+                value: vl,
+                items: choices,
+                onChanged: (value) {
+                  widget.formResults
+                      .remove(element['name'], notifyActivities: false);
+                  widget.formResults.add(
+                      element['name'],
+                      {
+                        'controller': element['name'],
+                        'value': value,
+                        'label': element['title'],
+                        'type': 'dropdown',
+                        'options': element['choices'],
+                        'extras': {}
+                      },
+                      notifyActivities: false);
+
+                  setState(() {
+                    formValues['${element['name']}'] = {
+                      'controller': element['name'],
+                      'value': value,
+                      'label': element['title'],
+                      'type': 'dropdown',
+                      'options': element['choices'],
+                      'extras': {}
+                    };
+                  });
+                },
               ),
             ),
           ),
@@ -650,7 +691,8 @@ class _FormBuilderState extends State<FormBuilder> {
         for (var i = 0; i < element['options'].length; i++)
           DropdownMenuItem(
             value: widget.formResults[element['name']]!['options'][i]['value'],
-            child: Text(widget.formResults[element['name']]!['options'][i]['label']),
+            child: Text(
+                widget.formResults[element['name']]!['options'][i]['label']),
           )
       ];
 
@@ -679,7 +721,8 @@ class _FormBuilderState extends State<FormBuilder> {
                 printSuccess(value);
                 printSuccess(element['name']);
                 print("????? VALUE");
-                widget.formResults.remove(element['name'], notifyActivities: false);
+                widget.formResults
+                    .remove(element['name'], notifyActivities: false);
                 widget.formResults.add(
                     element['name'],
                     {
@@ -773,7 +816,8 @@ class _FormBuilderState extends State<FormBuilder> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    child: Text('${item['name']}', style: TextStyle(color: Colors.green)),
+                    child: Text('${item['name']}',
+                        style: TextStyle(color: Colors.green)),
                   ),
                   SizedBox(
                     height: 200,
@@ -816,8 +860,8 @@ class _FormBuilderState extends State<FormBuilder> {
                       }
 
                       // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(content: Text('Processing Data')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Processing Data')));
                     },
                     child: const Text('Search'),
                   ),
@@ -1021,7 +1065,9 @@ class _FormBuilderState extends State<FormBuilder> {
     Widget checkElement(Map<String, dynamic> element) {
       if (element['type'] == 'panel') {
         Column children = Column(
-          children: [for (var element in element['elements']) checkElement(element)],
+          children: [
+            for (var element in element['elements']) checkElement(element)
+          ],
         );
 
         return Card(
