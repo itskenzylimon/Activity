@@ -240,9 +240,8 @@ TextEditingController textCont = TextEditingController();
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
-          endpoint: request['url'], queryParameters: {"number": "31474175"}));
-      ActiveResponse activeResponse = await activeRequest
-          .getApi(Params(endpoint: request['url'], queryParameters: {"number":"${request['id']}"}));
+          endpoint: request['url'],
+          queryParameters: {"number": "${request['id']}"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
       final Map<String, dynamic> convertedData =
@@ -256,11 +255,16 @@ TextEditingController textCont = TextEditingController();
     }
 
     Future<Map<String, dynamic>> httpLookUpUrl(Map choicesByUrl) async {
+      printError("????????");
       printError(choicesByUrl);
 
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
       printInfo("choices ???");
       printInfo(choices);
+      if(widget.formResults.containsKey(choicesByUrl['data'])) {
+
+      }
+
       return choices;
     }
 
@@ -271,6 +275,12 @@ TextEditingController textCont = TextEditingController();
           type = TextInputType.number;
         }
       } else {
+        if (element['type'] != null) {
+          if (element['type'] == 'number') {
+            type = TextInputType.number;
+          }
+        }
+
         /// Find a way to get the form input type
         /// Mobile Number
         if (element.containsValue("^[+][0-9]{12}\$")) {
@@ -380,29 +390,33 @@ TextEditingController textCont = TextEditingController();
       );
     }
 
-    Visibility textFieldIPRS(Map<String, dynamic> element) {
+    Visibility textFieldIPRS(Map<String, dynamic> element, value) {
+      printInfo("????????>>>>");
+      printInfo(element);
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
       bool isRequired = true;
       String labelText = element['label'] + (isRequired == true ? ' * ' : '');
 
       /// Add to the widget.formResults
-      if (widget.formResults.containsKey(element['name'])) {
+      if (widget.formResults.containsKey('$value-${element['name']}')) {
         textEditingController.text =
-            widget.formResults[element['name']]!['value'] ?? '';
+            widget.formResults['$value-${element['name']}']!['value'] ?? '';
         widget.formResults.update(
-            element['name'],
+            '$value-${element['name']}',
             (value) => {
                   'controller': textEditingController,
                   'value': textEditingController.text,
                   'label': labelText,
                   'type': 'text',
-                  'extras': widget.formResults[element['name']]!['extras'] ?? {}
+                  'extras': {}
                 },
             notifyActivities: false);
       } else {
+        textEditingController.text =
+            widget.formResults['$value-${element['name']}']!['value'] ?? '';
         widget.formResults.add(
-            element['name'],
+            '$value-${element['name']}',
             {
               'controller': textEditingController,
               'value': textEditingController.text,
@@ -417,7 +431,8 @@ TextEditingController textCont = TextEditingController();
       return Visibility(
         visible: visibleIf(element),
         child: TextFormField(
-          controller: widget.formResults[element['name']]!['controller'],
+          controller:
+              widget.formResults['$value-${element['name']}']!['controller'],
           keyboardType: checkInputType(element),
           key: textFieldKey,
           // readOnly: enableIf(element),
@@ -454,9 +469,10 @@ TextEditingController textCont = TextEditingController();
             return null;
           },
           onChanged: (value) {
-            widget.formResults.remove(element['name'], notifyActivities: false);
+            widget.formResults
+                .remove('$value-${element['name']}', notifyActivities: false);
             widget.formResults.add(
-                element['name'],
+                '$value-${element['name']}',
                 {
                   'controller': textEditingController,
                   'value': value,
@@ -700,18 +716,23 @@ TextEditingController textCont = TextEditingController();
       }
     }
 
-    Visibility dropdownChoicesIPRS(Map<String, dynamic> element) {
-      Key dropdownKey = Key(element['name']);
+    Visibility dropdownChoicesIPRS(Map<String, dynamic> element, valueItem) {
+      printWarning("?>DS>A>>>D>D");
+      printWarning(valueItem);
+      var labelText = valueItem;
+
+      Key dropdownKey = Key('$labelText-${element['name']}');
 
       /// Add to the widget.formResults
-      if (widget.formResults.containsKey(element['name']) == false) {
+      if (widget.formResults.containsKey('$labelText-${element['name']}') ==
+          false) {
         printInfo('{{{element}}}');
-        printInfo(element['name']);
+        printInfo('$labelText-${element['name']}');
 
         widget.formResults.add(
-            element['name'],
+            '$labelText-${element['name']}',
             {
-              'controller': element['name'],
+              'controller': '$labelText-${element['name']}',
               'value': element['label'].toString(),
               'label': element['label'],
               'type': 'text',
@@ -737,17 +758,21 @@ TextEditingController textCont = TextEditingController();
         ),
         for (var i = 0; i < element['options'].length; i++)
           DropdownMenuItem(
-            value: widget.formResults[element['name']]!['options'][i]['value'],
+            value:
+                widget.formResults['$labelText-${element['name']}']!['options']
+                    [i]['value'],
             child: Text(
-                widget.formResults[element['name']]!['options'][i]['label']),
+                widget.formResults['$labelText-${element['name']}']!['options']
+                    [i]['label']),
           )
       ];
 
-      if (formValues.containsKey(element['name']) == false) {
-        formValues['${element['name']}'] = widget.formResults[element['name']];
+      if (formValues.containsKey('$labelText-${element['name']}') == false) {
+        formValues['$labelText-${element['name']}'] =
+            widget.formResults['$labelText-${element['name']}'];
       }
 
-      String vl = formValues[element['name']]['value'];
+      String vl = formValues['$labelText-${element['name']}']['value'];
 
       return Visibility(
         visible: visibleIf(element),
@@ -766,14 +791,14 @@ TextEditingController textCont = TextEditingController();
               onChanged: (value) {
                 printSuccess("Value Selected");
                 printSuccess(value);
-                printSuccess(element['name']);
+                printSuccess('$labelText-${element['name']}');
                 print("????? VALUE");
-                widget.formResults
-                    .remove(element['name'], notifyActivities: false);
+                widget.formResults.remove('$labelText-${element['name']}',
+                    notifyActivities: false);
                 widget.formResults.add(
-                    element['name'],
+                    '$labelText-${element['name']}',
                     {
-                      'controller': element['name'],
+                      'controller': '$labelText-${element['name']}',
                       'value': value,
                       'label': element['label'],
                       'type': 'text',
@@ -783,8 +808,8 @@ TextEditingController textCont = TextEditingController();
                     notifyActivities: false);
 
                 setState(() {
-                  formValues['${element['name']}'] = {
-                    'controller': element['name'],
+                  formValues['$labelText-${element['name']}'] = {
+                    'controller': '$labelText-${element['name']}',
                     'value': value,
                     'label': element['label'],
                     'type': 'text',
@@ -802,42 +827,6 @@ TextEditingController textCont = TextEditingController();
       );
     }
 
-    Visibility ageCalc(Map<String, dynamic> element) {
-      Key textFieldKey = Key(element['name']);
-      TextEditingController textEditingController = TextEditingController();
-      TextEditingController agecalcEditingController = TextEditingController();
-      String labelText = element['title'];
-
-      /// return the widget to be displayed
-      return Visibility(
-        visible: visibleIf(element),
-        child: TextFormField(
-          keyboardType: checkInputType(element),
-          key: textFieldKey,
-          readOnly: enableIf(element),
-          decoration: InputDecoration(
-            labelText: labelText,
-            hintText: element['placeholder'] ?? '',
-          ),
-          validator: (value) {},
-          onChanged: (value) {
-            widget.formResults.remove(element['name'], notifyActivities: false);
-            widget.formResults.add(
-                element['name'],
-                {
-                  'controller': agecalcEditingController,
-                  'value': value,
-                  'label': labelText,
-                  'type': 'agecalc',
-                  'extras': {}
-                },
-                notifyActivities: false);
-            ;
-          },
-        ),
-      );
-    }
-
     Visibility htmlText(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
@@ -849,6 +838,8 @@ TextEditingController textCont = TextEditingController();
 
     Visibility httpLookUp(Map<String, dynamic> element) {
       // httpLookUpUrl(element);
+      printWarning("????????>>>> ELEMENT");
+      printWarning(element);
 
       /// after loading update the data forms
       return Visibility(
@@ -875,37 +866,47 @@ TextEditingController textCont = TextEditingController();
                         final parameters = item['parameters'][index];
                         return Container(
                           child: parameters['type'] == 'dropdown'
-                              ? dropdownChoicesIPRS(parameters)
-                              : textFieldIPRS(parameters),
-                            );
-                          },
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: () {
-                          print(widget.formResults);
-                          print(widget.formResults['id_number']);
-                          print(widget.formResults['id_number']);
-                          var idType;
-                          if(widget.formResults.containsKey('id_type')){
-                            if(widget.formResults['id_type'] != null){
-                              idType = widget.formResults['id_type']!['value'];
-                              if(idType == 'NationalIdentification'){
-                                printSuccess('NationalIdentification');
-                                var data = httpLookUpUrl({"url":"http://197.248.4.134/iprs/databyid",
-                                  "id":'${widget.formResults['id_number']!['value']}'});
-                                printInfo("data ???");
-                                printInfo(data);
-                            } else if(idType == 'AlienIdentification'){
-                                printSuccess('AlienIdentification');
-                                var data = httpLookUpUrl({
-                                  "url":"http://197.248.4.134/iprs/databyalienid",
-                                  "id":'${widget.formResults['id_number']!['value']}'});
-                                printInfo("data ???");
-                                printInfo(data);
-                            }
-                            }
+                              ? dropdownChoicesIPRS(
+                                  parameters, element['outputs'][0]['value'])
+                              : textFieldIPRS(parameters, element['value']),
+                        );
+                      },
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () {
+                      printWarning(widget.formResults);
+                      printWarning(widget.formResults['${element['value']}-id_number']);
+                      TextEditingController idEditingController = TextEditingController();
+                      idEditingController = widget.formResults['${element['value']}-id_number']!['controller'] ;
+
+                      var idType;
+                      if (widget.formResults.containsKey('${element['outputs'][0]['value']}-id_type')) {
+                        if (widget.formResults['${element['outputs'][0]['value']}-id_type'] != null) {
+                          idType = widget.formResults['${element['outputs'][0]['value']}-id_type']!['value'];
+                          printWarning(' ????????idEditingController.text');
+                          printWarning(idEditingController.text);
+                          if (idType == 'NationalIdentification') {
+                            printSuccess('NationalIdentification');
+                            var data = httpLookUpUrl({
+                              "url": "http://197.248.4.134/iprs/databyid",
+                              "id": '${idEditingController.text}',
+                              "data": element['value']
+                            });
+                            printInfo("data ???");
+                            printInfo(data);
+                          } else if (idType == 'AlienIdentification') {
+                            printSuccess('AlienIdentification');
+                            var data = httpLookUpUrl({
+                              "url": "http://197.248.4.134/iprs/databyalienid",
+                              "id": '${idEditingController.text}',
+                              "data": element['value']
+                            });
+                            printInfo("data ???");
+                            printInfo(data);
                           }
+                        }
+                      }
 
                       // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
                       ScaffoldMessenger.of(context).showSnackBar(
