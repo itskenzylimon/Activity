@@ -328,18 +328,25 @@ class MainController extends ActiveController {
 
   Map<ContentType, dynamic> aboutPage(HttpRequest request) {
     return {
-      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is about us!'}
+      ContentType.json: {
+        'url': request.uri.path,
+        'key': 'Hello, World!... This is about us!'
+      }
     };
   }
 
   Map<ContentType, dynamic> contactUsPage(HttpRequest request) {
     return {
-      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is contact us!'}
+      ContentType.json: {
+        'url': request.uri.path,
+        'key': 'Hello, World!... This is contact us!'
+      }
     };
   }
 
   Map<ContentType, dynamic> notFoundPage(HttpRequest request) {
-    var json = jsonEncode({'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
+    var json = jsonEncode(
+        {'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
 
     return {ContentType.json: json};
   }
@@ -384,39 +391,52 @@ class MainController extends ActiveController {
     });
   }
 
+
   reOrganizeData() {
 
     print("Start reOrganizeData");
-    for (var i in schema2['service']['schema']['pages']) {
-      for (var j in i['elements']) {
-        if (j['elements'] != null) {
-          for (var k in j['elements']) {
-            if (k['type'] == 'httplookup') {
+    for(var i in schema2['service']['schema']['pages']) {
+      for(var j in i['elements']) {
+        if(j['elements'] != null){
+          for(var k in j['elements']) {
+            if(k['type'] == 'httplookup') {
               k['lookup'] = [];
-              for (var l in schema2['lookup_services']) {
-                if (l['id'] == k['lookupServiceId']) {
+              for(var l in schema2['lookup_services']) {
+                if(l['id'] == k['lookupServiceId']) {
                   k['lookup'].add(l);
                 }
                 print("?????K");
                 print(k);
+
               }
             }
           }
           print("?????J");
           print(j);
         }
+
+
       }
+
+
     }
+    print("?????SCHEMA3");
+    print("?????SCHEMA2");
+    print(schema2);
+    print("?????PAGES");
+    print(schema2['service']['schema']['pages']);
 
   }
 
+
   //create an object of ActiveMap<String, Map<String, dynamic>> to store the form results
 
-  ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({
+  ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap( {
     "data": {
       "data": "data",
       "data1": "data",
       "data2": "data",
     }
   });
+
 }
