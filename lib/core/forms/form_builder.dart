@@ -27,7 +27,7 @@ class FormBuilder extends StatefulWidget {
 class _FormBuilderState extends State<FormBuilder> {
   Center create() {
     // Key / value for the form
-
+TextEditingController textCont = TextEditingController();
     Map formValues = widget.formResults.value;
     Timer? _debounce;
     ActiveRequest activeRequest = ActiveRequest();
@@ -474,7 +474,7 @@ class _FormBuilderState extends State<FormBuilder> {
       printSuccess(element['name']);
       String? currentSelectedValue = 'Select';
 
-      final ValueNotifier<List<String>> _listNotifier =
+      ValueNotifier<List<String>> _listNotifier =
           ValueNotifier<List<String>>(["Select"]);
       List<String> choiceList = [..._listNotifier.value];
 
@@ -497,8 +497,7 @@ class _FormBuilderState extends State<FormBuilder> {
       }
       printSuccess("-------==-=-=-=--");
       List<DropdownMenuItem> choices = [];
-      if (element['renderAs'] == null && element['choices']!=null) {
-
+      if (element['renderAs'] == null && element['choices'] != null) {
         printSuccess("-------==-=-=${element['choices']}-=--");
         printWarning(widget.formResults[element['name']]!['options']);
         choices = [
@@ -542,24 +541,33 @@ class _FormBuilderState extends State<FormBuilder> {
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.only(bottom: 12, left: 16),
                   ),
+                  controller:textCont ,
                   onChanged: (value) {
-                    if (_debounce?.isActive ?? false) _debounce?.cancel();
-                    _debounce =
-                        Timer(const Duration(milliseconds: 1000), () async {
-                      var list = await getListItems(
-                        value,
-                        element['choicesByUrl']['url'],
-                      );
-                      for (var l in list) {
-                        choiceList.add(
-                          l['value'].toString(),
+                    if (value.isNotEmpty) {
+                      if (_debounce?.isActive ?? false) _debounce?.cancel();
+                      _debounce =
+                          Timer(const Duration(milliseconds: 1000), () async {
+                        var list = await getListItems(
+                          value,
+                          element['choicesByUrl']['url'],
                         );
-                        _listNotifier.value = choiceList;
-                      }
+                        for (var l in list) {
+                          choiceList.add(
+                            l['value'].toString(),
+                          );
+                          _listNotifier.value = choiceList;
+                        }
 
-                      printSuccess("after query");
-                      printSuccess(choiceList);
-                    });
+                        printSuccess("after query");
+                        printSuccess(choiceList);
+                      });
+                    } else {
+                      setState(() {
+                        choiceList = ["Select"];
+                      });
+
+
+                    }
                   },
                 ),
               ),
@@ -567,40 +575,74 @@ class _FormBuilderState extends State<FormBuilder> {
                   valueListenable: _listNotifier,
                   builder: (BuildContext context, choiceList, Widget? child) {
                     return Container(
-                      width: double.infinity,
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton(
-                          key: key,
-                          isDense: true,
-                          hint: Text(element['title'] +
-                              ' ' +
-                              (element['description'] ?? '')),
-                          value: currentSelectedValue,
-                          items: choiceList.map((String val) {
-                            return DropdownMenuItem<String>(
-                              value: val,
-                              child: Text(val),
+                        width: double.infinity,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemBuilder: (context, int index) {
+                            return Expanded(
+                              child: Container(
+                                child: ListTile(
+                                  onTap: (){
+
+                                          widget.formResults.add(
+                                              element['name'],
+                                              {
+                                                'controller': element['name'],
+                                                'value': choiceList[index],
+                                                'label': element['title'],
+                                                'type': 'select2',
+                                                'options': "",
+                                                'extras': {}
+                                              },
+                                              notifyActivities: false);
+                                          textCont.text = choiceList[index];
+                                            printWarning(textCont.text);
+                                          choiceList.clear();
+                                          choiceList.add( textCont.text);
+                                          _listNotifier.notifyListeners();
+
+                                  },
+                                  title: Text(choiceList[index]),
+                                ),
+                              ),
                             );
-                          }).toList(),
-                          onChanged: (value) {
-                            currentSelectedValue = value;
-                            _listNotifier.notifyListeners();
-                            widget.formResults.add(
-                                element['name'],
-                                {
-                                  'controller': element['name'],
-                                  'value': value,
-                                  'label': element['title'],
-                                  'type': 'select2',
-                                  'options': "",
-                                  'extras': {}
-                                },
-                                notifyActivities: false);
                           },
-                        ),
-                      ),
-                    );
+                          separatorBuilder: (context, int index) =>
+                              SizedBox(height: 10),
+                          itemCount: choiceList.length,
+                        ));
                   }),
+              // DropdownButtonHideUnderline(
+              //   child: DropdownButton(
+              //     key: key,
+              //     isDense: true,
+              //     hint: Text(element['title'] +
+              //         ' ' +
+              //         (element['description'] ?? '')),
+              //     value: currentSelectedValue,
+              //     items: choiceList.map((String val) {
+              //       return DropdownMenuItem<String>(
+              //         value: val,
+              //         child: Text(val),
+              //       );
+              //     }).toList(),
+              //     onChanged: (value) {
+              //       currentSelectedValue = value;
+              //       _listNotifier.notifyListeners();
+              //       widget.formResults.add(
+              //           element['name'],
+              //           {
+              //             'controller': element['name'],
+              //             'value': value,
+              //             'label': element['title'],
+              //             'type': 'select2',
+              //             'options': "",
+              //             'extras': {}
+              //           },
+              //           notifyActivities: false);
+              //     },
+              //   ),
+              // ),
             ],
           ),
         ));
