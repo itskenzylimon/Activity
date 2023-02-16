@@ -29,7 +29,7 @@ class FormBuilder extends StatefulWidget {
 
 class _FormBuilderState extends State<FormBuilder> {
   final SignatureController _controller = SignatureController(
-    penStrokeWidth: 1,
+    penStrokeWidth: 1.5,
     penColor: Colors.black,
     exportBackgroundColor: Colors.blue,
     exportPenColor: Colors.black,
@@ -207,14 +207,18 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     bool enableIf(element) {
+
+
+
       bool enabled = true;
       if (element['readOnly'] != null) {
         printError('sfds');
         enabled = element['readOnly'];
       }
-      if (element['enableIf'] != null) {
-        printError('sfwefvwevds');
 
+
+      if (element['enableIf'] != null) {
+        printError(element);
         /// Handle anyof conditions
         /// it should overwrite enabled state from above
 
@@ -398,60 +402,81 @@ class _FormBuilderState extends State<FormBuilder> {
       /// return the widget to be displayed
       return Visibility(
         visible: visibleIf(element),
-        child: TextFormField(
-          controller: widget.formResults[element['name']]!['controller'],
-          keyboardType: checkInputType(element),
-          key: textFieldKey,
-          // readOnly: enableIf(element),
-          maxLines: element['type'] == 'comment' ? 5 : 1,
-          decoration: InputDecoration(
-            labelText: labelText,
-            hintText: element['placeholder'] ?? '',
+        child: Container(
+          margin: const EdgeInsets.all(10),
+          child: Center(
+            child: TextFormField(
+              controller: widget.formResults[element['name']]!['controller'],
+              keyboardType: checkInputType(element),
+              key: textFieldKey,
+              readOnly: !enableIf(element),
+              maxLines: element['type'] == 'comment' ? 5 : 1,
+              style: const TextStyle(
+                color: Colors.black,
+              ),
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.only(top: 3, left: 8),
+                hintStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffE0E0E0)),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.black,)),
+                labelText: labelText,
+                hintText: element['placeholder'] ?? '',
+              ),
+              validator: (value) {
+                /// check if value is required
+                if (element['isRequired'] == true) {
+                  /// input validator for numbers
+                  if (element['inputType'] == 'number') {
+                    int intValue = int.parse(value ?? '0');
+                    //check if max exist
+                    if (element['max'] != null) {
+                      if (intValue > element['max']) {
+                        return '${element['max']} is the max ${element['title']}';
+                      }
+                    }
+                    //check if min exist
+                    if (element['min'] != null) {
+                      if (element['min'] > intValue) {
+                        return '${element['min']} is the min ${element['title']}';
+                      }
+                    }
+                    //
+                  }
+                }
+
+                if (value == null || value.isEmpty) {
+                  return (element['title'] + ' is required');
+                } else if (value.contains('@')) {
+                  return 'Please don\'t use the @ char.';
+                }
+                return null;
+              },
+              onChanged: (value) {
+                widget.formResults.remove(element['name'], notifyActivities: false);
+                widget.formResults.add(
+                    element['name'],
+                    {
+                      'controller': textEditingController,
+                      'value': value,
+                      'label': labelText,
+                      'type': 'text',
+                      'extras': {}
+                    },
+                    notifyActivities: false);
+
+                printError(widget.formResults);
+              },
+            ),
           ),
-          validator: (value) {
-            /// check if value is required
-            if (element['isRequired'] == true) {
-              /// input validator for numbers
-              if (element['inputType'] == 'number') {
-                int intValue = int.parse(value ?? '0');
-                //check if max exist
-                if (element['max'] != null) {
-                  if (intValue > element['max']) {
-                    return '${element['max']} is the max ${element['title']}';
-                  }
-                }
-                //check if min exist
-                if (element['min'] != null) {
-                  if (element['min'] > intValue) {
-                    return '${element['min']} is the min ${element['title']}';
-                  }
-                }
-                //
-              }
-            }
-
-            if (value == null || value.isEmpty) {
-              return (element['title'] + ' is required');
-            } else if (value.contains('@')) {
-              return 'Please don\'t use the @ char.';
-            }
-            return null;
-          },
-          onChanged: (value) {
-            widget.formResults.remove(element['name'], notifyActivities: false);
-            widget.formResults.add(
-                element['name'],
-                {
-                  'controller': textEditingController,
-                  'value': value,
-                  'label': labelText,
-                  'type': 'text',
-                  'extras': {}
-                },
-                notifyActivities: false);
-
-            printError(widget.formResults);
-          },
         ),
       );
     }
