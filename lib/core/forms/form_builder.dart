@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:activity/activity.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:activity/core/forms/signature_pad.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -1123,7 +1124,10 @@ TextEditingController textCont = TextEditingController();
     }
 
     Container signaturepad(Map<String, dynamic> element) {
-      return Container();
+      return Container(
+        height: 450,
+        child: SignatureView()
+      );
     }
 
     Visibility html(Map<String, dynamic> element) {

@@ -328,18 +328,25 @@ class MainController extends ActiveController {
 
   Map<ContentType, dynamic> aboutPage(HttpRequest request) {
     return {
-      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is about us!'}
+      ContentType.json: {
+        'url': request.uri.path,
+        'key': 'Hello, World!... This is about us!'
+      }
     };
   }
 
   Map<ContentType, dynamic> contactUsPage(HttpRequest request) {
     return {
-      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is contact us!'}
+      ContentType.json: {
+        'url': request.uri.path,
+        'key': 'Hello, World!... This is contact us!'
+      }
     };
   }
 
   Map<ContentType, dynamic> notFoundPage(HttpRequest request) {
-    var json = jsonEncode({'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
+    var json = jsonEncode(
+        {'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
 
     return {ContentType.json: json};
   }
