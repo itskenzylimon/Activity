@@ -92,6 +92,14 @@ TextEditingController textCont = TextEditingController();
       return fileInBase64;
     }
 
+    String _textSelect(String str) {
+      str = str.replaceAll('<<', '');
+      str = str.replaceAll('>>', '');
+      str = str.replaceAll('result.', '');
+      str = str.replaceAll(' ', '');
+      return str;
+    }
+
     //upload file
     Future<String> getFile() async {
       FilePickerResult? result =
@@ -222,8 +230,10 @@ TextEditingController textCont = TextEditingController();
     Future<Map<String, dynamic>> formRequest(Map request) async {
       String username = 'mrmiddleman';
       String password = '6I2-u?=W';
-      String basicAuth = base64Encode(utf8.encode('$username:$password'));
+      // String basicAuth = base64Encode(utf8.encode('$username:$password'));
+      String basicAuth = 'bXJtaWRkbGVtYW46NkkyLXU/PVc=';
       print(basicAuth);
+      print(request['id']);
       ActiveRequest activeRequest = ActiveRequest();
       activeRequest.setUp = RequestSetUp(
           idleTimeout: 10,
@@ -237,10 +247,11 @@ TextEditingController textCont = TextEditingController();
       /// Handle httplookup
       /// Handle choicesByUrl
 
+      printWarning('URL ?????????');
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
-          endpoint: request['url'],
+          endpoint: request['url']  ,
           queryParameters: {"number": "${request['id']}"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
@@ -413,8 +424,9 @@ TextEditingController textCont = TextEditingController();
                 },
             notifyActivities: false);
       } else {
-        textEditingController.text =
-            widget.formResults['$value-${element['name']}']!['value'] ?? '';
+        printWarning(value);
+        printWarning(element['name']);
+
         widget.formResults.add(
             '$value-${element['name']}',
             {
@@ -425,6 +437,9 @@ TextEditingController textCont = TextEditingController();
               'extras': {}
             },
             notifyActivities: false);
+
+        textEditingController.text =
+            widget.formResults['$value-${element['name']}']!['value'] ?? '';
       }
 
       /// return the widget to be displayed
@@ -827,6 +842,42 @@ TextEditingController textCont = TextEditingController();
       );
     }
 
+    Visibility ageCalc(Map<String, dynamic> element) {
+      Key textFieldKey = Key(element['name']);
+      TextEditingController textEditingController = TextEditingController();
+      TextEditingController agecalcEditingController = TextEditingController();
+      String labelText = element['title'];
+
+      /// return the widget to be displayed
+      return Visibility(
+        visible: visibleIf(element),
+        child: TextFormField(
+          keyboardType: checkInputType(element),
+          key: textFieldKey,
+          readOnly: enableIf(element),
+          decoration: InputDecoration(
+            labelText: labelText,
+            hintText: element['placeholder'] ?? '',
+          ),
+          validator: (value) {},
+          onChanged: (value) {
+            widget.formResults.remove(element['name'], notifyActivities: false);
+            widget.formResults.add(
+                element['name'],
+                {
+                  'controller': agecalcEditingController,
+                  'value': value,
+                  'label': labelText,
+                  'type': 'agecalc',
+                  'extras': {}
+                },
+                notifyActivities: false);
+            ;
+          },
+        ),
+      );
+    }
+
     Visibility htmlText(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
@@ -838,8 +889,7 @@ TextEditingController textCont = TextEditingController();
 
     Visibility httpLookUp(Map<String, dynamic> element) {
       // httpLookUpUrl(element);
-      printWarning("????????>>>> ELEMENT");
-      printWarning(element);
+
 
       /// after loading update the data forms
       return Visibility(
@@ -850,6 +900,8 @@ TextEditingController textCont = TextEditingController();
             itemCount: element['lookup'].length,
             itemBuilder: (BuildContext context, int index) {
               final item = element['lookup'][index];
+              printWarning("????????>>>> ELEMENT");
+              printWarning(element);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -864,53 +916,91 @@ TextEditingController textCont = TextEditingController();
                       itemCount: item['parameters'].length,
                       itemBuilder: (BuildContext context, int index) {
                         final parameters = item['parameters'][index];
+                        printWarning("????????>>>> ELEMENT");
+                        printWarning(element);
                         return Container(
                           child: parameters['type'] == 'dropdown'
                               ? dropdownChoicesIPRS(
                                   parameters, element['outputs'][0]['value'])
-                              : textFieldIPRS(parameters, element['value']),
+                              : textFieldIPRS(parameters, element['outputs'][0]['value']),
                         );
                       },
                     ),
                   ),
                   OutlinedButton(
-                    onPressed: () {
-                      printWarning(widget.formResults);
-                      printWarning(widget.formResults['${element['value']}-id_number']);
+                    onPressed: () async {
                       TextEditingController idEditingController = TextEditingController();
-                      idEditingController = widget.formResults['${element['value']}-id_number']!['controller'] ;
+                      TextEditingController firstNameController = TextEditingController();
+                      idEditingController = widget.formResults['${element['outputs'][0]['value']}-id_number']!['controller'] ;
+                      firstNameController = widget.formResults['${element['outputs'][0]['value']}-first_name']!['controller'] ;
 
                       var idType;
                       if (widget.formResults.containsKey('${element['outputs'][0]['value']}-id_type')) {
                         if (widget.formResults['${element['outputs'][0]['value']}-id_type'] != null) {
                           idType = widget.formResults['${element['outputs'][0]['value']}-id_type']!['value'];
-                          printWarning(' ????????idEditingController.text');
-                          printWarning(idEditingController.text);
+
                           if (idType == 'NationalIdentification') {
-                            printSuccess('NationalIdentification');
-                            var data = httpLookUpUrl({
+                            var data = await httpLookUpUrl({
                               "url": "http://197.248.4.134/iprs/databyid",
                               "id": '${idEditingController.text}',
-                              "data": element['value']
+                              "data": element['outputs'][0]['value']
                             });
-                            printInfo("data ???");
-                            printInfo(data);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(duration: const Duration(milliseconds: 250),
+                                    content: Text('Processing Data')));
+                            var  resData;
+                            printWarning(data['first_name']);
+                            printWarning(firstNameController.text);
+                            if (data['first_name'].toLowerCase().contains(firstNameController.text.toLowerCase())) {
+
+                              for(var i = 0; i < element['outputs'].length; i++) {
+                                TextEditingController textEditingController = TextEditingController();
+
+                                if(widget.formResults.containsKey(element['outputs'][i]['value'])) {
+                                  resData = _textSelect(element['outputs'][i]['text']);
+                                  widget.formResults.remove(element['outputs'][i]['value'], notifyActivities: false);
+                                  textEditingController.text = data['$resData'] ?? '';
+                                  widget.formResults.add(
+                                      element['outputs'][i]['value'],
+                                      {
+                                        'controller': textEditingController,
+                                        'value': textEditingController.text,
+                                        'label':  element['outputs'][i]['value'],
+                                        'type': 'text',
+                                        'extras': {}
+                                      },
+                                      notifyActivities: false);
+
+                                  setState(() {
+                                    widget.formResults[element['outputs'][i]['value']]!['controller'].text = data['$resData'] ?? '';
+                                  });
+
+
+
+                                }
+
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('First Name does not match particulars')));
+                            }
+
+
+
                           } else if (idType == 'AlienIdentification') {
-                            printSuccess('AlienIdentification');
-                            var data = httpLookUpUrl({
+                            var data = await httpLookUpUrl({
                               "url": "http://197.248.4.134/iprs/databyalienid",
                               "id": '${idEditingController.text}',
-                              "data": element['value']
+                              "data": element['outputs'][0]['value']
                             });
-                            printInfo("data ???");
-                            printInfo(data);
+
+
                           }
                         }
                       }
 
                       // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Processing Data')));
+
                     },
                     child: const Text('Search'),
                   ),
