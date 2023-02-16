@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:activity/activity.dart';
+import 'package:activity/core/forms/signature.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:activity/core/forms/signature_pad.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -26,9 +28,63 @@ class FormBuilder extends StatefulWidget {
 }
 
 class _FormBuilderState extends State<FormBuilder> {
+  final SignatureController _controller = SignatureController(
+    penStrokeWidth: 1,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.blue,
+    exportPenColor: Colors.black,
+    onDrawStart: () => log('onDrawStart called!'),
+    onDrawEnd: () => log('onDrawEnd called!'),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() => log('Value changed'));
+  }
+
+  @override
+  void dispose() {
+    // IMPORTANT to dispose of the controller
+    _controller.dispose();
+    super.dispose();
+  }
+
+  exportImage(element) async {
+    final Uint8List? data =
+        await _controller.toPngBytes(height: 1000, width: 1000);
+    if (data == null) {
+      return;
+    } else {
+      printSuccess(data);
+      List<int> fileInByte = data;
+      String fileInBase64 = base64Encode(fileInByte);
+      printSuccess(fileInBase64);
+      widget.formResults.add(
+          element['name'],
+          {
+            'controller': element['name'],
+            'value': element['label'].toString(),
+            'label': element['label'],
+            'type': 'file',
+            'file': fileInBase64,
+            'extras': {}
+          },
+          notifyActivities: false);
+    }
+    if (!mounted) return;
+  }
+
+  convertToBase64(var image) async {
+    List<int> fileInByte = image.readAsBytesSync();
+    String fileInBase64 = base64Encode(fileInByte);
+    printSuccess(fileInBase64)
+;    return fileInBase64;
+  }
+
   Center create() {
     // Key / value for the form
-TextEditingController textCont = TextEditingController();
+    TextEditingController textCont = TextEditingController();
     Map formValues = widget.formResults.value;
     Timer? _debounce;
     ActiveRequest activeRequest = ActiveRequest();
@@ -252,7 +308,7 @@ TextEditingController textCont = TextEditingController();
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
-          endpoint: request['url']  ,
+          endpoint: request['url'],
           queryParameters: {"number": "${request['id']}"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
@@ -273,9 +329,7 @@ TextEditingController textCont = TextEditingController();
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
       printInfo("choices ???");
       printInfo(choices);
-      if(widget.formResults.containsKey(choicesByUrl['data'])) {
-
-      }
+      if (widget.formResults.containsKey(choicesByUrl['data'])) {}
 
       return choices;
     }
@@ -577,7 +631,7 @@ TextEditingController textCont = TextEditingController();
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.only(bottom: 12, left: 16),
                   ),
-                  controller:textCont ,
+                  controller: textCont,
                   onChanged: (value) {
                     if (value.isNotEmpty) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -601,8 +655,6 @@ TextEditingController textCont = TextEditingController();
                       setState(() {
                         choiceList = ["Select"];
                       });
-
-
                     }
                   },
                 ),
@@ -618,25 +670,23 @@ TextEditingController textCont = TextEditingController();
                             return Expanded(
                               child: Container(
                                 child: ListTile(
-                                  onTap: (){
-
-                                          widget.formResults.add(
-                                              element['name'],
-                                              {
-                                                'controller': element['name'],
-                                                'value': choiceList[index],
-                                                'label': element['title'],
-                                                'type': 'select2',
-                                                'options': "",
-                                                'extras': {}
-                                              },
-                                              notifyActivities: false);
-                                          textCont.text = choiceList[index];
-                                            printWarning(textCont.text);
-                                          choiceList.clear();
-                                          choiceList.add( textCont.text);
-                                          _listNotifier.notifyListeners();
-
+                                  onTap: () {
+                                    widget.formResults.add(
+                                        element['name'],
+                                        {
+                                          'controller': element['name'],
+                                          'value': choiceList[index],
+                                          'label': element['title'],
+                                          'type': 'select2',
+                                          'options': "",
+                                          'extras': {}
+                                        },
+                                        notifyActivities: false);
+                                    textCont.text = choiceList[index];
+                                    printWarning(textCont.text);
+                                    choiceList.clear();
+                                    choiceList.add(textCont.text);
+                                    _listNotifier.notifyListeners();
                                   },
                                   title: Text(choiceList[index]),
                                 ),
@@ -891,7 +941,6 @@ TextEditingController textCont = TextEditingController();
     Visibility httpLookUp(Map<String, dynamic> element) {
       // httpLookUpUrl(element);
 
-
       /// after loading update the data forms
       return Visibility(
           child: SizedBox(
@@ -923,22 +972,34 @@ TextEditingController textCont = TextEditingController();
                           child: parameters['type'] == 'dropdown'
                               ? dropdownChoicesIPRS(
                                   parameters, element['outputs'][0]['value'])
-                              : textFieldIPRS(parameters, element['outputs'][0]['value']),
+                              : textFieldIPRS(
+                                  parameters, element['outputs'][0]['value']),
                         );
                       },
                     ),
                   ),
                   OutlinedButton(
                     onPressed: () async {
-                      TextEditingController idEditingController = TextEditingController();
-                      TextEditingController firstNameController = TextEditingController();
-                      idEditingController = widget.formResults['${element['outputs'][0]['value']}-id_number']!['controller'] ;
-                      firstNameController = widget.formResults['${element['outputs'][0]['value']}-first_name']!['controller'] ;
+                      TextEditingController idEditingController =
+                          TextEditingController();
+                      TextEditingController firstNameController =
+                          TextEditingController();
+                      idEditingController = widget.formResults[
+                              '${element['outputs'][0]['value']}-id_number']![
+                          'controller'];
+                      firstNameController = widget.formResults[
+                              '${element['outputs'][0]['value']}-first_name']![
+                          'controller'];
 
                       var idType;
-                      if (widget.formResults.containsKey('${element['outputs'][0]['value']}-id_type')) {
-                        if (widget.formResults['${element['outputs'][0]['value']}-id_type'] != null) {
-                          idType = widget.formResults['${element['outputs'][0]['value']}-id_type']!['value'];
+                      if (widget.formResults.containsKey(
+                          '${element['outputs'][0]['value']}-id_type')) {
+                        if (widget.formResults[
+                                '${element['outputs'][0]['value']}-id_type'] !=
+                            null) {
+                          idType = widget.formResults[
+                                  '${element['outputs'][0]['value']}-id_type']![
+                              'value'];
 
                           if (idType == 'NationalIdentification') {
                             var data = await httpLookUpUrl({
@@ -947,61 +1008,65 @@ TextEditingController textCont = TextEditingController();
                               "data": element['outputs'][0]['value']
                             });
                             ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(duration: const Duration(milliseconds: 250),
+                                const SnackBar(
+                                    duration: const Duration(milliseconds: 250),
                                     content: Text('Processing Data')));
-                            var  resData;
+                            var resData;
                             printWarning(data['first_name']);
                             printWarning(firstNameController.text);
-                            if (data['first_name'].toLowerCase().contains(firstNameController.text.toLowerCase())) {
+                            if (data['first_name'].toLowerCase().contains(
+                                firstNameController.text.toLowerCase())) {
+                              for (var i = 0;
+                                  i < element['outputs'].length;
+                                  i++) {
+                                TextEditingController textEditingController =
+                                    TextEditingController();
 
-                              for(var i = 0; i < element['outputs'].length; i++) {
-                                TextEditingController textEditingController = TextEditingController();
-
-                                if(widget.formResults.containsKey(element['outputs'][i]['value'])) {
-                                  resData = _textSelect(element['outputs'][i]['text']);
-                                  widget.formResults.remove(element['outputs'][i]['value'], notifyActivities: false);
-                                  textEditingController.text = data['$resData'] ?? '';
+                                if (widget.formResults.containsKey(
+                                    element['outputs'][i]['value'])) {
+                                  resData = _textSelect(
+                                      element['outputs'][i]['text']);
+                                  widget.formResults.remove(
+                                      element['outputs'][i]['value'],
+                                      notifyActivities: false);
+                                  textEditingController.text =
+                                      data['$resData'] ?? '';
                                   widget.formResults.add(
                                       element['outputs'][i]['value'],
                                       {
                                         'controller': textEditingController,
                                         'value': textEditingController.text,
-                                        'label':  element['outputs'][i]['value'],
+                                        'label': element['outputs'][i]['value'],
                                         'type': 'text',
                                         'extras': {}
                                       },
                                       notifyActivities: false);
 
                                   setState(() {
-                                    widget.formResults[element['outputs'][i]['value']]!['controller'].text = data['$resData'] ?? '';
+                                    widget
+                                        .formResults[element['outputs'][i]
+                                            ['value']]!['controller']
+                                        .text = data['$resData'] ?? '';
                                   });
-
-
-
                                 }
-
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('First Name does not match particulars')));
+                                  const SnackBar(
+                                      content: Text(
+                                          'First Name does not match particulars')));
                             }
-
-
-
                           } else if (idType == 'AlienIdentification') {
                             var data = await httpLookUpUrl({
                               "url": "http://197.248.4.134/iprs/databyalienid",
                               "id": '${idEditingController.text}',
                               "data": element['outputs'][0]['value']
                             });
-
-
                           }
                         }
                       }
 
                       // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
-
                     },
                     child: const Text('Search'),
                   ),
@@ -1123,10 +1188,47 @@ TextEditingController textCont = TextEditingController();
       );
     }
 
-    Container signaturepad(Map<String, dynamic> element) {
+    Container signaturePad(Map<String, dynamic> element) {
       return Container(
         height: 450,
-        child: SignatureView()
+        child: Stack(
+          children: [
+            Signature(
+              key: const Key('signature'),
+              controller: _controller,
+              height: 450,
+              backgroundColor: Colors.grey[300]!,
+            ),
+            Positioned(
+              left: 10,
+              right: 10,
+              top: 5,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      _controller.clear();
+                    },
+                    icon: Icon(
+                      Icons.clear,
+                      color: Colors.black,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      exportImage(element);
+                    },
+                    icon: Icon(
+                      Icons.check,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              )
+            ),
+          ],
+        ),
       );
     }
 
@@ -1190,7 +1292,7 @@ TextEditingController textCont = TextEditingController();
           return checkbox(element);
 
         case 'signaturepad':
-          return signaturepad(element);
+          return signaturePad(element);
 
         case 'html':
           return html(element);
