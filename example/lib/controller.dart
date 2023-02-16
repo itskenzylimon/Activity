@@ -385,6 +385,7 @@ class MainController extends ActiveController {
   }
 
   reOrganizeData() {
+
     print("Start reOrganizeData");
     for (var i in schema2['service']['schema']['pages']) {
       for (var j in i['elements']) {

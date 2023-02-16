@@ -92,6 +92,14 @@ TextEditingController textCont = TextEditingController();
       return fileInBase64;
     }
 
+    String _textSelect(String str) {
+      str = str.replaceAll('<<', '');
+      str = str.replaceAll('>>', '');
+      str = str.replaceAll('result.', '');
+      str = str.replaceAll(' ', '');
+      return str;
+    }
+
     //upload file
     Future<String> getFile() async {
       FilePickerResult? result =
@@ -222,8 +230,10 @@ TextEditingController textCont = TextEditingController();
     Future<Map<String, dynamic>> formRequest(Map request) async {
       String username = 'mrmiddleman';
       String password = '6I2-u?=W';
-      String basicAuth = base64Encode(utf8.encode('$username:$password'));
+      // String basicAuth = base64Encode(utf8.encode('$username:$password'));
+      String basicAuth = 'bXJtaWRkbGVtYW46NkkyLXU/PVc=';
       print(basicAuth);
+      print(request['id']);
       ActiveRequest activeRequest = ActiveRequest();
       activeRequest.setUp = RequestSetUp(
           idleTimeout: 10,
@@ -237,10 +247,12 @@ TextEditingController textCont = TextEditingController();
       /// Handle httplookup
       /// Handle choicesByUrl
 
+      printWarning('URL ?????????');
       printWarning(request['url']);
       printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
-          endpoint: request['url'], queryParameters: {"number": "31474175"}));
+          endpoint: request['url']  ,
+          queryParameters: {"number": "${request['id']}"}));
       printError("Active Respobse ??????");
       printError(activeResponse);
       final Map<String, dynamic> convertedData =
@@ -254,9 +266,16 @@ TextEditingController textCont = TextEditingController();
     }
 
     Future<Map<String, dynamic>> httpLookUpUrl(Map choicesByUrl) async {
+      printError("????????");
       printError(choicesByUrl);
 
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
+      printInfo("choices ???");
+      printInfo(choices);
+      if(widget.formResults.containsKey(choicesByUrl['data'])) {
+
+      }
+
       return choices;
     }
 
@@ -267,6 +286,12 @@ TextEditingController textCont = TextEditingController();
           type = TextInputType.number;
         }
       } else {
+        if (element['type'] != null) {
+          if (element['type'] == 'number') {
+            type = TextInputType.number;
+          }
+        }
+
         /// Find a way to get the form input type
         /// Mobile Number
         if (element.containsValue("^[+][0-9]{12}\$")) {
@@ -376,29 +401,34 @@ TextEditingController textCont = TextEditingController();
       );
     }
 
-    Visibility textFieldIPRS(Map<String, dynamic> element) {
+    Visibility textFieldIPRS(Map<String, dynamic> element, value) {
+      printInfo("????????>>>>");
+      printInfo(element);
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
       bool isRequired = true;
       String labelText = element['label'] + (isRequired == true ? ' * ' : '');
 
       /// Add to the widget.formResults
-      if (widget.formResults.containsKey(element['name'])) {
+      if (widget.formResults.containsKey('$value-${element['name']}')) {
         textEditingController.text =
-            widget.formResults[element['name']]!['value'] ?? '';
+            widget.formResults['$value-${element['name']}']!['value'] ?? '';
         widget.formResults.update(
-            element['name'],
+            '$value-${element['name']}',
             (value) => {
                   'controller': textEditingController,
                   'value': textEditingController.text,
                   'label': labelText,
                   'type': 'text',
-                  'extras': widget.formResults[element['name']]!['extras'] ?? {}
+                  'extras': {}
                 },
             notifyActivities: false);
       } else {
+        printWarning(value);
+        printWarning(element['name']);
+
         widget.formResults.add(
-            element['name'],
+            '$value-${element['name']}',
             {
               'controller': textEditingController,
               'value': textEditingController.text,
@@ -407,13 +437,17 @@ TextEditingController textCont = TextEditingController();
               'extras': {}
             },
             notifyActivities: false);
+
+        textEditingController.text =
+            widget.formResults['$value-${element['name']}']!['value'] ?? '';
       }
 
       /// return the widget to be displayed
       return Visibility(
         visible: visibleIf(element),
         child: TextFormField(
-          controller: widget.formResults[element['name']]!['controller'],
+          controller:
+              widget.formResults['$value-${element['name']}']!['controller'],
           keyboardType: checkInputType(element),
           key: textFieldKey,
           // readOnly: enableIf(element),
@@ -450,9 +484,10 @@ TextEditingController textCont = TextEditingController();
             return null;
           },
           onChanged: (value) {
-            widget.formResults.remove(element['name'], notifyActivities: false);
+            widget.formResults
+                .remove('$value-${element['name']}', notifyActivities: false);
             widget.formResults.add(
-                element['name'],
+                '$value-${element['name']}',
                 {
                   'controller': textEditingController,
                   'value': value,
@@ -696,18 +731,23 @@ TextEditingController textCont = TextEditingController();
       }
     }
 
-    Visibility dropdownChoicesIPRS(Map<String, dynamic> element) {
-      Key dropdownKey = Key(element['name']);
+    Visibility dropdownChoicesIPRS(Map<String, dynamic> element, valueItem) {
+      printWarning("?>DS>A>>>D>D");
+      printWarning(valueItem);
+      var labelText = valueItem;
+
+      Key dropdownKey = Key('$labelText-${element['name']}');
 
       /// Add to the widget.formResults
-      if (widget.formResults.containsKey(element['name']) == false) {
+      if (widget.formResults.containsKey('$labelText-${element['name']}') ==
+          false) {
         printInfo('{{{element}}}');
-        printInfo(element['name']);
+        printInfo('$labelText-${element['name']}');
 
         widget.formResults.add(
-            element['name'],
+            '$labelText-${element['name']}',
             {
-              'controller': element['name'],
+              'controller': '$labelText-${element['name']}',
               'value': element['label'].toString(),
               'label': element['label'],
               'type': 'text',
@@ -733,17 +773,21 @@ TextEditingController textCont = TextEditingController();
         ),
         for (var i = 0; i < element['options'].length; i++)
           DropdownMenuItem(
-            value: widget.formResults[element['name']]!['options'][i]['value'],
+            value:
+                widget.formResults['$labelText-${element['name']}']!['options']
+                    [i]['value'],
             child: Text(
-                widget.formResults[element['name']]!['options'][i]['label']),
+                widget.formResults['$labelText-${element['name']}']!['options']
+                    [i]['label']),
           )
       ];
 
-      if (formValues.containsKey(element['name']) == false) {
-        formValues['${element['name']}'] = widget.formResults[element['name']];
+      if (formValues.containsKey('$labelText-${element['name']}') == false) {
+        formValues['$labelText-${element['name']}'] =
+            widget.formResults['$labelText-${element['name']}'];
       }
 
-      String vl = formValues[element['name']]['value'];
+      String vl = formValues['$labelText-${element['name']}']['value'];
 
       return Visibility(
         visible: visibleIf(element),
@@ -762,14 +806,14 @@ TextEditingController textCont = TextEditingController();
               onChanged: (value) {
                 printSuccess("Value Selected");
                 printSuccess(value);
-                printSuccess(element['name']);
+                printSuccess('$labelText-${element['name']}');
                 print("????? VALUE");
-                widget.formResults
-                    .remove(element['name'], notifyActivities: false);
+                widget.formResults.remove('$labelText-${element['name']}',
+                    notifyActivities: false);
                 widget.formResults.add(
-                    element['name'],
+                    '$labelText-${element['name']}',
                     {
-                      'controller': element['name'],
+                      'controller': '$labelText-${element['name']}',
                       'value': value,
                       'label': element['label'],
                       'type': 'text',
@@ -779,8 +823,8 @@ TextEditingController textCont = TextEditingController();
                     notifyActivities: false);
 
                 setState(() {
-                  formValues['${element['name']}'] = {
-                    'controller': element['name'],
+                  formValues['$labelText-${element['name']}'] = {
+                    'controller': '$labelText-${element['name']}',
                     'value': value,
                     'label': element['label'],
                     'type': 'text',
@@ -846,6 +890,7 @@ TextEditingController textCont = TextEditingController();
     Visibility httpLookUp(Map<String, dynamic> element) {
       // httpLookUpUrl(element);
 
+
       /// after loading update the data forms
       return Visibility(
           child: SizedBox(
@@ -855,6 +900,8 @@ TextEditingController textCont = TextEditingController();
             itemCount: element['lookup'].length,
             itemBuilder: (BuildContext context, int index) {
               final item = element['lookup'][index];
+              printWarning("????????>>>> ELEMENT");
+              printWarning(element);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -869,42 +916,91 @@ TextEditingController textCont = TextEditingController();
                       itemCount: item['parameters'].length,
                       itemBuilder: (BuildContext context, int index) {
                         final parameters = item['parameters'][index];
+                        printWarning("????????>>>> ELEMENT");
+                        printWarning(element);
                         return Container(
                           child: parameters['type'] == 'dropdown'
-                              ? dropdownChoicesIPRS(parameters)
-                              : textFieldIPRS(parameters),
+                              ? dropdownChoicesIPRS(
+                                  parameters, element['outputs'][0]['value'])
+                              : textFieldIPRS(parameters, element['outputs'][0]['value']),
                         );
                       },
                     ),
                   ),
                   OutlinedButton(
-                    onPressed: () {
-                      print(widget.formResults);
-                      print(widget.formResults['id_number']);
-                      print(widget.formResults['id_number']);
+                    onPressed: () async {
+                      TextEditingController idEditingController = TextEditingController();
+                      TextEditingController firstNameController = TextEditingController();
+                      idEditingController = widget.formResults['${element['outputs'][0]['value']}-id_number']!['controller'] ;
+                      firstNameController = widget.formResults['${element['outputs'][0]['value']}-first_name']!['controller'] ;
+
                       var idType;
-                      if (widget.formResults.containsKey('id_type')) {
-                        if (widget.formResults['id_type'] != null) {
-                          idType = widget.formResults['id_type']!['value'];
+                      if (widget.formResults.containsKey('${element['outputs'][0]['value']}-id_type')) {
+                        if (widget.formResults['${element['outputs'][0]['value']}-id_type'] != null) {
+                          idType = widget.formResults['${element['outputs'][0]['value']}-id_type']!['value'];
+
                           if (idType == 'NationalIdentification') {
-                            printSuccess('NationalIdentification');
-                            httpLookUpUrl({
-                              "url":
-                                  "http://197.248.4.134/iprs/databyid?number=${widget.formResults['id_number']!['value']}"
+                            var data = await httpLookUpUrl({
+                              "url": "http://197.248.4.134/iprs/databyid",
+                              "id": '${idEditingController.text}',
+                              "data": element['outputs'][0]['value']
                             });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(duration: const Duration(milliseconds: 250),
+                                    content: Text('Processing Data')));
+                            var  resData;
+                            printWarning(data['first_name']);
+                            printWarning(firstNameController.text);
+                            if (data['first_name'].toLowerCase().contains(firstNameController.text.toLowerCase())) {
+
+                              for(var i = 0; i < element['outputs'].length; i++) {
+                                TextEditingController textEditingController = TextEditingController();
+
+                                if(widget.formResults.containsKey(element['outputs'][i]['value'])) {
+                                  resData = _textSelect(element['outputs'][i]['text']);
+                                  widget.formResults.remove(element['outputs'][i]['value'], notifyActivities: false);
+                                  textEditingController.text = data['$resData'] ?? '';
+                                  widget.formResults.add(
+                                      element['outputs'][i]['value'],
+                                      {
+                                        'controller': textEditingController,
+                                        'value': textEditingController.text,
+                                        'label':  element['outputs'][i]['value'],
+                                        'type': 'text',
+                                        'extras': {}
+                                      },
+                                      notifyActivities: false);
+
+                                  setState(() {
+                                    widget.formResults[element['outputs'][i]['value']]!['controller'].text = data['$resData'] ?? '';
+                                  });
+
+
+
+                                }
+
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('First Name does not match particulars')));
+                            }
+
+
+
                           } else if (idType == 'AlienIdentification') {
-                            printSuccess('AlienIdentification');
-                            httpLookUpUrl({
-                              "url":
-                                  "http://197.248.4.134/iprs/databyalienid?number=${widget.formResults['id_number']!['value']}"
+                            var data = await httpLookUpUrl({
+                              "url": "http://197.248.4.134/iprs/databyalienid",
+                              "id": '${idEditingController.text}',
+                              "data": element['outputs'][0]['value']
                             });
+
+
                           }
                         }
                       }
 
                       // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Processing Data')));
+
                     },
                     child: const Text('Search'),
                   ),
