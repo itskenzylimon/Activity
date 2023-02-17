@@ -78,10 +78,10 @@ class _FormBuilderState extends State<FormBuilder> {
     if (data == null) {
       return;
     } else {
-      printSuccess(data);
+
       List<int> fileInByte = data;
       String fileInBase64 = base64Encode(fileInByte);
-      printSuccess(fileInBase64);
+
       widget.formResults.add(
           element['name'],
           {
@@ -100,7 +100,7 @@ class _FormBuilderState extends State<FormBuilder> {
   convertToBase64(var image) async {
     List<int> fileInByte = image.readAsBytesSync();
     String fileInBase64 = base64Encode(fileInByte);
-    printSuccess(fileInBase64)
+
 ;    return fileInBase64;
   }
 
@@ -161,17 +161,17 @@ class _FormBuilderState extends State<FormBuilder> {
   /// returns a bool
   bool enableIf(element) {
 
-    bool enabled = true;
-    if (element['readOnly'] != null) {
-      printError('sfds');
-      enabled = element['readOnly'];
-    }
 
 
-    if (element['enableIf'] != null) {
-      printError(element);
-      /// Handle anyof conditions
-      /// it should overwrite enabled state from above
+      bool enabled = true;
+      if (element['readOnly'] != null) {
+        enabled = element['readOnly'];
+      }
+
+
+      if (element['enableIf'] != null) {
+        /// Handle anyof conditions
+        /// it should overwrite enabled state from above
 
       /// Here we handle the many conditions in the visibleIf
       if (element['enableIf'].toString().contains('anyof')) {
@@ -282,7 +282,7 @@ class _FormBuilderState extends State<FormBuilder> {
             }
           }
         }
-        
+
         /// Handle the and / or conditions state
         if(value['visibleIf'].toString().contains(' and ')){
           setState(() {
@@ -340,6 +340,36 @@ class _FormBuilderState extends State<FormBuilder> {
         widget.formResults.add(name, value, notifyActivities: false);
       });
     }
+  }
+
+  /// Remove Unsused elements in Response
+  String _textSelect(String str) {
+    str = str.replaceAll('<<', '');
+    str = str.replaceAll('>>', '');
+    str = str.replaceAll('result.', '');
+    str = str.replaceAll(' ', '');
+    return str;
+  }
+
+  /// Calculate Age of person based on date of birth
+  calculateAge(birthDate) {
+    // 9/30/1993
+    birthDate = birthDate.split(" ").first;
+    birthDate = birthDate.split("/");
+    DateTime currentDate = DateTime.now();
+    num age = currentDate.year - num.parse(birthDate[2]);
+    int month1 = currentDate.month;
+    int month2 = int.parse(birthDate[0]);
+    if (month2 > month1) {
+      age--;
+    } else if (month1 == month2) {
+      int day1 = currentDate.day;
+      int day2 = int.parse(birthDate[1]);
+      if (day2 > day1) {
+        age--;
+      }
+    }
+    return age;
   }
 
   Center create() {
@@ -431,21 +461,12 @@ class _FormBuilderState extends State<FormBuilder> {
       return list;
     }
 
-    String _textSelect(String str) {
-      str = str.replaceAll('<<', '');
-      str = str.replaceAll('>>', '');
-      str = str.replaceAll('result.', '');
-      str = str.replaceAll(' ', '');
-      return str;
-    }
 
     Future<Map<String, dynamic>> formRequest(Map request) async {
       String username = 'mrmiddleman';
       String password = '6I2-u?=W';
-      // String basicAuth = base64Encode(utf8.encode('$username:$password'));
-      String basicAuth = 'bXJtaWRkbGVtYW46NkkyLXU/PVc=';
-      print(basicAuth);
-      print(request['id']);
+      String basicAuth = base64Encode(utf8.encode('$username:$password'));
+      // String basicAuth = 'bXJtaWRkbGVtYW46NkkyLXU/PVc=';
       ActiveRequest activeRequest = ActiveRequest();
       activeRequest.setUp = RequestSetUp(
           idleTimeout: 10,
@@ -459,14 +480,10 @@ class _FormBuilderState extends State<FormBuilder> {
       /// Handle httplookup
       /// Handle choicesByUrl
 
-      printWarning('URL ?????????');
-      printWarning(request['url']);
-      printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
           endpoint: request['url'],
           queryParameters: {"number": "${request['id']}"}));
-      printError("Active Respobse ??????");
-      printError(activeResponse);
+
       final Map<String, dynamic> convertedData =
           jsonDecode(activeResponse.data!);
       return convertedData;
@@ -478,12 +495,10 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Future<Map<String, dynamic>> httpLookUpUrl(Map choicesByUrl) async {
-      printError("????????");
-      printError(choicesByUrl);
+
 
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
-      printInfo("choices ???");
-      printInfo(choices);
+
       if (widget.formResults.containsKey(choicesByUrl['data'])) {}
 
       return choices;
@@ -603,8 +618,7 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility textFieldIPRS(Map<String, dynamic> element, value) {
-      printInfo("????????>>>>");
-      printInfo(element);
+
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
       bool isRequired = true;
@@ -625,8 +639,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 },
             notifyActivities: false);
       } else {
-        printWarning(value);
-        printWarning(element['name']);
+
 
         widget.formResults.add(
             '$value-${element['name']}',
@@ -698,7 +711,6 @@ class _FormBuilderState extends State<FormBuilder> {
                 },
                 notifyActivities: false);
 
-            printError(widget.formResults);
           },
         ),
       );
@@ -707,8 +719,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility dropdownChoices(Map<String, dynamic> element) {
       Key dropdownKey = Key(element['name']);
       Key key = Key("123");
-      printSuccess(element['name']);
-      String? currentSelectedValue = 'Select ${element['title']}';
+      String? currentSelectedValue = 'Select';
 
       ValueNotifier<List<String>> _listNotifier =
           ValueNotifier<List<String>>(["Select ${element['title']}"]);
@@ -719,8 +730,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// Add to the widget.formResults
       if (widget.formResults.containsKey(element['name']) == false) {
-        printInfo('{{{element}}}');
-        printInfo(element['name']);
+
 
         widget.formResults.add(
             element['name'],
@@ -737,6 +747,7 @@ class _FormBuilderState extends State<FormBuilder> {
       List<DropdownMenuItem> choices = [];
 
       if (element['renderAs'] == null && element['choices'] != null) {
+
         choices = [
           DropdownMenuItem(
             value: element['title'].toString(),
@@ -794,6 +805,7 @@ class _FormBuilderState extends State<FormBuilder> {
                           );
                           _listNotifier.value = choiceList;
                         }
+
                       });
                     } else {
                       setState(() {
@@ -977,8 +989,7 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility dropdownChoicesIPRS(Map<String, dynamic> element, valueItem) {
-      printWarning("?>DS>A>>>D>D");
-      printWarning(valueItem);
+
       var labelText = valueItem;
 
       Key dropdownKey = Key('$labelText-${element['name']}');
@@ -986,8 +997,7 @@ class _FormBuilderState extends State<FormBuilder> {
       /// Add to the widget.formResults
       if (widget.formResults.containsKey('$labelText-${element['name']}') ==
           false) {
-        printInfo('{{{element}}}');
-        printInfo('$labelText-${element['name']}');
+
 
         widget.formResults.add(
             '$labelText-${element['name']}',
@@ -1049,10 +1059,7 @@ class _FormBuilderState extends State<FormBuilder> {
               value: vl,
               items: choiceList,
               onChanged: (value) {
-                printSuccess("Value Selected");
-                printSuccess(value);
-                printSuccess('$labelText-${element['name']}');
-                print("????? VALUE");
+
                 widget.formResults.remove('$labelText-${element['name']}',
                     notifyActivities: false);
                 widget.formResults.add(
@@ -1077,6 +1084,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     'extras': {}
                   };
                 });
+
               },
             ),
           ),
@@ -1087,52 +1095,120 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility ageCalc(Map<String, dynamic> element) {
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
-      TextEditingController agecalcEditingController = TextEditingController();
-      String labelText = element['title'];
+      bool isRequired = element['isRequired'] ?? false;
+      String labelText = element['title'] + (isRequired == true ? ' * ' : '');
+
+      /// Add to the widget.formResults
+      if (widget.formResults.containsKey(element['name'])) {
+        textEditingController.text =
+            widget.formResults[element['name']]!['value'] == ""?
+        "": calculateAge(widget.formResults[element['name']]!['value']).toString();
+        widget.formResults.update(
+            element['name'],
+                (value) => {
+              'controller': textEditingController,
+              'value': textEditingController.text.isEmpty? '':textEditingController.text,
+              'label': labelText,
+              'type': 'text',
+              'extras': widget.formResults[element['name']]!['extras'] ?? {}
+            },
+            notifyActivities: false);
+      } else {
+        widget.formResults.add(
+            element['name'],
+            {
+              'controller': textEditingController,
+              'value': textEditingController.text.isEmpty? '':textEditingController.text,
+              'label': labelText,
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
+      }
 
       /// return the widget to be displayed
       return Visibility(
         // visible: visibleIf(element),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            "$labelText",
-            style: TextStyle(color: Colors.black, fontSize: 18),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          TextFormField(
-            keyboardType: checkInputType(element),
-            key: textFieldKey,
-            readOnly: enableIf(element),
-            decoration: InputDecoration(
-              labelText: labelText,
-              hintText: element['placeholder'] ?? '',
+        child: Container(
+          margin: const EdgeInsets.all(10),
+          child: Center(
+            child: TextFormField(
+              controller: widget.formResults[element['name']]!['controller'],
+              keyboardType: checkInputType(element),
+              key: textFieldKey,
+              readOnly: !enableIf(element),
+              maxLines: element['type'] == 'comment' ? 5 : 1,
+              style: const TextStyle(
+                color: Colors.black,
+              ),
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.only(top: 3, left: 8),
+                hintStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffE0E0E0)),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.black,)),
+                labelText: labelText,
+                hintText: element['placeholder'] ?? '',
+              ),
+              validator: (value) {
+                /// check if value is required
+                if (element['isRequired'] == true) {
+                  /// input validator for numbers
+                  if (element['inputType'] == 'number') {
+                    int intValue = int.parse(value ?? '0');
+                    //check if max exist
+                    if (element['max'] != null) {
+                      if (intValue > element['max']) {
+                        return '${element['max']} is the max ${element['title']}';
+                      }
+                    }
+                    //check if min exist
+                    if (element['min'] != null) {
+                      if (element['min'] > intValue) {
+                        return '${element['min']} is the min ${element['title']}';
+                      }
+                    }
+                    //
+                  }
+                }
+
+                if (value == null || value.isEmpty) {
+                  return (element['title'] + ' is required');
+                } else if (value.contains('@')) {
+                  return 'Please don\'t use the @ char.';
+                }
+                return null;
+              },
+              onChanged: (value) {
+                widget.formResults.remove(element['name'], notifyActivities: false);
+                widget.formResults.add(
+                    element['name'],
+                    {
+                      'controller': textEditingController,
+                      'value': value,
+                      'label': labelText,
+                      'type': 'text',
+                      'extras': {}
+                    },
+                    notifyActivities: false);
+
+              },
             ),
-            validator: (value) {},
-            onChanged: (value) {
-              widget.formResults.remove(element['name'], notifyActivities: false);
-              widget.formResults.add(
-                  element['name'],
-                  {
-                    'controller': agecalcEditingController,
-                    'value': value,
-                    'label': labelText,
-                    'type': 'agecalc',
-                    'extras': {}
-                  },
-                  notifyActivities: false);
-            },
           ),
-        ]),
+        ),
       );
     }
 
+
     Visibility htmlText(Map<String, dynamic> element) {
-      printError(' **** ' + element['name']);
       return Visibility(
           visible: invisibilityMap[element['name']],
           child: Html(
@@ -1153,8 +1229,7 @@ class _FormBuilderState extends State<FormBuilder> {
             itemCount: element['lookup'].length,
             itemBuilder: (BuildContext context, int index) {
               final item = element['lookup'][index];
-              printWarning("????????>>>> ELEMENT");
-              printWarning(element);
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1169,8 +1244,7 @@ class _FormBuilderState extends State<FormBuilder> {
                       itemCount: item['parameters'].length,
                       itemBuilder: (BuildContext context, int index) {
                         final parameters = item['parameters'][index];
-                        printWarning("????????>>>> ELEMENT");
-                        printWarning(element);
+
                         return Container(
                           child: parameters['type'] == 'dropdown'
                               ? dropdownChoicesIPRS(
@@ -1215,8 +1289,7 @@ class _FormBuilderState extends State<FormBuilder> {
                                     duration: const Duration(milliseconds: 250),
                                     content: Text('Processing Data')));
                             var resData;
-                            printWarning(data['first_name']);
-                            printWarning(firstNameController.text);
+
                             if (data['first_name'].toLowerCase().contains(
                                 firstNameController.text.toLowerCase())) {
                               for (var i = 0;
@@ -1384,6 +1457,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility filePicker(Map<String, dynamic> element) {
       TextEditingController _textEditingController = TextEditingController();
       printError(' **** ' + element['name']);
+
       return Visibility(
         // visible: visibleIf(element),
         child: Padding(
@@ -1489,7 +1563,7 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility html(Map<String, dynamic> element) {
-      printError(' **** ' + element['name']);
+
       return Visibility(
           // visible: visibleIf(element),
           child: Html(
@@ -1553,6 +1627,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
         case 'html':
           return html(element);
+
         case 'agecalc':
           return ageCalc(element);
         // case '':
