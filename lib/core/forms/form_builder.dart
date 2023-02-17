@@ -50,6 +50,28 @@ class _FormBuilderState extends State<FormBuilder> {
     super.dispose();
   }
 
+  /// List results
+  /// key : {
+  ///  key: dynamic,
+  /// }
+  ///
+  /// key Element name
+  /// Controller
+  ///
+
+  /// Validation func
+
+  /// Logic fun
+  String? path;
+
+  /// invisibilityList is a list of elements that are invisible
+  /// { ''key' : bool }
+  /// key being the element name
+  Map invisibilityMap = {};
+
+  // Map representation of the formResults
+  Map formValues = {};
+
   exportImage(element) async {
     final Uint8List? data =
         await _controller.toPngBytes(height: 1000, width: 1000);
@@ -82,13 +104,249 @@ class _FormBuilderState extends State<FormBuilder> {
 ;    return fileInBase64;
   }
 
+  //upload file
+  Future<String> getFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false);
+    if (result == null) return "";
+    path = result.files.single.path!;
+    return getBase64FormateFile(path!);
+  }
+
+  String getBase64FormateFile(String path) {
+    File file = File(path);
+    print('File is = ' + file.toString());
+    List<int> fileInByte = file.readAsBytesSync();
+    String fileInBase64 = base64Encode(fileInByte);
+    return fileInBase64;
+  }
+
+  /// Helper func
+  String trimCurly(String value) {
+    int start = value.indexOf("{") + 1;
+    int end = value.indexOf("}");
+    return value.substring(start, end);
+  }
+
+  List trimListString(String value) {
+    int start = value.indexOf("[") + 1;
+    int end = value.indexOf("]");
+    return value.substring(start, end)
+        .split(",").toList();
+  }
+
+  String conditionValue(String value) {
+    printSuccess('@@@@@#$value');
+    int start = value.indexOf(" = ");
+    return value.substring(start);
+  }
+
+  /// Use this to split the string by [and, or]
+  /// and remove the ' from values
+  /// returns a list of strings
+  List splitStringList(String value) {
+    List splits = [];
+    /// separate a string by or and remove the ' from values
+    if(value.contains(" or ")){
+      splits.addAll(value.split(" or ").map((str) => str.replaceAll("'", "")).toList());
+    }
+    /// separate a string by and and remove the ' from values
+    if(value.contains(" and ")){
+      splits.addAll(value.split(" and ").map((str) => str.replaceAll("'", "")).toList());
+    }
+    return splits;
+  }
+
+  /// Use this to split the string by [and, or]
+  /// and remove the ' from values
+  /// returns a bool
+  bool enableIf(element) {
+
+    bool enabled = true;
+    if (element['readOnly'] != null) {
+      printError('sfds');
+      enabled = element['readOnly'];
+    }
+
+
+    if (element['enableIf'] != null) {
+      printError(element);
+      /// Handle anyof conditions
+      /// it should overwrite enabled state from above
+
+      /// Here we handle the many conditions in the visibleIf
+      if (element['enableIf'].toString().contains('anyof')) {
+        List enableIfConditions = splitStringList(element['enableIf']);
+        for (String search in enableIfConditions) {
+          if (widget.formResults[trimCurly(search)] != null) {
+            /// TODO: Handel for OR conditions
+            //data found, now check if trimCurly is in getListString
+            enabled = trimListString(search).contains(trimCurly(search))
+                ? true
+                : false;
+          }
+        }
+      }
+    }
+
+    /// Handle notempty conditions
+    /// it should overwrite enabled state from above
+    if (element['enableIf'].toString().contains('notempty')) {
+      /// Here we handle the many conditions in the visibleIf
+      List enableIfConditions = splitStringList(element['enableIf']);
+      for (String search in enableIfConditions) {
+        if (widget.formResults[trimCurly(search)] != null) {
+          return true;
+        }
+      }
+    }
+    return enabled;
+  }
+
+  /// Use this to split the string by [and, or]
+  /// and remove the ' from values
+  visibleIf() {
+    invisibilityMap.clear();
+    formValues.forEach((key, value) {
+      if (value['visible'] != null) {
+        invisibilityMap.addAll({
+          key: value['visible']
+        });
+      } else if (value['visibleIf'] != null) {
+        /// create a list of conditions
+        /// Handle or conditions
+        /// Handle and conditions
+        List visibleIfConditions = splitStringList(value['visibleIf']);
+        /// New Map for conditional bools
+        Map newInvisibilityMap = {};
+        /// loop through visibleIfConditions
+        for (var condition in visibleIfConditions) {
+          /// Handle anyof conditionType
+          /// it should overwrite visible state from above
+          if (condition.toString().contains(' anyof ')) {
+            /// Here we handle the many conditions in the visibleIf that meet
+            /// the anyof condition type
+            if (formValues[trimCurly(condition)] != null) {
+              // data found, now check if trimCurly is in getListString
+              if(trimListString(condition).contains(trimCurly(condition))){
+                newInvisibilityMap.addAll({
+                  key: true
+                });
+              } else {
+                newInvisibilityMap.addAll({
+                  key: false
+                });
+              }
+            }
+          }
+
+          /// Handle notempty conditions
+          /// it should overwrite enabled state from above
+          if (condition.toString().contains(' notempty ')) {
+            /// Here we handle the many conditions in the visibleIf that meet
+            /// the notempty condition type
+            if (formValues[trimCurly(condition)] != null) {
+              // check condition not empty
+              if(formValues[trimCurly(condition)]!['value'].toString().isNotEmpty){
+                newInvisibilityMap.addAll({
+                  key: true
+                });
+              } else {
+                newInvisibilityMap.addAll({
+                  key: false
+                });
+              }
+            }
+          }
+
+          /// Handle = conditions
+          /// it should overwrite enabled state from above
+          if (condition.toString().contains(' = ')) {
+            /// Here we handle the many conditions in the visibleIf that meet
+            /// the = condition type
+            if (formValues[trimCurly(condition)] != null) {
+              /// get condition value
+              String value = conditionValue(condition);
+              printError('{{{{{{text}}}}}}');
+              printError(value);
+              printError('{{{{{{text}}}}}}');
+
+              if(formValues[trimCurly(condition)]!['value'] == value){
+                newInvisibilityMap.addAll({
+                  key: true
+                });
+              } else {
+                newInvisibilityMap.addAll({
+                  key: false
+                });
+              }
+            }
+          }
+        }
+        
+        /// Handle the and / or conditions state
+        if(value['visibleIf'].toString().contains(' and ')){
+          setState(() {
+            invisibilityMap.addAll({
+              key: newInvisibilityMap.containsValue(false)
+            });
+          });
+        } else if (value['visibleIf'].toString().contains(' or ')){
+          setState(() {
+            invisibilityMap.addAll({
+              key: newInvisibilityMap.containsValue(true)
+            });
+          });
+        }
+      }
+    });
+  }
+
+  /// All updates should be done here
+  /// This is called when a form element is changed
+  /// It updates the formValues map
+  updateElement(String name, Map<String, dynamic> value){
+    /// Update formResults
+    if(widget.formResults.containsKey(name)){
+      setState(() {
+        widget.formResults.remove(name, notifyActivities: false);
+        widget.formResults.add(name, value, notifyActivities: false);
+      });
+    }
+    /// Update formValues
+    if(formValues.containsKey(name)){
+      setState(() {
+        formValues.remove(name);
+        formValues.addAll({name: value});
+      });
+    }
+    /// Call visibleIf condition
+    visibleIf();
+    /// Call requiredIf condition
+
+    /// Call enableIf condition
+  }
+
+  /// All created elements should be added here
+  /// This is called when a form element is created
+  /// It updates the formValues map and formResults map
+  setUpElement(String name, Map<String, dynamic> value){
+    /// Update formValues
+    if(!formValues.containsKey(name)){
+      setState(() {
+        formValues.remove(name);
+        formValues.addAll({name: value});
+        /// Update formResults
+        widget.formResults.remove(name, notifyActivities: false);
+        widget.formResults.add(name, value, notifyActivities: false);
+      });
+    }
+  }
+
   Center create() {
     // Key / value for the form
     TextEditingController textCont = TextEditingController();
-    // Map representation of the formResults
-    Map formValues = widget.formResults.value;
-    /// invisibilityList is a list of elements that are invisible
-    List invisibilityList = [];
+    // assign formResults to formValues.
+    formValues = widget.formResults.value;
 
     String textCont1 = "";
     String textCont2 = "";
@@ -173,203 +431,12 @@ class _FormBuilderState extends State<FormBuilder> {
       return list;
     }
 
-    /// List results
-    /// key : {
-    ///  key: dynamic,
-    /// }
-    ///
-    /// key Element name
-    /// Controller
-    ///
-
-    /// Validation func
-
-    /// Logic fun
-    String? path;
-
-    String getBase64FormateFile(String path) {
-      File file = File(path);
-      print('File is = ' + file.toString());
-      List<int> fileInByte = file.readAsBytesSync();
-      String fileInBase64 = base64Encode(fileInByte);
-      return fileInBase64;
-    }
-
     String _textSelect(String str) {
       str = str.replaceAll('<<', '');
       str = str.replaceAll('>>', '');
       str = str.replaceAll('result.', '');
       str = str.replaceAll(' ', '');
       return str;
-    }
-
-    //upload file
-    Future<String> getFile() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false);
-      if (result == null) return "";
-      path = result.files.single.path!;
-      return getBase64FormateFile(path!);
-    }
-
-    /// Helper func
-    String trimCurly(String value) {
-      int start = value.indexOf("{") + 1;
-      int end = value.indexOf("}");
-      return value.substring(start, end);
-    }
-
-    List trimListString(String value) {
-      int start = value.indexOf("[") + 1;
-      int end = value.indexOf("]");
-      return value.substring(start, end)
-          .split(",").toList();
-    }
-
-    String conditionValue(String value) {
-      printSuccess('@@@@@#$value');
-      int start = value.indexOf(" = ");
-      return value.substring(start);
-    }
-
-    /// Use this to split the string by [and, or]
-    /// and remove the ' from values
-    /// returns a list of strings
-    List splitStringList(String value) {
-      List splits = [];
-      /// separate a string by or and remove the ' from values
-      if(value.contains(" or ")){
-        splits.addAll(value.split(" or ").map((str) => str.replaceAll("'", "")).toList());
-      }
-      /// separate a string by and and remove the ' from values
-      if(value.contains(" and ")){
-        splits.addAll(value.split(" and ").map((str) => str.replaceAll("'", "")).toList());
-      }
-      return splits;
-    }
-
-    /// Use this to split the string by [and, or]
-    /// and remove the ' from values
-    /// returns a bool
-    bool enableIf(element) {
-
-      bool enabled = true;
-      if (element['readOnly'] != null) {
-        printError('sfds');
-        enabled = element['readOnly'];
-      }
-
-
-      if (element['enableIf'] != null) {
-        printError(element);
-        /// Handle anyof conditions
-        /// it should overwrite enabled state from above
-
-        /// Here we handle the many conditions in the visibleIf
-        if (element['enableIf'].toString().contains('anyof')) {
-          List enableIfConditions = splitStringList(element['enableIf']);
-          for (String search in enableIfConditions) {
-            if (widget.formResults[trimCurly(search)] != null) {
-              /// TODO: Handel for OR conditions
-              //data found, now check if trimCurly is in getListString
-              enabled = trimListString(search).contains(trimCurly(search))
-                  ? true
-                  : false;
-            }
-          }
-        }
-      }
-
-      /// Handle notempty conditions
-      /// it should overwrite enabled state from above
-      if (element['enableIf'].toString().contains('notempty')) {
-        /// Here we handle the many conditions in the visibleIf
-        List enableIfConditions = splitStringList(element['enableIf']);
-        for (String search in enableIfConditions) {
-          if (widget.formResults[trimCurly(search)] != null) {
-            return true;
-          }
-        }
-      }
-      return enabled;
-    }
-
-    /// Use this to split the string by [and, or]
-    /// and remove the ' from values
-    visibleIf() {
-      bool visible = true;
-      formValues.forEach((key, value) {
-        if (value['visible'] != null) {
-          visible = value['visible'];
-        }
-
-        if (value['visibleIf'] != null) {
-          printInfo(value['visibleIf']);
-          printInfo('{{{{visibleIf}}}}');
-
-          /// create a list of conditions
-          /// Handle or conditions
-          /// Handle and conditions
-          List visibleIfConditions = splitStringList(value['visibleIf']);
-          /// loop through visibleIfConditions
-          for (var condition in visibleIfConditions) {
-            /// Handle anyof conditionType
-            /// it should overwrite visible state from above
-            if (condition.toString().contains(' anyof ')) {
-              /// Here we handle the many conditions in the visibleIf that meet
-              /// the anyof condition type
-              if (widget.formResults[trimCurly(condition)] != null) {
-                //data found, now check if trimCurly is in getListString
-                visible = trimListString(condition).contains(trimCurly(condition))
-                    ? true
-                    : false;
-              }
-            }
-            /// Handle notempty conditions
-            /// it should overwrite enabled state from above
-            if (condition.toString().contains(' notempty ')) {
-              /// Here we handle the many conditions in the visibleIf that meet
-              /// the notempty condition type
-              if (widget.formResults[trimCurly(condition)] != null) {
-                visible = widget.formResults[trimCurly(condition)]!['value'] != ''
-                    ? true
-                    : false;
-              }
-            }
-
-            /// Handle = conditions
-            /// it should overwrite enabled state from above
-            if (condition.toString().contains(' = ')) {
-              /// Here we handle the many conditions in the visibleIf that meet
-              /// the = condition type
-              if (widget.formResults[trimCurly(condition)] != null) {
-                /// get condition value
-                String value = conditionValue(condition);
-                visible = widget.formResults[trimCurly(condition)]!['value'] == value
-                    ? true
-                    : false;
-              }
-            }
-          }
-          /// check if visible is false and add to visible list
-          if(!visible){
-            if(!invisibilityList.contains(value['name'])){
-              setState(() {
-                invisibilityList.add(value['name']);
-              });
-            } else{
-              setState(() {
-                invisibilityList.remove(value['name']);
-                invisibilityList.add(value['name']);
-              });
-            }
-          } else if (visible && invisibilityList.contains(value['name'])) {
-            /// check if visible is true and remove from visible list
-            setState(() {
-              invisibilityList.remove(value['name']);
-            });
-          }
-        }
-      });
     }
 
     Future<Map<String, dynamic>> formRequest(Map request) async {
@@ -456,36 +523,14 @@ class _FormBuilderState extends State<FormBuilder> {
       bool isRequired = element['isRequired'] ?? false;
       String labelText = element['title'] + (isRequired == true ? ' * ' : '');
 
-      /// Add to the widget.formResults
-      if (widget.formResults.containsKey(element['name'])) {
-        textEditingController.text =
-            widget.formResults[element['name']]!['value'] ?? '';
-        widget.formResults.update(
-            element['name'],
-            (value) => {
-                  'controller': textEditingController,
-                  'value': textEditingController.text,
-                  'label': labelText,
-                  'type': 'text',
-                  'extras': widget.formResults[element['name']]!['extras'] ?? {}
-                },
-            notifyActivities: false);
-      } else {
-        widget.formResults.add(
-            element['name'],
-            {
-              'controller': textEditingController,
-              'value': textEditingController.text,
-              'label': labelText,
-              'type': 'text',
-              'extras': {}
-            },
-            notifyActivities: false);
-      }
+      /// call setUpElement
+      element['controller'] = textEditingController;
+      element['value'] = textEditingController.text;
+      setUpElement(element['name'], element);
 
       /// return the widget to be displayed
       return Visibility(
-        visible: invisibilityList.contains(element['name']) ? false : true,
+        visible: invisibilityMap[element['name']],
         child: Container(
           margin: const EdgeInsets.all(10),
           child: Center(
@@ -545,19 +590,11 @@ class _FormBuilderState extends State<FormBuilder> {
                 return null;
               },
               onChanged: (value) {
-                widget.formResults.remove(element['name'], notifyActivities: false);
-                widget.formResults.add(
-                    element['name'],
-                    {
-                      'controller': textEditingController,
-                      'value': value,
-                      'label': labelText,
-                      'type': 'text',
-                      'extras': {}
-                    },
-                    notifyActivities: false);
 
-                printError(widget.formResults);
+                element['value'] = value;
+                /// call updateElement
+                updateElement(element['name'], element);
+
               },
             ),
           ),
@@ -608,7 +645,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// return the widget to be displayed
       return Visibility(
-        visible: invisibilityList.contains(element['name']) ? false : true,
+        visible: invisibilityMap[element['name']],
         child: TextFormField(
           controller:
               widget.formResults['$value-${element['name']}']!['controller'],
@@ -805,7 +842,8 @@ class _FormBuilderState extends State<FormBuilder> {
             ],
           ),
         ));
-      } else if (element['renderAs'] == null && element['choicesByUrl'] != null) {
+      }
+      else if (element['renderAs'] == null && element['choicesByUrl'] != null) {
         return Visibility(
             // visible: visibleIf(element),
             child: Container(
@@ -889,9 +927,10 @@ class _FormBuilderState extends State<FormBuilder> {
             ],
           ),
         ));
-      } else {
+      }
+      else {
         return Visibility(
-          visible: !invisibilityList.contains(element['name']),
+          visible: invisibilityMap[element['name']],
           child: Container(
             width: double.infinity,
             margin: const EdgeInsets.only(top: 10, bottom: 10),
@@ -911,7 +950,6 @@ class _FormBuilderState extends State<FormBuilder> {
                   widget.formResults.add(
                       element['name'],
                       {
-                        'controller': element['name'],
                         'value': value,
                         'label': element['title'],
                         'type': 'dropdown',
@@ -997,7 +1035,7 @@ class _FormBuilderState extends State<FormBuilder> {
       String vl = formValues['$labelText-${element['name']}']['value'];
 
       return Visibility(
-        visible: invisibilityList.contains(element['name']) ? false : true,
+        visible: invisibilityMap[element['name']],
         child: Container(
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           decoration: BoxDecoration(
@@ -1096,7 +1134,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility htmlText(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
-          visible: !invisibilityList.contains(element['name']),
+          visible: invisibilityMap[element['name']],
           child: Html(
             data: element['displayTemplate'],
           ));
@@ -1107,7 +1145,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// after loading update the data forms
       return Visibility(
-          visible: !invisibilityList.contains(element['name']),
+          visible: invisibilityMap[element['name']],
           child: SizedBox(
         height: 300,
         child: ListView.builder(
@@ -1318,7 +1356,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       String selectedChoice = '';
       return Visibility(
-        visible: invisibilityList.contains(element['name']) ? false : true,
+        visible: invisibilityMap[element['name']],
         child: Container(
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           child: Column(
@@ -1405,7 +1443,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
     Visibility signaturePad(Map<String, dynamic> element) {
       return Visibility(
-        visible: invisibilityList.contains(element['name']) ? false : true,
+        visible: invisibilityMap[element['name']],
         child: SizedBox(
           height: 450,
           child: Stack(
@@ -1462,7 +1500,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility checkbox(Map<String, dynamic> element) {
       String selectedChoice = '';
       return Visibility(
-        visible: invisibilityList.contains(element['name']) ? false : true,
+        visible: invisibilityMap[element['name']],
         child: Column(
           children: [
             Wrap(
@@ -1534,7 +1572,7 @@ class _FormBuilderState extends State<FormBuilder> {
         );
 
         return Visibility(
-          visible: !invisibilityList.contains(element['name']),
+          visible: invisibilityMap[element['name']],
           child: Card(
             margin: const EdgeInsets.all(20),
             elevation: 1,
