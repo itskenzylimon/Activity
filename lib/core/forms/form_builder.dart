@@ -85,9 +85,14 @@ class _FormBuilderState extends State<FormBuilder> {
   Center create() {
     // Key / value for the form
     TextEditingController textCont = TextEditingController();
+    // Map representation of the formResults
+    Map formValues = widget.formResults.value;
+    /// invisibilityList is a list of elements that are invisible
+    List invisibilityList = [];
+
     String textCont1 = "";
     String textCont2 = "";
-    Map formValues = widget.formResults.value;
+
     Timer? _debounce;
     ActiveRequest activeRequest = ActiveRequest();
     Future<List> getListItems(
@@ -216,8 +221,14 @@ class _FormBuilderState extends State<FormBuilder> {
     List trimListString(String value) {
       int start = value.indexOf("[") + 1;
       int end = value.indexOf("]");
-      String listString = value.substring(start, end);
-      return listString.split(",").map((str) => str.replaceAll("'", "")).toList();
+      return value.substring(start, end)
+          .split(",").toList();
+    }
+
+    String conditionValue(String value) {
+      printSuccess('@@@@@#$value');
+      int start = value.indexOf(" = ");
+      return value.substring(start);
     }
 
     /// Use this to split the string by [and, or]
@@ -225,25 +236,21 @@ class _FormBuilderState extends State<FormBuilder> {
     /// returns a list of strings
     List splitStringList(String value) {
       List splits = [];
-
-      /// separate a string by [and, or] and remove the ' from values
-      value.contains(" or ")
-          ? splits = value.split(" or ").map((str) => str.replaceAll("'", "")).toList()
-          : splits = value.split("and").map((str) => str.replaceAll("'", "")).toList();
-      // splits = value.split("and")
-      //     .map((str) => str.replaceAll("'", "")).toList();
-      // for (var split in splits) {
-      //   if (split.contains("or")) {
-      //     splits.addAll(split.split("or")
-      //         .map((str) => str.replaceAll("'", "")).toList());
-      //   }
-      // }
+      /// separate a string by or and remove the ' from values
+      if(value.contains(" or ")){
+        splits.addAll(value.split(" or ").map((str) => str.replaceAll("'", "")).toList());
+      }
+      /// separate a string by and and remove the ' from values
+      if(value.contains(" and ")){
+        splits.addAll(value.split(" and ").map((str) => str.replaceAll("'", "")).toList());
+      }
       return splits;
     }
 
+    /// Use this to split the string by [and, or]
+    /// and remove the ' from values
+    /// returns a bool
     bool enableIf(element) {
-
-
 
       bool enabled = true;
       if (element['readOnly'] != null) {
@@ -264,7 +271,9 @@ class _FormBuilderState extends State<FormBuilder> {
             if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
-              enabled = trimListString(search).contains(trimCurly(search)) ? true : false;
+              enabled = trimListString(search).contains(trimCurly(search))
+                  ? true
+                  : false;
             }
           }
         }
@@ -284,39 +293,83 @@ class _FormBuilderState extends State<FormBuilder> {
       return enabled;
     }
 
-    bool visibleIf(element) {
+    /// Use this to split the string by [and, or]
+    /// and remove the ' from values
+    visibleIf() {
       bool visible = true;
-      if (element['visibleIf'] != null) {
-        printInfo(element['name']);
+      formValues.forEach((key, value) {
+        if (value['visible'] != null) {
+          visible = value['visible'];
+        }
 
-        /// Handle anyof conditions
-        /// it should overwrite visible state from above
-        if (element['visibleIf'].toString().contains('anyof')) {
-          /// Here we handle the many conditions in the visibleIf
-          List visibleIfConditions = splitStringList(element['visibleIf']);
-          for (String search in visibleIfConditions) {
-            if (widget.formResults[trimCurly(search)] != null) {
-              /// TODO: Handel for OR conditions
-              //data found, now check if trimCurly is in getListString
-              visible = trimListString(search).contains(trimCurly(search)) ? true : false;
+        if (value['visibleIf'] != null) {
+          printInfo(value['visibleIf']);
+          printInfo('{{{{visibleIf}}}}');
+
+          /// create a list of conditions
+          /// Handle or conditions
+          /// Handle and conditions
+          List visibleIfConditions = splitStringList(value['visibleIf']);
+          /// loop through visibleIfConditions
+          for (var condition in visibleIfConditions) {
+            /// Handle anyof conditionType
+            /// it should overwrite visible state from above
+            if (condition.toString().contains(' anyof ')) {
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the anyof condition type
+              if (widget.formResults[trimCurly(condition)] != null) {
+                //data found, now check if trimCurly is in getListString
+                visible = trimListString(condition).contains(trimCurly(condition))
+                    ? true
+                    : false;
+              }
+            }
+            /// Handle notempty conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains(' notempty ')) {
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the notempty condition type
+              if (widget.formResults[trimCurly(condition)] != null) {
+                visible = widget.formResults[trimCurly(condition)]!['value'] != ''
+                    ? true
+                    : false;
+              }
+            }
+
+            /// Handle = conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains(' = ')) {
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the = condition type
+              if (widget.formResults[trimCurly(condition)] != null) {
+                /// get condition value
+                String value = conditionValue(condition);
+                visible = widget.formResults[trimCurly(condition)]!['value'] == value
+                    ? true
+                    : false;
+              }
             }
           }
-        }
-        printInfo(visible);
-
-        /// Handle notempty conditions
-        /// it should overwrite enabled state from above
-        if (element['visibleIf'].toString().contains('notempty')) {
-          /// Here we handle the many conditions in the visibleIf
-          List visibleIfConditions = splitStringList(element['visibleIf']);
-          for (String search in visibleIfConditions) {
-            if (widget.formResults[trimCurly(search)] != null) {
-              return true;
+          /// check if visible is false and add to visible list
+          if(!visible){
+            if(!invisibilityList.contains(value['name'])){
+              setState(() {
+                invisibilityList.add(value['name']);
+              });
+            } else{
+              setState(() {
+                invisibilityList.remove(value['name']);
+                invisibilityList.add(value['name']);
+              });
             }
+          } else if (visible && invisibilityList.contains(value['name'])) {
+            /// check if visible is true and remove from visible list
+            setState(() {
+              invisibilityList.remove(value['name']);
+            });
           }
         }
-      }
-      return visible;
+      });
     }
 
     Future<Map<String, dynamic>> formRequest(Map request) async {
@@ -389,7 +442,8 @@ class _FormBuilderState extends State<FormBuilder> {
         }
 
         /// Email
-        if (element.containsValue(" Email") || element.containsValue(" abc@xyz.com")) {
+        if (element.containsValue(" Email") ||
+            element.containsValue(" abc@xyz.com")) {
           type = TextInputType.emailAddress;
         }
       }
@@ -404,7 +458,8 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// Add to the widget.formResults
       if (widget.formResults.containsKey(element['name'])) {
-        textEditingController.text = widget.formResults[element['name']]!['value'] ?? '';
+        textEditingController.text =
+            widget.formResults[element['name']]!['value'] ?? '';
         widget.formResults.update(
             element['name'],
             (value) => {
@@ -430,7 +485,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// return the widget to be displayed
       return Visibility(
-        visible: visibleIf(element),
+        visible: invisibilityList.contains(element['name']) ? false : true,
         child: Container(
           margin: const EdgeInsets.all(10),
           child: Center(
@@ -553,7 +608,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// return the widget to be displayed
       return Visibility(
-        visible: visibleIf(element),
+        visible: invisibilityList.contains(element['name']) ? false : true,
         child: TextFormField(
           controller:
               widget.formResults['$value-${element['name']}']!['controller'],
@@ -653,7 +708,8 @@ class _FormBuilderState extends State<FormBuilder> {
           for (var i = 0; i < element['choices'].length; i++)
             DropdownMenuItem(
               value: widget.formResults[element['name']]!['options'][i] ?? "na",
-              child: Text(widget.formResults[element['name']]!['options'][i] ?? ""),
+              child: Text(
+                  widget.formResults[element['name']]!['options'][i] ?? ""),
             )
         ];
       }
@@ -689,7 +745,8 @@ class _FormBuilderState extends State<FormBuilder> {
                   onChanged: (value) {
                     if (value.isNotEmpty) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
-                      _debounce = Timer(const Duration(milliseconds: 1000), () async {
+                      _debounce =
+                          Timer(const Duration(milliseconds: 1000), () async {
                         var list = await getListItems(
                           value,
                           element['choicesByUrl']['url'],
@@ -834,7 +891,7 @@ class _FormBuilderState extends State<FormBuilder> {
         ));
       } else {
         return Visibility(
-          visible: visibleIf(element),
+          visible: !invisibilityList.contains(element['name']),
           child: Container(
             width: double.infinity,
             margin: const EdgeInsets.only(top: 10, bottom: 10),
@@ -845,8 +902,9 @@ class _FormBuilderState extends State<FormBuilder> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton(
                 key: dropdownKey,
-                hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
-                value: vl,
+                hint: Text(
+                    element['title'] + ' ' + (element['description'] ?? '')),
+                value: formValues[element['name']]['value'],
                 items: choices,
                 onChanged: (value) {
                   widget.formResults.remove(element['name'], notifyActivities: false);
@@ -939,7 +997,7 @@ class _FormBuilderState extends State<FormBuilder> {
       String vl = formValues['$labelText-${element['name']}']['value'];
 
       return Visibility(
-        visible: visibleIf(element),
+        visible: invisibilityList.contains(element['name']) ? false : true,
         child: Container(
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           decoration: BoxDecoration(
@@ -981,9 +1039,6 @@ class _FormBuilderState extends State<FormBuilder> {
                     'extras': {}
                   };
                 });
-
-                printWarning("????? FormResults");
-                printWarning(widget.formResults);
               },
             ),
           ),
@@ -1041,7 +1096,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility htmlText(Map<String, dynamic> element) {
       printError(' **** ' + element['name']);
       return Visibility(
-          visible: visibleIf(element),
+          visible: !invisibilityList.contains(element['name']),
           child: Html(
             data: element['displayTemplate'],
           ));
@@ -1052,6 +1107,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// after loading update the data forms
       return Visibility(
+          visible: !invisibilityList.contains(element['name']),
           child: SizedBox(
         height: 300,
         child: ListView.builder(
@@ -1065,7 +1121,8 @@ class _FormBuilderState extends State<FormBuilder> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    child: Text('${item['name']}', style: TextStyle(color: Colors.green)),
+                    child: Text('${item['name']}',
+                        style: TextStyle(color: Colors.green)),
                   ),
                   SizedBox(
                     height: 200,
@@ -1173,9 +1230,7 @@ class _FormBuilderState extends State<FormBuilder> {
                           }
                         }
                       }
-
-                      // httpLookUpUrl('http://197.248.4.134/iprs/{% if id_type == 'NationalIdentification' %}databyid{% else %}databyalienid{% endif %}?number={{id_number}}');
-                    },
+                      },
                     child: const Text('Search'),
                   ),
                 ],
@@ -1242,7 +1297,7 @@ class _FormBuilderState extends State<FormBuilder> {
       );
     }
 
-    Container radiogroup(Map<String, dynamic> element) {
+    Visibility radiogroup(Map<String, dynamic> element) {
       List choices = [];
 
       // element['choices'].forEach((item) {
@@ -1262,21 +1317,24 @@ class _FormBuilderState extends State<FormBuilder> {
       // });
 
       String selectedChoice = '';
-      return Container(
-        margin: const EdgeInsets.only(top: 10, bottom: 10),
-        child: Column(
-          children: choices.map((choice) {
-            return RadioListTile(
-              title: Text(choice),
-              value: choice,
-              groupValue: selectedChoice,
-              onChanged: (value) {
-                // setState(() {
-                //   selectedChoice = value;
-                // });
-              },
-            );
-          }).toList(),
+      return Visibility(
+        visible: invisibilityList.contains(element['name']) ? false : true,
+        child: Container(
+          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          child: Column(
+            children: choices.map((choice) {
+              return RadioListTile(
+                title: Text(choice),
+                value: choice,
+                groupValue: selectedChoice,
+                onChanged: (value) {
+                  // setState(() {
+                  //   selectedChoice = value;
+                  // });
+                },
+              );
+            }).toList(),
+          ),
         ),
       );
     }
@@ -1345,46 +1403,49 @@ class _FormBuilderState extends State<FormBuilder> {
       );
     }
 
-    Container signaturePad(Map<String, dynamic> element) {
-      return Container(
-        height: 450,
-        child: Stack(
-          children: [
-            Signature(
-              key: const Key('signature'),
-              controller: _controller,
-              height: 450,
-              backgroundColor: Colors.grey[300]!,
-            ),
-            Positioned(
-              left: 10,
-              right: 10,
-              top: 5,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      _controller.clear();
-                    },
-                    icon: Icon(
-                      Icons.clear,
-                      color: Colors.black,
+    Visibility signaturePad(Map<String, dynamic> element) {
+      return Visibility(
+        visible: invisibilityList.contains(element['name']) ? false : true,
+        child: SizedBox(
+          height: 450,
+          child: Stack(
+            children: [
+              Signature(
+                key: const Key('signature'),
+                controller: _controller,
+                height: 450,
+                backgroundColor: Colors.grey[300]!,
+              ),
+              Positioned(
+                left: 10,
+                right: 10,
+                top: 5,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        _controller.clear();
+                      },
+                      icon: Icon(
+                        Icons.clear,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      exportImage(element);
-                    },
-                    icon: Icon(
-                      Icons.check,
-                      color: Colors.black,
+                    IconButton(
+                      onPressed: () {
+                        exportImage(element);
+                      },
+                      icon: Icon(
+                        Icons.check,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                ],
-              )
-            ),
-          ],
+                  ],
+                )
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -1398,9 +1459,10 @@ class _FormBuilderState extends State<FormBuilder> {
       ));
     }
 
-    Container checkbox(Map<String, dynamic> element) {
+    Visibility checkbox(Map<String, dynamic> element) {
       String selectedChoice = '';
-      return Container(
+      return Visibility(
+        visible: invisibilityList.contains(element['name']) ? false : true,
         child: Column(
           children: [
             Wrap(
@@ -1454,8 +1516,6 @@ class _FormBuilderState extends State<FormBuilder> {
         case 'html':
           return html(element);
         case 'agecalc':
-          printError("agecalc");
-          printError(element);
           return ageCalc(element);
         // case '':
         //   return aboutPage(httpRequest);
@@ -1468,32 +1528,37 @@ class _FormBuilderState extends State<FormBuilder> {
     Widget checkElement(Map<String, dynamic> element) {
       if (element['type'] == 'panel') {
         Column children = Column(
-          children: [for (var element in element['elements']) checkElement(element)],
+          children: [
+            for (var element in element['elements']) checkElement(element)
+          ],
         );
 
-        return Card(
-          margin: const EdgeInsets.all(20),
-          elevation: 1,
-          child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      element['title'] ?? '',
-                      style: const TextStyle(
-                        color: Color(0xff0f1728),
-                        fontSize: 18,
-                        fontFamily: "Inter",
-                        fontWeight: FontWeight.w600,
+        return Visibility(
+          visible: !invisibilityList.contains(element['name']),
+          child: Card(
+            margin: const EdgeInsets.all(20),
+            elevation: 1,
+            child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        element['title'] ?? '',
+                        style: const TextStyle(
+                          color: Color(0xff0f1728),
+                          fontSize: 18,
+                          fontFamily: "Inter",
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                  children,
-                ],
-              )),
+                    children,
+                  ],
+                )),
+          ),
         );
       } else {
         return getElement(element);
@@ -1506,6 +1571,7 @@ class _FormBuilderState extends State<FormBuilder> {
       );
     }
 
+    visibleIf();
     return Center(
       child: buildForm(),
     );
