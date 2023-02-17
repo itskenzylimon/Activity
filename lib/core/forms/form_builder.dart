@@ -70,7 +70,7 @@ class _FormBuilderState extends State<FormBuilder> {
   Map invisibilityMap = {};
 
   // Map representation of the formResults
-  Map formValues = {};
+  Map<String, Map<String, dynamic>> formValues = {};
 
   exportImage(element) async {
     final Uint8List? data =
@@ -751,10 +751,10 @@ class _FormBuilderState extends State<FormBuilder> {
         ];
       }
       if (formValues.containsKey(element['name']) == false) {
-        formValues['${element['name']}'] = widget.formResults[element['name']];
+        formValues['${element['name']}'] = widget.formResults[element['name']]!;
       }
 
-      String vl = formValues[element['name']]['value'];
+      String vl = formValues[element['name']]!['value'];
       if (element['renderAs'] != null && element['renderAs'] == 'select2') {
         return Visibility(
             // visible: visibleIf(element),
@@ -943,7 +943,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 key: dropdownKey,
                 hint: Text(
                     element['title'] + ' ' + (element['description'] ?? '')),
-                value: formValues[element['name']]['value'],
+                value: formValues[element['name']]!['value'],
                 items: choices,
                 onChanged: (value) {
                   widget.formResults.remove(element['name'], notifyActivities: false);
@@ -1029,10 +1029,10 @@ class _FormBuilderState extends State<FormBuilder> {
 
       if (formValues.containsKey('$labelText-${element['name']}') == false) {
         formValues['$labelText-${element['name']}'] =
-            widget.formResults['$labelText-${element['name']}'];
+            widget.formResults['$labelText-${element['name']}']!;
       }
 
-      String vl = formValues['$labelText-${element['name']}']['value'];
+      String vl = formValues['$labelText-${element['name']}']!['value'];
 
       return Visibility(
         visible: invisibilityMap[element['name']],
