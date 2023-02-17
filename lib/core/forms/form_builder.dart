@@ -85,6 +85,8 @@ class _FormBuilderState extends State<FormBuilder> {
   Center create() {
     // Key / value for the form
     TextEditingController textCont = TextEditingController();
+    String textCont1 = "";
+    String textCont2 = "";
     Map formValues = widget.formResults.value;
     Timer? _debounce;
     ActiveRequest activeRequest = ActiveRequest();
@@ -111,16 +113,55 @@ class _FormBuilderState extends State<FormBuilder> {
         var data = json.decode(userDataRes.data!);
         var filteredList = data
             .where((elem) =>
-                elem['value']
-                    .toString()
-                    .toLowerCase()
-                    .contains(query.toLowerCase()) ||
-                elem['text']
-                    .toString()
-                    .toLowerCase()
-                    .contains(query.toLowerCase()))
+                elem['value'].toString().toLowerCase().contains(query.toLowerCase()) ||
+                elem['text'].toString().toLowerCase().contains(query.toLowerCase()))
             .toList();
         list = filteredList.toSet().toList();
+      } else {
+        // printError(response['error_description']);
+      }
+      return list;
+    }
+
+    Future<List> getChoicesByUrl(
+      query,
+      url,
+    ) async {
+      var list = [];
+      activeRequest.setUp = RequestSetUp(
+        idleTimeout: 10,
+        connectionTimeout: 10,
+        logResponse: true,
+        withTrustedRoots: true,
+      );
+      printNormal(url);
+      ActiveResponse userDataRes =
+          await activeRequest.getApi(Params(endpoint: url, queryParameters: {
+        '': "",
+      }));
+
+      if (userDataRes.statusCode == 200) {
+        var data = json.decode(userDataRes.data!);
+        var listData = [];
+        if (data is Map) {
+          data.forEach((key, value) {
+             for (var j = 0; j < value.length; j++) {
+            listData.add(value[j]);
+          }
+          });
+
+        } else if (data is List) {
+          printWarning("this is a list data");
+          printWarning("this is a list ${data.runtimeType}");
+          for (var i = 0; i < data.length; i++) {
+            listData.add(data[i]);
+          }
+        }
+        var filteredList = listData
+            .where((elem) => elem['value'].toString().toLowerCase().contains(query.toLowerCase()))
+            .toList();
+        list = filteredList.toSet().toList();
+        printSuccess(list);
       } else {
         // printError(response['error_description']);
       }
@@ -159,8 +200,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
     //upload file
     Future<String> getFile() async {
-      FilePickerResult? result =
-          await FilePicker.platform.pickFiles(allowMultiple: false);
+      FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false);
       if (result == null) return "";
       path = result.files.single.path!;
       return getBase64FormateFile(path!);
@@ -177,10 +217,7 @@ class _FormBuilderState extends State<FormBuilder> {
       int start = value.indexOf("[") + 1;
       int end = value.indexOf("]");
       String listString = value.substring(start, end);
-      return listString
-          .split(",")
-          .map((str) => str.replaceAll("'", ""))
-          .toList();
+      return listString.split(",").map((str) => str.replaceAll("'", "")).toList();
     }
 
     /// Use this to split the string by [and, or]
@@ -191,10 +228,8 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// separate a string by [and, or] and remove the ' from values
       value.contains(" or ")
-          ? splits =
-              value.split(" or ").map((str) => str.replaceAll("'", "")).toList()
-          : splits =
-              value.split("and").map((str) => str.replaceAll("'", "")).toList();
+          ? splits = value.split(" or ").map((str) => str.replaceAll("'", "")).toList()
+          : splits = value.split("and").map((str) => str.replaceAll("'", "")).toList();
       // splits = value.split("and")
       //     .map((str) => str.replaceAll("'", "")).toList();
       // for (var split in splits) {
@@ -229,9 +264,7 @@ class _FormBuilderState extends State<FormBuilder> {
             if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
-              enabled = trimListString(search).contains(trimCurly(search))
-                  ? true
-                  : false;
+              enabled = trimListString(search).contains(trimCurly(search)) ? true : false;
             }
           }
         }
@@ -265,9 +298,7 @@ class _FormBuilderState extends State<FormBuilder> {
             if (widget.formResults[trimCurly(search)] != null) {
               /// TODO: Handel for OR conditions
               //data found, now check if trimCurly is in getListString
-              visible = trimListString(search).contains(trimCurly(search))
-                  ? true
-                  : false;
+              visible = trimListString(search).contains(trimCurly(search)) ? true : false;
             }
           }
         }
@@ -358,8 +389,7 @@ class _FormBuilderState extends State<FormBuilder> {
         }
 
         /// Email
-        if (element.containsValue(" Email") ||
-            element.containsValue(" abc@xyz.com")) {
+        if (element.containsValue(" Email") || element.containsValue(" abc@xyz.com")) {
           type = TextInputType.emailAddress;
         }
       }
@@ -374,8 +404,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// Add to the widget.formResults
       if (widget.formResults.containsKey(element['name'])) {
-        textEditingController.text =
-            widget.formResults[element['name']]!['value'] ?? '';
+        textEditingController.text = widget.formResults[element['name']]!['value'] ?? '';
         widget.formResults.update(
             element['name'],
             (value) => {
@@ -587,11 +616,14 @@ class _FormBuilderState extends State<FormBuilder> {
       Key dropdownKey = Key(element['name']);
       Key key = Key("123");
       printSuccess(element['name']);
-      String? currentSelectedValue = 'Select';
+      String? currentSelectedValue = 'Select ${element['title']}';
 
       ValueNotifier<List<String>> _listNotifier =
-          ValueNotifier<List<String>>(["Select"]);
+          ValueNotifier<List<String>>(["Select ${element['title']}"]);
+      ValueNotifier<List<String>> _choicesNotifier =
+          ValueNotifier<List<String>>(["Select ${element['title']}"]);
       List<String> choiceList = [..._listNotifier.value];
+      List<String> choicesbyurl = [..._choicesNotifier.value];
 
       /// Add to the widget.formResults
       if (widget.formResults.containsKey(element['name']) == false) {
@@ -610,21 +642,18 @@ class _FormBuilderState extends State<FormBuilder> {
             },
             notifyActivities: false);
       }
-      printSuccess("-------==-=-=-=--");
       List<DropdownMenuItem> choices = [];
+
       if (element['renderAs'] == null && element['choices'] != null) {
-        printSuccess("-------==-=-=${element['choices']}-=--");
-        printWarning(widget.formResults[element['name']]!['options']);
         choices = [
           DropdownMenuItem(
             value: element['title'].toString(),
-            child: const Text('Select choices'),
+            child: Text(element['title']),
           ),
           for (var i = 0; i < element['choices'].length; i++)
             DropdownMenuItem(
               value: widget.formResults[element['name']]!['options'][i] ?? "na",
-              child: Text(
-                  widget.formResults[element['name']]!['options'][i] ?? ""),
+              child: Text(widget.formResults[element['name']]!['options'][i] ?? ""),
             )
         ];
       }
@@ -660,8 +689,7 @@ class _FormBuilderState extends State<FormBuilder> {
                   onChanged: (value) {
                     if (value.isNotEmpty) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
-                      _debounce =
-                          Timer(const Duration(milliseconds: 1000), () async {
+                      _debounce = Timer(const Duration(milliseconds: 1000), () async {
                         var list = await getListItems(
                           value,
                           element['choicesByUrl']['url'],
@@ -672,13 +700,10 @@ class _FormBuilderState extends State<FormBuilder> {
                           );
                           _listNotifier.value = choiceList;
                         }
-
-                        printSuccess("after query");
-                        printSuccess(choiceList);
                       });
                     } else {
                       setState(() {
-                        choiceList = ["Select"];
+                        choiceList = ['Select ${element['title']}'];
                       });
                     }
                   },
@@ -692,68 +717,118 @@ class _FormBuilderState extends State<FormBuilder> {
                         child: ListView.separated(
                           shrinkWrap: true,
                           itemBuilder: (context, int index) {
-                            return Expanded(
-                              child: Container(
-                                child: ListTile(
-                                  onTap: () {
-                                    widget.formResults.add(
-                                        element['name'],
-                                        {
-                                          'controller': element['name'],
-                                          'value': choiceList[index],
-                                          'label': element['title'],
-                                          'type': 'select2',
-                                          'options': "",
-                                          'extras': {}
-                                        },
-                                        notifyActivities: false);
-                                    textCont.text = choiceList[index];
-                                    printWarning(textCont.text);
-                                    choiceList.clear();
-                                    choiceList.add(textCont.text);
-                                    _listNotifier.notifyListeners();
-                                  },
-                                  title: Text(choiceList[index]),
-                                ),
+                            return Container(
+                              child: ListTile(
+                                onTap: () {
+                                  widget.formResults.add(
+                                      element['name'],
+                                      {
+                                        'controller': element['name'],
+                                        'value': choiceList[index],
+                                        'label': element['title'],
+                                        'type': 'select2',
+                                        'options': "",
+                                        'extras': {}
+                                      },
+                                      notifyActivities: false);
+                                  textCont.text = choiceList[index];
+                                  printWarning(textCont.text);
+                                  choiceList.clear();
+                                  choiceList.add(textCont.text);
+                                  _listNotifier.notifyListeners();
+                                },
+                                title: Text(choiceList[index]),
                               ),
                             );
                           },
-                          separatorBuilder: (context, int index) =>
-                              SizedBox(height: 10),
+                          separatorBuilder: (context, int index) => SizedBox(height: 10),
                           itemCount: choiceList.length,
                         ));
                   }),
-              // DropdownButtonHideUnderline(
-              //   child: DropdownButton(
-              //     key: key,
-              //     isDense: true,
-              //     hint: Text(element['title'] +
-              //         ' ' +
-              //         (element['description'] ?? '')),
-              //     value: currentSelectedValue,
-              //     items: choiceList.map((String val) {
-              //       return DropdownMenuItem<String>(
-              //         value: val,
-              //         child: Text(val),
-              //       );
-              //     }).toList(),
-              //     onChanged: (value) {
-              //       currentSelectedValue = value;
-              //       _listNotifier.notifyListeners();
-              //       widget.formResults.add(
-              //           element['name'],
-              //           {
-              //             'controller': element['name'],
-              //             'value': value,
-              //             'label': element['title'],
-              //             'type': 'select2',
-              //             'options': "",
-              //             'extras': {}
-              //           },
-              //           notifyActivities: false);
-              //     },
-              //   ),
-              // ),
+            ],
+          ),
+        ));
+      } else if (element['renderAs'] == null && element['choicesByUrl'] != null) {
+        return Visibility(
+            // visible: visibleIf(element),
+            child: Container(
+          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
+                ),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: textCont1 == "" ? 'Search' : textCont1,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(bottom: 12, left: 16),
+                  ),
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      if (_debounce?.isActive ?? false) _debounce?.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 1000), () async {
+                        var list = await getChoicesByUrl(
+                          value,
+                          element['choicesByUrl']['url'],
+                        );
+                        for (var l in list) {
+                          choicesbyurl.add(
+                            l['value'].toString(),
+                          );
+                          _choicesNotifier.value = choicesbyurl;
+                        }
+                      });
+                    } else {
+                      setState(() {
+                        choicesbyurl = ["Select ${element['title']}"];
+                      });
+                    }
+                  },
+                ),
+              ),
+              ValueListenableBuilder(
+                  valueListenable: _choicesNotifier,
+                  builder: (BuildContext context, choicesbyurl, Widget? child) {
+                    return Container(
+                        width: double.infinity,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemBuilder: (context, int index) {
+                            return Container(
+                              child: ListTile(
+                                onTap: () {
+                                  widget.formResults.add(
+                                      element['name'],
+                                      {
+                                        'controller': element['name'],
+                                        'value': choicesbyurl[index],
+                                        'label': element['title'],
+                                        'type': 'dropdownChoices',
+                                        'options': "",
+                                        'extras': {}
+                                      },
+                                      notifyActivities: false);
+                                  textCont1 = choicesbyurl[index];
+                                  choicesbyurl.clear();
+                                  choicesbyurl.add(textCont1);
+                                  _choicesNotifier.notifyListeners();
+                                },
+                                title: Text(choicesbyurl[index]),
+                              ),
+                            );
+                          },
+                          separatorBuilder: (context, int index) => SizedBox(height: 10),
+                          itemCount: choicesbyurl.length,
+                        ));
+                  }),
             ],
           ),
         ));
@@ -770,13 +845,11 @@ class _FormBuilderState extends State<FormBuilder> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton(
                 key: dropdownKey,
-                hint: Text(
-                    element['title'] + ' ' + (element['description'] ?? '')),
+                hint: Text(element['title'] + ' ' + (element['description'] ?? '')),
                 value: vl,
                 items: choices,
                 onChanged: (value) {
-                  widget.formResults
-                      .remove(element['name'], notifyActivities: false);
+                  widget.formResults.remove(element['name'], notifyActivities: false);
                   widget.formResults.add(
                       element['name'],
                       {
@@ -926,31 +999,42 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// return the widget to be displayed
       return Visibility(
-        visible: visibleIf(element),
-        child: TextFormField(
-          keyboardType: checkInputType(element),
-          key: textFieldKey,
-          readOnly: enableIf(element),
-          decoration: InputDecoration(
-            labelText: labelText,
-            hintText: element['placeholder'] ?? '',
+        // visible: visibleIf(element),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(
+            height: 20,
           ),
-          validator: (value) {},
-          onChanged: (value) {
-            widget.formResults.remove(element['name'], notifyActivities: false);
-            widget.formResults.add(
-                element['name'],
-                {
-                  'controller': agecalcEditingController,
-                  'value': value,
-                  'label': labelText,
-                  'type': 'agecalc',
-                  'extras': {}
-                },
-                notifyActivities: false);
-            ;
-          },
-        ),
+          Text(
+            "$labelText",
+            style: TextStyle(color: Colors.black, fontSize: 18),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          TextFormField(
+            keyboardType: checkInputType(element),
+            key: textFieldKey,
+            readOnly: enableIf(element),
+            decoration: InputDecoration(
+              labelText: labelText,
+              hintText: element['placeholder'] ?? '',
+            ),
+            validator: (value) {},
+            onChanged: (value) {
+              widget.formResults.remove(element['name'], notifyActivities: false);
+              widget.formResults.add(
+                  element['name'],
+                  {
+                    'controller': agecalcEditingController,
+                    'value': value,
+                    'label': labelText,
+                    'type': 'agecalc',
+                    'extras': {}
+                  },
+                  notifyActivities: false);
+            },
+          ),
+        ]),
       );
     }
 
@@ -981,8 +1065,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    child: Text('${item['name']}',
-                        style: TextStyle(color: Colors.green)),
+                    child: Text('${item['name']}', style: TextStyle(color: Colors.green)),
                   ),
                   SizedBox(
                     height: 200,
@@ -1102,6 +1185,7 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Ink datepicker(Map<String, dynamic> element) {
+      TextEditingController _textEditingController = TextEditingController();
       DateTime selectedDate = DateTime.now();
       DateTime maxDays = DateTime.now();
       if (element['maxDays'] != null) {
@@ -1116,17 +1200,44 @@ class _FormBuilderState extends State<FormBuilder> {
         );
         if (picked != null && picked != selectedDate) {
           selectedDate = picked;
+          _textEditingController.text = selectedDate.toString();
         }
       }
 
       return Ink(
-        child: GestureDetector(
+        child: TextField(
           onTap: () {
             selectDate(context);
           },
-          child: Center(
-            child: Text(element['title']),
+          readOnly: true,
+          decoration: InputDecoration(
+            hintText: element['title'],
+            hintStyle: TextStyle(color: Colors.black),
+            contentPadding: const EdgeInsets.all(16),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5),
+              borderSide: BorderSide(
+                color: Colors.grey,
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(2),
+              borderSide: BorderSide(
+                width: 1.5,
+                color: Colors.grey,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(2),
+              borderSide: BorderSide(
+                color: Colors.grey,
+                width: 1.5,
+              ),
+            ),
           ),
+          controller: _textEditingController,
+          onChanged: (value) {},
         ),
       );
     }
@@ -1175,6 +1286,7 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility filePicker(Map<String, dynamic> element) {
+      TextEditingController _textEditingController = TextEditingController();
       printError(' **** ' + element['name']);
       return Visibility(
         // visible: visibleIf(element),
@@ -1182,7 +1294,7 @@ class _FormBuilderState extends State<FormBuilder> {
           padding: const EdgeInsets.only(
             top: 20,
           ),
-          child: InkWell(
+          child: TextField(
             onTap: () async {
               //upload file
               String base64 = await getFile();
@@ -1197,17 +1309,37 @@ class _FormBuilderState extends State<FormBuilder> {
                     'extras': {}
                   },
                   notifyActivities: false);
+              _textEditingController.text = path!;
             },
-            child: Container(
-              color: Colors.blue,
-              height: 40,
-              child: Center(
-                child: Text(
-                  "Pick file",
-                  style: TextStyle(color: Colors.white),
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: element['title'],
+              hintStyle: TextStyle(color: Colors.black),
+              contentPadding: const EdgeInsets.all(16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5),
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(2),
+                borderSide: BorderSide(
+                  width: 1.5,
+                  color: Colors.grey,
+                ),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(2),
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.5,
                 ),
               ),
             ),
+            controller: _textEditingController,
+            onChanged: (value) {},
           ),
         ),
       );
@@ -1323,6 +1455,7 @@ class _FormBuilderState extends State<FormBuilder> {
           return html(element);
         case 'agecalc':
           printError("agecalc");
+          printError(element);
           return ageCalc(element);
         // case '':
         //   return aboutPage(httpRequest);
@@ -1335,9 +1468,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Widget checkElement(Map<String, dynamic> element) {
       if (element['type'] == 'panel') {
         Column children = Column(
-          children: [
-            for (var element in element['elements']) checkElement(element)
-          ],
+          children: [for (var element in element['elements']) checkElement(element)],
         );
 
         return Card(
