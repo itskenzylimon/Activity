@@ -134,7 +134,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                   /// At this point, the form has been submitted and the
                   /// results are available in the formResults variable
                   /// handle the results here
-                }).createSurveyJSView()
+                })
             // activeController.activeForm.create(context)
             // Column(
             //   children: [
