@@ -146,9 +146,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                   printSuccess(pages!.length - 1);
                                 }),
                           )
-                          : _controller.index > 1 && _controller.index < pages!.length
+                          : _controller.index > 0 && _controller.index < pages!.length
                               ? Visibility(
-                                visible: _controller.index > 1 && _controller.index < pages!.length -1 ,
+                                visible: _controller.index > 0 && _controller.index < pages!.length -1 ,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end, children: [
                                     Previous(
@@ -182,24 +182,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                           printSuccess(pages!.length - 1);
                                         }),
                                   ]),
-                              ) : Visibility(
-                            visible: _controller.index == 0,
-                            child: Next(
-                                formKey: _formKey,
-                                context: context,
-                                onNext: () {
-                                  setState(() {
-                                    if (_controller.index < pages!.length - 1) {
-                                      _controller.index += 1;
-                                    }
-                                  });
-                                  _intNotifier.notifyListeners();
-                                  printSuccess("_controller.index");
-                                  printSuccess(_controller.index);
-                                  printSuccess(pages!.length - 1);
-                                }),
-                          )
-                              
+                              ) : SizedBox()   
                               
                               
                                  
