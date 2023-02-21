@@ -78,10 +78,8 @@ class _FormBuilderState extends State<FormBuilder> {
     if (data == null) {
       return;
     } else {
-      printSuccess(data);
       List<int> fileInByte = data;
       String fileInBase64 = base64Encode(fileInByte);
-      printSuccess(fileInBase64);
       widget.formResults.add(
           element['name'],
           {
@@ -100,7 +98,6 @@ class _FormBuilderState extends State<FormBuilder> {
   convertToBase64(var image) async {
     List<int> fileInByte = image.readAsBytesSync();
     String fileInBase64 = base64Encode(fileInByte);
-    printSuccess(fileInBase64)
 ;    return fileInBase64;
   }
 
@@ -114,7 +111,6 @@ class _FormBuilderState extends State<FormBuilder> {
 
   String getBase64FormateFile(String path) {
     File file = File(path);
-    print('File is = ' + file.toString());
     List<int> fileInByte = file.readAsBytesSync();
     String fileInBase64 = base64Encode(fileInByte);
     return fileInBase64;
@@ -135,7 +131,6 @@ class _FormBuilderState extends State<FormBuilder> {
   }
 
   String conditionValue(String value) {
-    printSuccess('@@@@@#$value');
     int start = value.indexOf(" = ");
     return value.substring(start);
   }
@@ -163,13 +158,11 @@ class _FormBuilderState extends State<FormBuilder> {
 
     bool enabled = true;
     if (element['readOnly'] != null) {
-      printError('sfds');
       enabled = element['readOnly'];
     }
 
 
     if (element['enableIf'] != null) {
-      printError(element);
       /// Handle anyof conditions
       /// it should overwrite enabled state from above
 
@@ -205,13 +198,21 @@ class _FormBuilderState extends State<FormBuilder> {
   /// Use this to split the string by [and, or]
   /// and remove the ' from values
   visibleIf() {
-    invisibilityMap.clear();
+
+    printInfo(formValues.length.toString());
+
     formValues.forEach((key, value) {
       if (value['visible'] != null) {
         invisibilityMap.addAll({
           key: value['visible']
         });
-      } else if (value['visibleIf'] != null) {
+      }
+
+      else if (value['visibleIf'] != null) {
+
+        printWarning( '$key --- ### --- ${value['visibleIf'] }');
+
+
         /// create a list of conditions
         /// Handle or conditions
         /// Handle and conditions
@@ -237,6 +238,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 });
               }
             }
+
           }
 
           /// Handle notempty conditions
@@ -266,9 +268,6 @@ class _FormBuilderState extends State<FormBuilder> {
             if (formValues[trimCurly(condition)] != null) {
               /// get condition value
               String value = conditionValue(condition);
-              printError('{{{{{{text}}}}}}');
-              printError(value);
-              printError('{{{{{{text}}}}}}');
 
               if(formValues[trimCurly(condition)]!['value'] == value){
                 newInvisibilityMap.addAll({
@@ -290,7 +289,8 @@ class _FormBuilderState extends State<FormBuilder> {
               key: newInvisibilityMap.containsValue(false)
             });
           });
-        } else if (value['visibleIf'].toString().contains(' or ')){
+        }
+        else if (value['visibleIf'].toString().contains(' or ')){
           setState(() {
             invisibilityMap.addAll({
               key: newInvisibilityMap.containsValue(true)
@@ -298,6 +298,7 @@ class _FormBuilderState extends State<FormBuilder> {
           });
         }
       }
+
     });
   }
 
@@ -329,9 +330,9 @@ class _FormBuilderState extends State<FormBuilder> {
   /// All created elements should be added here
   /// This is called when a form element is created
   /// It updates the formValues map and formResults map
-  setUpElement(String name, Map<String, dynamic> value){
+  Map<String, dynamic> setUpElement(String name, Map<String, dynamic> value){
     /// Update formValues
-    if(!formValues.containsKey(name)){
+    if(formValues.containsKey(name)){
       setState(() {
         formValues.remove(name);
         formValues.addAll({name: value});
@@ -340,13 +341,13 @@ class _FormBuilderState extends State<FormBuilder> {
         widget.formResults.add(name, value, notifyActivities: false);
       });
     }
+    return value;
   }
 
   Center create() {
     // Key / value for the form
     TextEditingController textCont = TextEditingController();
     // assign formResults to formValues.
-    formValues = widget.formResults.value;
 
     String textCont1 = "";
     String textCont2 = "";
@@ -364,15 +365,12 @@ class _FormBuilderState extends State<FormBuilder> {
         logResponse: true,
         withTrustedRoots: true,
       );
-      printNormal(url);
       ActiveResponse userDataRes =
           await activeRequest.getApi(Params(endpoint: url, queryParameters: {
         '': "",
       }));
 
       if (userDataRes.statusCode == 200) {
-        printWarning("dropdown data here");
-        printSuccess(userDataRes.data);
         var data = json.decode(userDataRes.data!);
         var filteredList = data
             .where((elem) =>
@@ -381,7 +379,6 @@ class _FormBuilderState extends State<FormBuilder> {
             .toList();
         list = filteredList.toSet().toList();
       } else {
-        // printError(response['error_description']);
       }
       return list;
     }
@@ -397,7 +394,6 @@ class _FormBuilderState extends State<FormBuilder> {
         logResponse: true,
         withTrustedRoots: true,
       );
-      printNormal(url);
       ActiveResponse userDataRes =
           await activeRequest.getApi(Params(endpoint: url, queryParameters: {
         '': "",
@@ -414,8 +410,6 @@ class _FormBuilderState extends State<FormBuilder> {
           });
 
         } else if (data is List) {
-          printWarning("this is a list data");
-          printWarning("this is a list ${data.runtimeType}");
           for (var i = 0; i < data.length; i++) {
             listData.add(data[i]);
           }
@@ -424,9 +418,7 @@ class _FormBuilderState extends State<FormBuilder> {
             .where((elem) => elem['value'].toString().toLowerCase().contains(query.toLowerCase()))
             .toList();
         list = filteredList.toSet().toList();
-        printSuccess(list);
       } else {
-        // printError(response['error_description']);
       }
       return list;
     }
@@ -444,8 +436,6 @@ class _FormBuilderState extends State<FormBuilder> {
       String password = '6I2-u?=W';
       // String basicAuth = base64Encode(utf8.encode('$username:$password'));
       String basicAuth = 'bXJtaWRkbGVtYW46NkkyLXU/PVc=';
-      print(basicAuth);
-      print(request['id']);
       ActiveRequest activeRequest = ActiveRequest();
       activeRequest.setUp = RequestSetUp(
           idleTimeout: 10,
@@ -459,14 +449,9 @@ class _FormBuilderState extends State<FormBuilder> {
       /// Handle httplookup
       /// Handle choicesByUrl
 
-      printWarning('URL ?????????');
-      printWarning(request['url']);
-      printWarning(activeRequest.setUp.httpHeaders);
       ActiveResponse activeResponse = await activeRequest.getApi(Params(
           endpoint: request['url'],
           queryParameters: {"number": "${request['id']}"}));
-      printError("Active Respobse ??????");
-      printError(activeResponse);
       final Map<String, dynamic> convertedData =
           jsonDecode(activeResponse.data!);
       return convertedData;
@@ -478,12 +463,8 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Future<Map<String, dynamic>> httpLookUpUrl(Map choicesByUrl) async {
-      printError("????????");
-      printError(choicesByUrl);
 
       Map<String, dynamic> choices = await formRequest(choicesByUrl);
-      printInfo("choices ???");
-      printInfo(choices);
       if (widget.formResults.containsKey(choicesByUrl['data'])) {}
 
       return choices;
@@ -524,18 +505,20 @@ class _FormBuilderState extends State<FormBuilder> {
       String labelText = element['title'] + (isRequired == true ? ' * ' : '');
 
       /// call setUpElement
-      element['controller'] = textEditingController;
-      element['value'] = textEditingController.text;
-      setUpElement(element['name'], element);
+      Map<String, dynamic> newElement = {
+        'value': textEditingController.text,
+      }..addAll(element);
+
+      var data = setUpElement(element['name'], newElement);
 
       /// return the widget to be displayed
       return Visibility(
-        visible: invisibilityMap[element['name']],
+        visible: invisibilityMap[element['name']] ?? true,
         child: Container(
           margin: const EdgeInsets.all(10),
           child: Center(
             child: TextFormField(
-              controller: widget.formResults[element['name']]!['controller'],
+              controller: textEditingController,
               keyboardType: checkInputType(element),
               key: textFieldKey,
               readOnly: !enableIf(element),
@@ -603,8 +586,6 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility textFieldIPRS(Map<String, dynamic> element, value) {
-      printInfo("????????>>>>");
-      printInfo(element);
       Key textFieldKey = Key(element['name']);
       TextEditingController textEditingController = TextEditingController();
       bool isRequired = true;
@@ -625,8 +606,6 @@ class _FormBuilderState extends State<FormBuilder> {
                 },
             notifyActivities: false);
       } else {
-        printWarning(value);
-        printWarning(element['name']);
 
         widget.formResults.add(
             '$value-${element['name']}',
@@ -645,7 +624,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// return the widget to be displayed
       return Visibility(
-        visible: invisibilityMap[element['name']],
+        visible: invisibilityMap[element['name']] ?? true,
         child: TextFormField(
           controller:
               widget.formResults['$value-${element['name']}']!['controller'],
@@ -698,7 +677,6 @@ class _FormBuilderState extends State<FormBuilder> {
                 },
                 notifyActivities: false);
 
-            printError(widget.formResults);
           },
         ),
       );
@@ -707,7 +685,6 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility dropdownChoices(Map<String, dynamic> element) {
       Key dropdownKey = Key(element['name']);
       Key key = Key("123");
-      printSuccess(element['name']);
       String? currentSelectedValue = 'Select ${element['title']}';
 
       ValueNotifier<List<String>> _listNotifier =
@@ -719,8 +696,6 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// Add to the widget.formResults
       if (widget.formResults.containsKey(element['name']) == false) {
-        printInfo('{{{element}}}');
-        printInfo(element['name']);
 
         widget.formResults.add(
             element['name'],
@@ -826,7 +801,6 @@ class _FormBuilderState extends State<FormBuilder> {
                                       },
                                       notifyActivities: false);
                                   textCont.text = choiceList[index];
-                                  printWarning(textCont.text);
                                   choiceList.clear();
                                   choiceList.add(textCont.text);
                                   _listNotifier.notifyListeners();
@@ -930,7 +904,7 @@ class _FormBuilderState extends State<FormBuilder> {
       }
       else {
         return Visibility(
-          visible: invisibilityMap[element['name']],
+          visible: invisibilityMap[element['name']] ?? true,
           child: Container(
             width: double.infinity,
             margin: const EdgeInsets.only(top: 10, bottom: 10),
@@ -977,8 +951,6 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility dropdownChoicesIPRS(Map<String, dynamic> element, valueItem) {
-      printWarning("?>DS>A>>>D>D");
-      printWarning(valueItem);
       var labelText = valueItem;
 
       Key dropdownKey = Key('$labelText-${element['name']}');
@@ -986,9 +958,6 @@ class _FormBuilderState extends State<FormBuilder> {
       /// Add to the widget.formResults
       if (widget.formResults.containsKey('$labelText-${element['name']}') ==
           false) {
-        printInfo('{{{element}}}');
-        printInfo('$labelText-${element['name']}');
-
         widget.formResults.add(
             '$labelText-${element['name']}',
             {
@@ -1035,7 +1004,7 @@ class _FormBuilderState extends State<FormBuilder> {
       String vl = formValues['$labelText-${element['name']}']!['value'];
 
       return Visibility(
-        visible: invisibilityMap[element['name']],
+        visible: invisibilityMap[element['name']] ?? true,
         child: Container(
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           decoration: BoxDecoration(
@@ -1049,10 +1018,6 @@ class _FormBuilderState extends State<FormBuilder> {
               value: vl,
               items: choiceList,
               onChanged: (value) {
-                printSuccess("Value Selected");
-                printSuccess(value);
-                printSuccess('$labelText-${element['name']}');
-                print("????? VALUE");
                 widget.formResults.remove('$labelText-${element['name']}',
                     notifyActivities: false);
                 widget.formResults.add(
@@ -1132,9 +1097,8 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility htmlText(Map<String, dynamic> element) {
-      printError(' **** ' + element['name']);
       return Visibility(
-          visible: invisibilityMap[element['name']],
+          visible: invisibilityMap[element['name']] ?? true,
           child: Html(
             data: element['displayTemplate'],
           ));
@@ -1145,7 +1109,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
       /// after loading update the data forms
       return Visibility(
-          visible: invisibilityMap[element['name']],
+          visible: invisibilityMap[element['name']] ?? true,
           child: SizedBox(
         height: 300,
         child: ListView.builder(
@@ -1153,8 +1117,6 @@ class _FormBuilderState extends State<FormBuilder> {
             itemCount: element['lookup'].length,
             itemBuilder: (BuildContext context, int index) {
               final item = element['lookup'][index];
-              printWarning("????????>>>> ELEMENT");
-              printWarning(element);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1169,8 +1131,6 @@ class _FormBuilderState extends State<FormBuilder> {
                       itemCount: item['parameters'].length,
                       itemBuilder: (BuildContext context, int index) {
                         final parameters = item['parameters'][index];
-                        printWarning("????????>>>> ELEMENT");
-                        printWarning(element);
                         return Container(
                           child: parameters['type'] == 'dropdown'
                               ? dropdownChoicesIPRS(
@@ -1215,8 +1175,6 @@ class _FormBuilderState extends State<FormBuilder> {
                                     duration: const Duration(milliseconds: 250),
                                     content: Text('Processing Data')));
                             var resData;
-                            printWarning(data['first_name']);
-                            printWarning(firstNameController.text);
                             if (data['first_name'].toLowerCase().contains(
                                 firstNameController.text.toLowerCase())) {
                               for (var i = 0;
@@ -1338,25 +1296,9 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility radiogroup(Map<String, dynamic> element) {
       List choices = [];
 
-      // element['choices'].forEach((item) {
-      //   bool add = false;
-      //   if(item['visibleIf'] != null){
-      //     if(visibleIf(item) == true){
-      //       add = true;
-      //     }
-      //   } if(item['enableIf'] != null){
-      //     if(enableIf(item) == true){
-      //       add = true;
-      //     }
-      //   }
-      //   if(add == true){
-      //     choices.add(item['value']);
-      //   }
-      // });
-
       String selectedChoice = '';
       return Visibility(
-        visible: invisibilityMap[element['name']],
+        visible: invisibilityMap[element['name']] ?? true,
         child: Container(
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           child: Column(
@@ -1383,7 +1325,6 @@ class _FormBuilderState extends State<FormBuilder> {
 
     Visibility filePicker(Map<String, dynamic> element) {
       TextEditingController _textEditingController = TextEditingController();
-      printError(' **** ' + element['name']);
       return Visibility(
         // visible: visibleIf(element),
         child: Padding(
@@ -1443,7 +1384,7 @@ class _FormBuilderState extends State<FormBuilder> {
 
     Visibility signaturePad(Map<String, dynamic> element) {
       return Visibility(
-        visible: invisibilityMap[element['name']],
+        visible: invisibilityMap[element['name']] ?? true,
         child: SizedBox(
           height: 450,
           child: Stack(
@@ -1489,7 +1430,6 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility html(Map<String, dynamic> element) {
-      printError(' **** ' + element['name']);
       return Visibility(
           // visible: visibleIf(element),
           child: Html(
@@ -1500,7 +1440,7 @@ class _FormBuilderState extends State<FormBuilder> {
     Visibility checkbox(Map<String, dynamic> element) {
       String selectedChoice = '';
       return Visibility(
-        visible: invisibilityMap[element['name']],
+        visible: invisibilityMap[element['name']] ?? true,
         child: Column(
           children: [
             Wrap(
@@ -1572,7 +1512,7 @@ class _FormBuilderState extends State<FormBuilder> {
         );
 
         return Visibility(
-          visible: invisibilityMap[element['name']],
+          visible: invisibilityMap[element['name']] ?? true,
           child: Card(
             margin: const EdgeInsets.all(20),
             elevation: 1,
@@ -1604,12 +1544,27 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Widget buildForm() {
+
+      Map<String, Map<String, dynamic>> formData = {};
+      for (Map<String, dynamic> element in widget.elements) {
+        formData.addAll({element['name']: element});
+      }
+
+      printError('{{{{formData}}}}');
+      printError('{{{{ ${formData.length} }}}}');
+      printError('{{{{formData}}}}');
+
+      setState(() {
+        formValues = formData;
+      });
+
+      visibleIf();
+
       return ListView(
         children: [for (var element in widget.elements) checkElement(element)],
       );
     }
 
-    visibleIf();
     return Center(
       child: buildForm(),
     );

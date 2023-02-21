@@ -20,12 +20,12 @@ class TaskController extends MainController {
     // print(memory.isDataEmpty);
     memory.upsertMemory('tasks', tasks);
 
-    print(testBool);
+    // print(testBool);
     testBool.set(true);
-    print(testBool);
+    // print(testBool);
     testBool.reset();
-    print(testBool);
-    print(testBool.originalValue);
+    // print(testBool);
+    // print(testBool.originalValue);
 
     // print(memory.isDataEmpty);
     // ActiveList<ActiveModel<Task>> memoryTasks = memory.readMemory('tasks');

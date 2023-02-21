@@ -115,8 +115,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                             }
                                           });
                                           _intNotifier.notifyListeners();
-                                          printSuccess("_controller.index");
-                                          printSuccess(_controller.index);
                                         }),
                                     SizedBox(
                                       width: 15,
@@ -141,9 +139,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                     }
                                   });
                                   _intNotifier.notifyListeners();
-                                  printSuccess("_controller.index");
-                                  printSuccess(_controller.index);
-                                  printSuccess(pages!.length - 1);
                                 }),
                           )
                           : _controller.index > 0 && _controller.index < pages!.length
@@ -161,8 +156,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                             }
                                           });
                                           _intNotifier.notifyListeners();
-                                          printSuccess("_controller.index");
-                                          printSuccess(_controller.index);
                                         }),
                                     SizedBox(
                                       width: 15,
@@ -177,9 +170,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                             }
                                           });
                                           _intNotifier.notifyListeners();
-                                          printSuccess("_controller.index");
-                                          printSuccess(_controller.index);
-                                          printSuccess(pages!.length - 1);
                                         }),
                                   ]),
                               ) : SizedBox()   
