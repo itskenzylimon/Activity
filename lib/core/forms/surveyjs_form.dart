@@ -23,31 +23,31 @@ class SurveyJSForm extends StatefulWidget {
 class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMixin {
   late TabController _controller;
 
-  ValueNotifier<int> _intNotifier = ValueNotifier<int>(0);
-  int? initialIndex;
+  int initialIndex = 0;
   List? pages;
   var list = [];
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     pages = widget.schema['service']['schema']['pages'];
-    initialIndex = _intNotifier.value;
     super.initState();
     _controller = TabController(
-      initialIndex: initialIndex!,
+      initialIndex: initialIndex,
       length: pages!.length,
       vsync: this,
     );
+    _controller.addListener(() {
+      setState(() {
+        _controller.index;
+      });
+      print("Selected Index: " + _controller.index.toString());
+    });
     list.followedBy(pages!);
-    _controller.index = _intNotifier.value;
   }
 
   Widget createSurveyJSView() {
     return Scaffold(
-      body: ValueListenableBuilder(
-          valueListenable: _intNotifier,
-          builder: (context, initialIndex, Widget? child) {
-            return Form(
+      body: Form(
               key: _formKey,
               child: Column(
                 children: <Widget>[
@@ -99,92 +99,87 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                   Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: _controller.index == pages!.length - 1 ?
-                      Visibility(
-                                visible: _controller.index == pages!.length - 1 ,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end, children: [
-                                    Previous(
-                                        formKey: _formKey,
-                                        context: context,
-                                        onPrevious: () {
-                                          setState(() {
-                                            if (_controller.index > 0) {
-                                              _controller.index -= 1;
-                                            }
-                                          });
-                                          _intNotifier.notifyListeners();
-                                        }),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
-                                    SubmitButton(
-                                        formKey: _formKey,
-                                        context: context,
-                                        onFormSubmit: widget.onFormSubmit),
-                                  ]),
-                              ):
-                      
-                      _controller.index == 0 
-                          ? Visibility(
-                            visible: _controller.index == 0,
-                            child: Next(
-                                formKey: _formKey,
-                                context: context,
-                                onNext: () {
-                                  setState(() {
-                                    if (_controller.index < pages!.length - 1) {
-                                      _controller.index += 1;
-                                    }
-                                  });
-                                  _intNotifier.notifyListeners();
-                                }),
-                          )
-                          : _controller.index > 0 && _controller.index < pages!.length
-                              ? Visibility(
-                                visible: _controller.index > 0 && _controller.index < pages!.length -1 ,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end, children: [
-                                    Previous(
-                                        formKey: _formKey,
-                                        context: context,
-                                        onPrevious: () {
-                                          setState(() {
-                                            if (_controller.index > 0) {
-                                              _controller.index -= 1;
-                                            }
-                                          });
-                                          _intNotifier.notifyListeners();
-                                        }),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
-                                    Next(
+                        alignment: Alignment.bottomRight,
+                        child: _controller.index == pages!.length - 1
+                            ? Visibility(
+                                visible: _controller.index == pages!.length - 1,
+                                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                                  Previous(
+                                      formKey: _formKey,
+                                      context: context,
+                                      onPrevious: () {
+                                          if (_controller.index > 0) {
+                                            _controller.index -= 1;
+                                          }
+                                        printSuccess("_controller.index");
+                                        printSuccess(_controller.index);
+                                      }),
+                                  SizedBox(
+                                    width: 15,
+                                  ),
+                                  SubmitButton(
+                                      formKey: _formKey,
+                                      context: context,
+                                      onFormSubmit: widget.onFormSubmit),
+                                ]),
+                              )
+                            : _controller.index == 0
+                                ? Visibility(
+                                    visible: _controller.index == 0,
+                                    child: Next(
                                         formKey: _formKey,
                                         context: context,
                                         onNext: () {
-                                          setState(() {
-                                            if (_controller.index < (pages!.length - 1)) {
+                                            if (_controller.index < pages!.length - 1) {
                                               _controller.index += 1;
                                             }
-                                          });
-                                          _intNotifier.notifyListeners();
+                                          printSuccess("_controller.index");
+                                          printSuccess(_controller.index);
+                                          printSuccess(pages!.length - 1);
                                         }),
-                                  ]),
-                              ) : SizedBox()   
-                              
-                              
-                                 
-                    ),
+                                  )
+                                : _controller.index > 0 && _controller.index < pages!.length
+                                    ? Visibility(
+                                        visible: _controller.index > 0 &&
+                                            _controller.index < pages!.length - 1,
+                                        child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              Previous(
+                                                  formKey: _formKey,
+                                                  context: context,
+                                                  onPrevious: () {
+                                                      if (_controller.index > 0) {
+                                                        _controller.index -= 1;
+                                                      }
+                                                    printSuccess("_controller.index");
+                                                    printSuccess(_controller.index);
+                                                  }),
+                                              SizedBox(
+                                                width: 15,
+                                              ),
+                                              Next(
+                                                  formKey: _formKey,
+                                                  context: context,
+                                                  onNext: () {
+                                                      if (_controller.index < (pages!.length - 1)) {
+                                                        _controller.index += 1;
+                                                      }
+                                                    printSuccess("_controller.index");
+                                                    printSuccess(_controller.index);
+                                                    printSuccess(pages!.length - 1);
+                                                  }),
+                                            ]),
+                                      )
+                                    : SizedBox()),
                   ),
                   SizedBox(
                     height: 20,
                   )
                 ],
               ),
-            );
-          }),
+            ),
+
     );
   }
 
@@ -214,8 +209,6 @@ class SubmitButton extends StatelessWidget {
       height: 40,
       child: ElevatedButton(
         onPressed: () {
-          // Validate returns true if the form is valid, or false
-          // otherwise.
           if (_formKey.currentState!.validate()) {
             // If the form is valid, display a Snackbar.
             ScaffoldMessenger.of(context)
@@ -224,7 +217,9 @@ class SubmitButton extends StatelessWidget {
             onFormSubmit.call();
           }
         },
-        child: const Text('Submit'),
+        child: Text("Submit"),
+        style: ElevatedButton.styleFrom(
+            primary: Colors.green,),
       ),
     );
   }
