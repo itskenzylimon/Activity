@@ -515,7 +515,7 @@ class _FormBuilderState extends State<FormBuilder> {
       return Visibility(
         visible: invisibilityMap[element['name']] ?? true,
         child: Container(
-          margin: const EdgeInsets.all(10),
+          margin: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
           child: Center(
             child: TextFormField(
               controller: textEditingController,
@@ -525,13 +525,16 @@ class _FormBuilderState extends State<FormBuilder> {
               maxLines: element['type'] == 'comment' ? 5 : 1,
               style: const TextStyle(
                 color: Colors.black,
+                fontSize: 14,
               ),
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.only(top: 3, left: 8),
+                 isDense: true,  
                 hintStyle: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: Color(0xffE0E0E0)),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.1),
                 enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(
                         color: Colors.grey, width: 0.0),
@@ -539,7 +542,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 focusedBorder: OutlineInputBorder(
                     borderRadius:
                     BorderRadius.all(Radius.circular(8.0)),
-                    borderSide: BorderSide(color: Colors.black,)),
+                    borderSide: BorderSide(color: Colors.blue,)),
                 labelText: labelText,
                 hintText: element['placeholder'] ?? '',
               ),
@@ -625,17 +628,39 @@ class _FormBuilderState extends State<FormBuilder> {
       /// return the widget to be displayed
       return Visibility(
         visible: invisibilityMap[element['name']] ?? true,
-        child: TextFormField(
+        child:Container(
+          margin: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
+          child:         
+         TextFormField(
           controller:
               widget.formResults['$value-${element['name']}']!['controller'],
           keyboardType: checkInputType(element),
           key: textFieldKey,
           // readOnly: enableIf(element),
           maxLines: element['type'] == 'comment' ? 5 : 1,
-          decoration: InputDecoration(
-            labelText: labelText,
-            hintText: element['placeholder'] ?? '',
-          ),
+                 style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+              ),
+              decoration: InputDecoration(
+                 isDense: true,  
+                hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffE0E0E0)),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.1),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.blue,)),
+                labelText: labelText,
+                hintText: element['placeholder'] ?? '',
+              ),
           validator: (value) {
             /// always  required
             /// input validator for numbers
@@ -676,9 +701,9 @@ class _FormBuilderState extends State<FormBuilder> {
                   'extras': {}
                 },
                 notifyActivities: false);
-
           },
         ),
+        )
       );
     }
 
@@ -729,30 +754,49 @@ class _FormBuilderState extends State<FormBuilder> {
         formValues['${element['name']}'] = widget.formResults[element['name']]!;
       }
 
-      String vl = formValues[element['name']]!['value'];
+      String vl = formValues[element['name']]!['value'] ?? "";
       if (element['renderAs'] != null && element['renderAs'] == 'select2') {
         return Visibility(
             // visible: visibleIf(element),
             child: Container(
-          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          margin: const EdgeInsets.only(top: 10, bottom: 10,right:16,left:16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
+            border: Border.all(color: Colors.grey,width: 0.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
+                 decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.withOpacity(0.0),width: 0.0),
+              borderRadius: BorderRadius.zero,
+          ),
                 child: TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Search',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(bottom: 12, left: 16),
-                  ),
+                style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+              ),
+                 decoration: InputDecoration(
+                 isDense: true,  
+                hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffE0E0E0)),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.0),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide:  BorderSide(
+                        color: Colors.grey.withOpacity(0.5), width: 0.0),
+                    borderRadius: BorderRadius.zero),
+                focusedBorder: UnderlineInputBorder(
+                    borderRadius:
+                    BorderRadius.zero,
+                    borderSide: BorderSide(color: Colors.blue,)),
+                labelText: 'Search',
+               
+              ),
                   controller: textCont,
                   onChanged: (value) {
                     if (value.isNotEmpty) {
@@ -805,10 +849,15 @@ class _FormBuilderState extends State<FormBuilder> {
                                   choiceList.add(textCont.text);
                                   _listNotifier.notifyListeners();
                                 },
-                                title: Text(choiceList[index]),
+                                title: Text(choiceList[index], 
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                )
                               ),
-                            );
-                          },
+                            ),
+                          );
+                        },
                           separatorBuilder: (context, int index) => SizedBox(height: 10),
                           itemCount: choiceList.length,
                         ));
@@ -821,25 +870,44 @@ class _FormBuilderState extends State<FormBuilder> {
         return Visibility(
             // visible: visibleIf(element),
             child: Container(
-          margin: const EdgeInsets.only(top: 10, bottom: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
+          margin: const EdgeInsets.only(top: 10, bottom: 10, right: 16, left:16),
+              decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey,width: 0.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
+              decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.withOpacity(0.0),width: 0.0),
+              borderRadius: BorderRadius.zero,
+            ),
                 child: TextField(
-                  decoration: InputDecoration(
-                    hintText: textCont1 == "" ? 'Search' : textCont1,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(bottom: 12, left: 16),
-                  ),
+                style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+              ),
+                 decoration: InputDecoration(
+                 isDense: true,  
+                hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffE0E0E0)),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.0),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide:  BorderSide(
+                        color: Colors.grey.withOpacity(0.5), width: 0.0),
+                    borderRadius: BorderRadius.zero),
+                focusedBorder: UnderlineInputBorder(
+                    borderRadius:
+                    BorderRadius.zero,
+                    borderSide: BorderSide(color: Colors.blue,)),
+                labelText: 'Search',
+               
+              ),
                   onChanged: (value) {
                     if (value.isNotEmpty) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -890,7 +958,11 @@ class _FormBuilderState extends State<FormBuilder> {
                                   choicesbyurl.add(textCont1);
                                   _choicesNotifier.notifyListeners();
                                 },
-                                title: Text(choicesbyurl[index]),
+                                title: Text(choicesbyurl[index],
+                                     style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                )),
                               ),
                             );
                           },
@@ -905,15 +977,29 @@ class _FormBuilderState extends State<FormBuilder> {
       else {
         return Visibility(
           visible: invisibilityMap[element['name']] ?? true,
-          child: Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(top: 10, bottom: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5.0),
+          child:
+          Container(
+            height: 48.0,
+            margin: EdgeInsets.symmetric(vertical: 8,horizontal: 16),
+            alignment: Alignment.center,
+            child:  DropdownButtonFormField(
+                style: TextStyle(color: Colors.black, fontSize: 14.0),
+                 decoration: InputDecoration(   
+                     contentPadding: EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 3.0,
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton(
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.1),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.blue,)),
+                ),
                 key: dropdownKey,
                 hint: Text(
                     element['title'] + ' ' + (element['description'] ?? '')),
@@ -944,8 +1030,7 @@ class _FormBuilderState extends State<FormBuilder> {
                   });
                 },
               ),
-            ),
-          ),
+          )          
         );
       }
     }
@@ -1006,13 +1091,27 @@ class _FormBuilderState extends State<FormBuilder> {
       return Visibility(
         visible: invisibilityMap[element['name']] ?? true,
         child: Container(
-          margin: const EdgeInsets.only(top: 10, bottom: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
+           height: 48.0,
+            margin: EdgeInsets.only(bottom:8,top:10,right: 16,left: 16),
+             alignment: Alignment.center,
+          child: DropdownButtonFormField(
+                   style: TextStyle(color: Colors.black, fontSize: 14.0),
+                 decoration: InputDecoration(   
+                     contentPadding: EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 3.0,
+            ),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.1),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.blue,)),
+                ),
               key: dropdownKey,
               hint: const Text('Select choices'),
               value: vl,
@@ -1044,7 +1143,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 });
               },
             ),
-          ),
+          
         ),
       );
     }
@@ -1059,39 +1158,39 @@ class _FormBuilderState extends State<FormBuilder> {
       return Visibility(
         // visible: visibleIf(element),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            "$labelText",
-            style: TextStyle(color: Colors.black, fontSize: 18),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          TextFormField(
-            keyboardType: checkInputType(element),
-            key: textFieldKey,
-            readOnly: enableIf(element),
-            decoration: InputDecoration(
-              labelText: labelText,
-              hintText: element['placeholder'] ?? '',
-            ),
-            validator: (value) {},
-            onChanged: (value) {
-              widget.formResults.remove(element['name'], notifyActivities: false);
-              widget.formResults.add(
-                  element['name'],
-                  {
-                    'controller': agecalcEditingController,
-                    'value': value,
-                    'label': labelText,
-                    'type': 'agecalc',
-                    'extras': {}
-                  },
-                  notifyActivities: false);
-            },
-          ),
+          // SizedBox(
+          //   height: 20,
+          // ),
+          // Text(
+          //   "$labelText",
+          //   style: TextStyle(color: Colors.black, fontSize: 18),
+          // ),
+          // SizedBox(
+          //   height: 10,
+          // ),
+          // TextFormField(
+          //   keyboardType: checkInputType(element),
+          //   key: textFieldKey,
+          //   readOnly: enableIf(element),
+          //   decoration: InputDecoration(
+          //     labelText: labelText,
+          //     hintText: element['placeholder'] ?? '',
+          //   ),
+          //   validator: (value) {},
+          //   onChanged: (value) {
+          //     widget.formResults.remove(element['name'], notifyActivities: false);
+          //     widget.formResults.add(
+          //         element['name'],
+          //         {
+          //           'controller': agecalcEditingController,
+          //           'value': value,
+          //           'label': labelText,
+          //           'type': 'agecalc',
+          //           'extras': {}
+          //         },
+          //         notifyActivities: false);
+          //   },
+          // ),
         ]),
       );
     }
@@ -1111,7 +1210,7 @@ class _FormBuilderState extends State<FormBuilder> {
       return Visibility(
           visible: invisibilityMap[element['name']] ?? true,
           child: SizedBox(
-        height: 300,
+        height: 270,
         child: ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             itemCount: element['lookup'].length,
@@ -1121,11 +1220,12 @@ class _FormBuilderState extends State<FormBuilder> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
+                    margin: EdgeInsets.only(top: 12,left:16,right:16),
                     child: Text('${item['name']}',
-                        style: TextStyle(color: Colors.green)),
+                        style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600)),
                   ),
                   SizedBox(
-                    height: 200,
+                    height: 195,
                     child: ListView.builder(
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: item['parameters'].length,
@@ -1141,7 +1241,7 @@ class _FormBuilderState extends State<FormBuilder> {
                       },
                     ),
                   ),
-                  OutlinedButton(
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 16), child:                   OutlinedButton(
                     onPressed: () async {
                       TextEditingController idEditingController =
                           TextEditingController();
@@ -1228,7 +1328,7 @@ class _FormBuilderState extends State<FormBuilder> {
                       }
                       },
                     child: const Text('Search'),
-                  ),
+                  ),)
                 ],
               );
             }),
@@ -1256,40 +1356,41 @@ class _FormBuilderState extends State<FormBuilder> {
       }
 
       return Ink(
-        child: TextField(
+        child: Container(
+          margin: EdgeInsets.only(top:8,bottom: 16,right:16,left:16),
+          child:   TextField(
           onTap: () {
             selectDate(context);
           },
           readOnly: true,
-          decoration: InputDecoration(
-            hintText: element['title'],
-            hintStyle: TextStyle(color: Colors.black),
-            contentPadding: const EdgeInsets.all(16),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5),
-              borderSide: BorderSide(
-                color: Colors.grey,
-                width: 1.5,
+          style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(2),
-              borderSide: BorderSide(
-                width: 1.5,
-                color: Colors.grey,
+            decoration: InputDecoration(
+                 isDense: true,  
+                hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.1),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.blue,)),
+                hintText: element['title'] ?? '',
               ),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(2),
-              borderSide: BorderSide(
-                color: Colors.grey,
-                width: 1.5,
-              ),
-            ),
-          ),
           controller: _textEditingController,
           onChanged: (value) {},
         ),
+        )
+        
+
       );
     }
 
@@ -1300,7 +1401,7 @@ class _FormBuilderState extends State<FormBuilder> {
       return Visibility(
         visible: invisibilityMap[element['name']] ?? true,
         child: Container(
-          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          margin: const EdgeInsets.only(top: 8, bottom: 10),
           child: Column(
             children: choices.map((choice) {
               return RadioListTile(
@@ -1329,7 +1430,7 @@ class _FormBuilderState extends State<FormBuilder> {
         // visible: visibleIf(element),
         child: Padding(
           padding: const EdgeInsets.only(
-            top: 20,
+            top: 8, bottom:8,right:16, left:16
           ),
           child: TextField(
             onTap: () async {
@@ -1349,32 +1450,28 @@ class _FormBuilderState extends State<FormBuilder> {
               _textEditingController.text = path!;
             },
             readOnly: true,
-            decoration: InputDecoration(
-              hintText: element['title'],
-              hintStyle: TextStyle(color: Colors.black),
-              contentPadding: const EdgeInsets.all(16),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
-                borderSide: BorderSide(
-                  color: Colors.grey,
-                  width: 1.5,
-                ),
+                 style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(2),
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: Colors.grey,
-                ),
+              decoration: InputDecoration(
+                 isDense: true,  
+                hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                   ),
+                filled: true,
+                fillColor: Colors.grey.withOpacity(0.1),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.grey, width: 0.0),
+                    borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Colors.blue,)),
+                hintText: element['title'] ?? '',
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(2),
-                borderSide: BorderSide(
-                  color: Colors.grey,
-                  width: 1.5,
-                ),
-              ),
-            ),
             controller: _textEditingController,
             onChanged: (value) {},
           ),
@@ -1430,11 +1527,17 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility html(Map<String, dynamic> element) {
-      return Visibility(
+      return 
+      Visibility(
           // visible: visibleIf(element),
-          child: Html(
-        data: element['html'],
-      ));
+          child: 
+           Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Html(
+                  data: element['html'],
+                ))
+           )
+;
     }
 
     Visibility checkbox(Map<String, dynamic> element) {
@@ -1446,11 +1549,15 @@ class _FormBuilderState extends State<FormBuilder> {
             Wrap(
               children: [
                 for (var choice in element['choices'])
-                  ChoiceChip(
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  child: ChoiceChip(
                     label: Text(choice),
                     selected: selectedChoice == choice ? true : false,
                     onSelected: (bool selected) {},
-                  )
+                  ),
+                )
+
               ],
             ),
             Text("${element['title']}: $selectedChoice")
@@ -1513,22 +1620,17 @@ class _FormBuilderState extends State<FormBuilder> {
 
         return Visibility(
           visible: invisibilityMap[element['name']] ?? true,
-          child: Card(
-            margin: const EdgeInsets.all(20),
-            elevation: 1,
-            child: Container(
-                padding: const EdgeInsets.all(10),
+          child:  Container(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      margin: const EdgeInsets.only(top: 10, bottom: 10),
+                      margin: const EdgeInsets.only(top: 8, bottom: 2,left: 16,right: 16),
                       child: Text(
                         element['title'] ?? '',
                         style: const TextStyle(
                           color: Color(0xff0f1728),
-                          fontSize: 18,
-                          fontFamily: "Inter",
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1536,7 +1638,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     children,
                   ],
                 )),
-          ),
+          
         );
       } else {
         return getElement(element);

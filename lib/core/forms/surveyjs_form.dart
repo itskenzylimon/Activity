@@ -59,12 +59,12 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                       backgroundColor: Colors.white,
                       bottom: TabBar(
                         unselectedLabelStyle:
-                            const TextStyle(fontSize: 16.0, color: Color(0xff0062E1)),
-                        labelStyle: const TextStyle(fontSize: 16.0, color: Color(0xff101828)),
+                            const TextStyle(fontSize: 14.0, color: Color(0xff0062E1),fontWeight: FontWeight.w500),
+                        labelStyle: const TextStyle(fontSize: 14.0, color: Color(0xff101828),fontWeight: FontWeight.bold),
                         labelColor: const Color(0xff0062E1),
                         unselectedLabelColor: const Color(0xff101828),
                         controller: _controller,
-                        isScrollable: false,
+                        isScrollable: true,
                         tabs: [
                           //// TODO: Some pages could be invisible
 
@@ -83,7 +83,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                   // create widgets for each tab bar here
                   Expanded(
                     flex: 1,
-                    child: TabBarView(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 8),
+                      child: TabBarView(
                       physics: NeverScrollableScrollPhysics(),
                       controller: _controller,
                       children: [
@@ -95,10 +97,20 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                               formResults: widget.formResults)
                       ],
                     ),
+                    )
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20),
-                    child: Align(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                        border: Border(
+                          top: BorderSide(width: 1.0, color: Colors.grey.withOpacity(0.3)),
+                        ),
+                    ),
+                    child: Padding(
+                    padding: const EdgeInsets.only(right: 16,top:8,bottom: 8,left:16),
+                    child: 
+                    
+                     Align(
                       alignment: Alignment.bottomRight,
                       child: _controller.index == pages!.length - 1 ?
                       Visibility(
@@ -116,9 +128,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                           });
                                           _intNotifier.notifyListeners();
                                         }),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
+                                    Spacer(),
                                     SubmitButton(
                                         formKey: _formKey,
                                         context: context,
@@ -145,7 +155,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                               ? Visibility(
                                 visible: _controller.index > 0 && _controller.index < pages!.length -1 ,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end, children: [
+                                  mainAxisAlignment: MainAxisAlignment.start, children: [
                                     Previous(
                                         formKey: _formKey,
                                         context: context,
@@ -157,9 +167,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                           });
                                           _intNotifier.notifyListeners();
                                         }),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
+                                 Spacer(), 
                                     Next(
                                         formKey: _formKey,
                                         context: context,
@@ -178,9 +186,10 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                                  
                     ),
                   ),
-                  SizedBox(
-                    height: 20,
-                  )
+),
+
+
+             
                 ],
               ),
             );
@@ -210,9 +219,14 @@ class SubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 150,
-      height: 40,
+ 
       child: ElevatedButton(
+           style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff2F6CF6),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                textStyle: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold)),
         onPressed: () {
           // Validate returns true if the form is valid, or false
           // otherwise.
@@ -245,9 +259,14 @@ class Next extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 150,
-      height: 40,
+ 
       child: ElevatedButton(
+           style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff2F6CF6),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                textStyle: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold)),
         onPressed: () {
           onNext();
           // Validate returns true if the form is valid, or false
@@ -281,9 +300,13 @@ class Previous extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 150,
-      height: 40,
-      child: ElevatedButton(
+      child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+                 foregroundColor: Colors.black.withOpacity(0.6),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                textStyle: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold)),
         onPressed: () {
           onPrevious.call();
           // Validate returns true if the form is valid, or false
