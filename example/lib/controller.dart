@@ -37,7 +37,6 @@ class MainController extends ActiveController {
   ]);
 
   Map schema2 = {};
-
   @override
   List<ActiveType> get activities {
     return [appTitle, appBarSize, dataLoaded];
