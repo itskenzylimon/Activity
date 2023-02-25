@@ -528,7 +528,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 fontSize: 14,
               ),
               decoration: InputDecoration(
-                 isDense: true,  
+                 isDense: true,
                 hintStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -630,7 +630,7 @@ class _FormBuilderState extends State<FormBuilder> {
         visible: invisibilityMap[element['name']] ?? true,
         child:Container(
           margin: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
-          child:         
+          child:
          TextFormField(
           controller:
               widget.formResults['$value-${element['name']}']!['controller'],
@@ -643,7 +643,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 fontSize: 14,
               ),
               decoration: InputDecoration(
-                 isDense: true,  
+                 isDense: true,
                 hintStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -779,7 +779,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 fontSize: 14,
               ),
                  decoration: InputDecoration(
-                 isDense: true,  
+                 isDense: true,
                 hintStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -795,7 +795,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     BorderRadius.zero,
                     borderSide: BorderSide(color: Colors.blue,)),
                 labelText: 'Search',
-               
+
               ),
                   controller: textCont,
                   onChanged: (value) {
@@ -849,7 +849,7 @@ class _FormBuilderState extends State<FormBuilder> {
                                   choiceList.add(textCont.text);
                                   _listNotifier.notifyListeners();
                                 },
-                                title: Text(choiceList[index], 
+                                title: Text(choiceList[index],
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 14,
@@ -890,7 +890,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 fontSize: 14,
               ),
                  decoration: InputDecoration(
-                 isDense: true,  
+                 isDense: true,
                 hintStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -906,7 +906,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     BorderRadius.zero,
                     borderSide: BorderSide(color: Colors.blue,)),
                 labelText: 'Search',
-               
+
               ),
                   onChanged: (value) {
                     if (value.isNotEmpty) {
@@ -984,7 +984,7 @@ class _FormBuilderState extends State<FormBuilder> {
             alignment: Alignment.center,
             child:  DropdownButtonFormField(
                 style: TextStyle(color: Colors.black, fontSize: 14.0),
-                 decoration: InputDecoration(   
+                 decoration: InputDecoration(
                      contentPadding: EdgeInsets.symmetric(
               horizontal: 10.0,
               vertical: 3.0,
@@ -1030,7 +1030,7 @@ class _FormBuilderState extends State<FormBuilder> {
                   });
                 },
               ),
-          )          
+          )
         );
       }
     }
@@ -1096,7 +1096,7 @@ class _FormBuilderState extends State<FormBuilder> {
              alignment: Alignment.center,
           child: DropdownButtonFormField(
                    style: TextStyle(color: Colors.black, fontSize: 14.0),
-                 decoration: InputDecoration(   
+                 decoration: InputDecoration(
                      contentPadding: EdgeInsets.symmetric(
               horizontal: 10.0,
               vertical: 3.0,
@@ -1143,7 +1143,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 });
               },
             ),
-          
+
         ),
       );
     }
@@ -1368,7 +1368,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 fontSize: 14,
               ),
             decoration: InputDecoration(
-                 isDense: true,  
+                 isDense: true,
                 hintStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -1389,32 +1389,96 @@ class _FormBuilderState extends State<FormBuilder> {
           onChanged: (value) {},
         ),
         )
-        
+
 
       );
     }
 
-    Visibility radiogroup(Map<String, dynamic> element) {
+    Visibility radioGroup(Map<String, dynamic> element) {
       List choices = [];
 
       String selectedChoice = '';
+      for (var i = 0; i < element['choices'].length; i++) {
+        choices.add(element['choices'][i]);
+      }
+      if (widget.formResults.containsKey('${element['name']}')) {
+        selectedChoice = widget.formResults['${element['name']}']!['value'] ?? '';
+        printError(selectedChoice);
+        widget.formResults.update(
+            '${element['name']}',
+                (value) => {
+              'value': selectedChoice,
+              'label': element['title'],
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
+      }
+      else {
+
+        widget.formResults.add(
+            '${element['name']}',
+            {
+              'value': element['choices'][0],
+              'label': element['title'],
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
+
+        selectedChoice =
+            widget.formResults['${element['name']}']!['value'] ?? '';
+      }
       return Visibility(
         visible: invisibilityMap[element['name']] ?? true,
         child: Container(
           margin: const EdgeInsets.only(top: 8, bottom: 10),
           child: Column(
-            children: choices.map((choice) {
-              return RadioListTile(
-                title: Text(choice),
-                value: choice,
-                groupValue: selectedChoice,
-                onChanged: (value) {
-                  // setState(() {
-                  //   selectedChoice = value;
-                  // });
-                },
-              );
-            }).toList(),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                element['title'],
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                element['isRequired'] ? '(Required)' : '(Optional)',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Column(
+                children: choices.map((choice) {
+                  return RadioListTile(
+                    title: Text(choice),
+                    value: choice,
+                    groupValue: selectedChoice,
+                    onChanged: (val) {
+                      print("Radio Tile pressed $val");
+                      print(val);
+                      setState(() {
+                        selectedChoice = val;
+                        printSuccess(selectedChoice);
+                        widget.formResults.update(
+                            '${element['name']}',
+                                (value) => {
+                              'value': selectedChoice,
+                              'label': element['title'],
+                              'type': 'text',
+                              'extras': {}
+                            },
+                            notifyActivities: false);
+                      });
+
+                    },
+
+                  );
+                }).toList(),
+              ),
+            ],
           ),
         ),
       );
@@ -1455,7 +1519,7 @@ class _FormBuilderState extends State<FormBuilder> {
                 fontSize: 14,
               ),
               decoration: InputDecoration(
-                 isDense: true,  
+                 isDense: true,
                 hintStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -1527,10 +1591,10 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility html(Map<String, dynamic> element) {
-      return 
+      return
       Visibility(
           // visible: visibleIf(element),
-          child: 
+          child:
            Container(
             padding: EdgeInsets.symmetric(horizontal: 10),
             child: Html(
@@ -1541,30 +1605,108 @@ class _FormBuilderState extends State<FormBuilder> {
     }
 
     Visibility checkbox(Map<String, dynamic> element) {
-      String selectedChoice = '';
+      printSuccess('CHECKBOX ???');
+      printSuccess('${element['name']}');
+      List choices = [];
+      var selectedCheck = false;
+
+      for (var i = 0; i < element['choices'].length; i++) {
+        choices.add(element['choices'][i]);
+      }
+
+      if (widget.formResults.containsKey('${element['name']}')) {
+        printWarning('Selected CheckBox');
+        printWarning(widget.formResults['${element['name']}']);
+        printWarning(widget.formResults['${element['name']}']!['value']);
+        selectedCheck = widget.formResults['${element['name']}']!['value'];
+        widget.formResults.update(
+            '${element['name']}',
+                (value) => {
+              'value': selectedCheck,
+              'label': element['title'],
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
+      }
+      else {
+        widget.formResults.add(
+            '${element['name']}',
+            {
+              'value': selectedCheck,
+              'label': element['title'],
+              'type': 'text',
+              'extras': {}
+            },
+            notifyActivities: false);
+
+
+      }
       return Visibility(
         visible: invisibilityMap[element['name']] ?? true,
-        child: Column(
-          children: [
-            Wrap(
-              children: [
-                for (var choice in element['choices'])
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16),
-                  child: ChoiceChip(
-                    label: Text(choice),
-                    selected: selectedChoice == choice ? true : false,
-                    onSelected: (bool selected) {},
-                  ),
-                )
+        child: Container(
+          margin: const EdgeInsets.only(top: 10, bottom: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                element['title'],
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Column(
+                children: choices.map((choice) {
+                  return Row(
+                    children: <Widget>[
+                      SizedBox(
+                        width: 10,
+                      ),
+                      /** Checkbox Widget **/
+                      Checkbox(
+                        value: selectedCheck,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCheck = value!;
+                            printSuccess("STATE CHECKED");
+                            printWarning(value);
+                            printWarning(selectedCheck);
+                            widget.formResults.remove('${element['name']}', notifyActivities: false);
+                            widget.formResults.add(
+                                '${element['name']}',
+                                {
+                                  'value': selectedCheck,
+                                  'label': element['title'],
+                                  'type': 'text',
+                                  'extras': {}
+                                },
+                                notifyActivities: false);
+                            printWarning(widget.formResults['${element['name']}']);
+                          });
+                        },
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '$choice',
+                          style: TextStyle(fontSize: 16),
+                          softWrap: false,
+                          maxLines: 2,
+                        ),
+                      ), //Text
 
-              ],
-            ),
-            Text("${element['title']}: $selectedChoice")
-          ],
+                    ], //<Widget>[]
+                  ); //Row
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       );
     }
+
+
 
     Widget getElement(Map<String, dynamic> element) {
       switch (element['type']) {
@@ -1587,7 +1729,7 @@ class _FormBuilderState extends State<FormBuilder> {
           return datepicker(element);
 
         case 'radiogroup':
-          return radiogroup(element);
+          return radioGroup(element);
 
         case 'file':
           return filePicker(element);
@@ -1638,7 +1780,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     children,
                   ],
                 )),
-          
+
         );
       } else {
         return getElement(element);
