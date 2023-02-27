@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Activity(
         MainController(),
-        // developerMode: true,
+        developerMode: true,
         onActivityStateChanged: () =>
             DateTime.now().microsecondsSinceEpoch.toString(),
         child: TaskView(
@@ -110,6 +110,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   //   super.didChangeDependencies();
   // }
 
+  Map<String, Map<String, dynamic>> formResults = {};
+
   @override
   Widget build(BuildContext context) {
     activeController.reOrganizeData();
@@ -127,10 +129,11 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         //   title: Text(activeController.appTitle.value),
         // ),
         body: SafeArea(
-            child:
-              SurveyJSForm(schema: activeController.schema2, context: context
-                  , formResults: activeController.formResults,
-                onFormSubmit: () {
+            child: SurveyJSForm(
+                  schema: activeController.schema,
+                  context: context,
+                  formResults: formResults,
+                  onFormSubmit: () {
                   /// At this point, the form has been submitted and the
                   /// results are available in the formResults variable
                   /// handle the results here

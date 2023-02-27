@@ -14,7 +14,6 @@ export 'core/helpers/logger.dart';
 export 'core/helpers/schema_validator.dart';
 export 'core/helpers/env.dart';
 
-export 'core/forms/form_builder.dart';
 export 'core/forms/surveyjs_form.dart';
 
 //Memory

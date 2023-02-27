@@ -1,15 +1,24 @@
+import 'dart:async';
+
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 
-import 'form_builder.dart';
+import '../../widgets/elements/age_calculator_field.dart';
+import '../../widgets/elements/check_box_field.dart';
+import '../../widgets/elements/date_picker_field.dart';
+import '../../widgets/elements/drop_down_field.dart';
+import '../../widgets/elements/radio_group_field.dart';
+import '../../widgets/elements/signature_pad_field.dart';
+import '../../widgets/elements/text_field.dart';
+import '../../widgets/elements/type_field.dart';
 
 class SurveyJSForm extends StatefulWidget {
   final Map schema;
-  final ActiveMap<String, Map<String, dynamic>> formResults;
+  final Map<String, Map<String, dynamic>> formResults;
   final BuildContext context;
   final VoidCallback onFormSubmit;
 
-  const SurveyJSForm({
+  const SurveyJSForm({super.key,
     required this.schema,
     required this.context,
     required this.formResults,
@@ -20,191 +29,1188 @@ class SurveyJSForm extends StatefulWidget {
   State<SurveyJSForm> createState() => _SurveyJSFormState();
 }
 
-class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMixin {
-  late TabController _controller;
+class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMixin{
+
+
+  /// All themes map
+  List<Map<String, dynamic>> themeStyle = [];
+
+  // Map<String, SampleWidget> customWidgets(){
+  //  return {
+  //
+  //  };
+  // }
+
+  /// Theme map
+  Map<String, dynamic> metaData = {
+    'theme' : {
+      'theme': {
+        'primaryColor': Colors.teal,
+        'secondaryColor': Colors.teal,
+      },
+      'textfield': {
+        'showCursor': true,
+      },
+      'button' : {
+        'type': 'outline' /// outline, filled
+      },
+    },
+    'customWidgets': {
+      'elementName':  SampleWidget
+    }
+  };
+
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  late TabController tabController;
 
   int initialIndex = 0;
-  List? pages;
-  var list = [];
-  final _formKey = GlobalKey<FormState>();
+
+  List pages = [];
+
+  late Timer debounce;
+
+  String? path;
+
+  Map<String, Map<String, dynamic>> valueFormResults = {};
+
   @override
   void initState() {
-    pages = widget.schema['service']['schema']['pages'];
     super.initState();
-    _controller = TabController(
+
+    pages = widget.schema['pages'] ??
+        widget.schema['service']['schema']['pages'];
+
+    tabController = TabController(
       initialIndex: initialIndex,
-      length: pages!.length,
+      length: pages.length,
       vsync: this,
     );
-    _controller.addListener(() {
-      setState(() {
-        _controller.index;
-      });
-      print("Selected Index: " + _controller.index.toString());
-    });
-    list.followedBy(pages!);
+
+    tabController.index = initialIndex;
+
+    /// set the current page view
+    setPageChangeListeners();
+
+    // metaData.putIfAbsent('customWidgets', () => customWidgets());
   }
 
-  Widget createSurveyJSView() {
-    return Scaffold(
-      body: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  // the tab bar with pages
-                  SizedBox(
-                    height: 50,
-                    child: AppBar(
-                      elevation: 0,
-                      backgroundColor: Colors.white,
-                      bottom: TabBar(
-                        unselectedLabelStyle:
-                            const TextStyle(fontSize: 14.0, color: Color(0xff0062E1),fontWeight: FontWeight.w500),
-                        labelStyle: const TextStyle(fontSize: 14.0, color: Color(0xff101828),fontWeight: FontWeight.bold),
-                        labelColor: const Color(0xff0062E1),
-                        unselectedLabelColor: const Color(0xff101828),
-                        controller: _controller,
-                        isScrollable: true,
-                        tabs: [
-                          //// TODO: Some pages could be invisible
+  setPageChangeListeners() {
+    tabController.addListener(() {
+      if (tabController.indexIsChanging) {
+        setState(() {
+          initialIndex = tabController.index;
+        });
+      }
+    });
+  }
 
-                          for (var page in widget.schema['service']['schema']['pages'])
-                            FittedBox(
-                              fit: BoxFit.contain,
-                              child: Tab(
-                                text: page['title'],
-                              ),
+  Widget formBuilderController(page) {
+
+    // assign formResults to formValues.
+    Visibility dropdownChoices(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(child: DropDownWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults, customTheme: metaData['theme'],
+      ));
+
+    }
+    Visibility httpLookUp(Map<String, dynamic> element){
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+      return Visibility(child: RadioGroupWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults,
+      ));
+
+    }
+    Visibility datepicker(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(child: DatePickerWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults, customTheme: metaData['theme'],
+      ));
+
+    }
+    Visibility radioGroup(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(child: RadioGroupWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults,
+      ));
+
+    }
+    Visibility filePicker(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          child: Container());
+    }
+    Visibility checkbox(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(child: CheckBoxWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults, customTheme: metaData['theme'],
+      ));
+
+    }
+    Visibility signaturePad(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(child: SignatureFieldWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults, customTheme: metaData['theme'],
+      ));
+    }
+    Visibility ageCalculator(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: AgeCalculatorWidget(
+            onElementCallback: (Map<String, dynamic> value) {
+              setState(() {
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                newValueFormResults[element['name']] = value;
+                valueFormResults = newValueFormResults;
+              });
+            },
+            elementName: element['name'],
+            valueFormResults: valueFormResults, customTheme: metaData['theme'],
+          ));
+
+    }
+    Visibility container(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: Container(
+            padding: const EdgeInsets.all(10),
+          ));
+
+    }
+    Visibility textField(Map<String, dynamic> element) {
+
+      TextEditingController textEditingController = TextEditingController();
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': textEditingController.text,
+        'controller': textEditingController,
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: TextFieldWidget(
+            onElementCallback: (Map<String, dynamic> value) {
+              setState(() {
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                newValueFormResults[element['name']] = value;
+                valueFormResults = newValueFormResults;
+              });
+            },
+            elementName: element['name'],
+            valueFormResults: valueFormResults,
+            customTheme: metaData['theme'],
+          ));
+
+    }
+    Visibility textSearchUpdateField(Map<String, dynamic> element) {
+
+      TextEditingController textEditingController = TextEditingController();
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': textEditingController.text,
+        'controller': textEditingController,
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: TextFieldWidget(
+            onElementCallback: (Map<String, dynamic> value) {
+              setState(() {
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                newValueFormResults[element['name']] = value;
+                valueFormResults = newValueFormResults;
+              });
+            },
+            elementName: element['name'],
+            valueFormResults: valueFormResults, customTheme: metaData['theme'],
+          ));
+
+    }
+    Visibility customWidget(Map<String, dynamic> element){
+
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      // if(metaData['customWidgets'].containsKey(element['name'])){
+      //   print('customWidget');
+      // CustomWidget customWidget = metaData['customWidgets'][element['name']]!;
+      // customWidget.elementName = element['name'];
+      // customWidget.valueFormResults = valueFormResults;
+      // customWidget.onFormCallback = (Map<String, dynamic> value) {
+      //   if (kDebugMode) {
+      //     print('customWidget.onElementCallback');
+      //   }
+      //   Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+      //   value.forEach((key, value) {
+      //     if(newValueFormResults.containsKey(key)){
+      //       newValueFormResults[key]!['value'] = value[key];
+      //     }
+      //   });
+      //   setState(() {
+      //     valueFormResults = newValueFormResults;
+      //   });
+      // };
+      // customWidget.onElementCallback = (Map<String, dynamic> value) {
+      //   if (kDebugMode) {
+      //     print('customWidget.onElementCallback');
+      //   }
+      //   Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+      //   newValueFormResults[element['name']] = value..addAll(newElement);
+      //   setState(() {
+      //     valueFormResults = newValueFormResults;
+      //   });
+      // };
+      //   return Visibility(
+      //       visible: valueFormResults[element['name']]!['visible'],
+      //       child:
+      //       CustomWidget(
+      //         elementName: element['name'],
+      //         valueFormResults: valueFormResults,
+      //         customTheme: metaData['theme'],
+      //         widgetData: metaData['customWidgets'][element['name']]!
+      //       )
+      //   );
+      // } else {
+      return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: Container());
+      // }
+    }
+
+    Widget getElement(Map<String, dynamic> element) {
+
+      switch (element['type']) {
+
+        case 'text':
+          return textField(element);
+
+        case 'textsearchupdatefield':
+          return textSearchUpdateField(element);
+
+        case 'comment':
+          return textField(element);
+
+        case 'dropdown':
+          return dropdownChoices(element);
+
+        case 'httplookup':
+          return httpLookUp(element);
+
+        case 'bsdatepicker':
+          return datepicker(element);
+
+        case 'radiogroup':
+          return radioGroup(element);
+
+        case 'file':
+          return filePicker(element);
+
+        case 'checkbox':
+          return checkbox(element);
+
+        case 'signaturepad':
+          return signaturePad(element);
+
+        case 'agecalc':
+          return ageCalculator(element);
+
+        case 'container':
+          return container(element);
+
+        default:
+          return customWidget(element);
+      }
+    }
+
+    Widget checkElement(Map<String, dynamic> element) {
+
+      if (element['type'] == 'panel') {
+
+        /// After setting up the element, add it to the elementData
+        /// use elementData in the rest of the function
+        setUpElement(element['name'], element);
+
+        // visibleMap.add(element['name'], true);
+        Column children = Column(
+          children: [
+            for (var element in element['elements']) checkElement(element)
+          ],
+        );
+        return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: Card(
+            margin: const EdgeInsets.all(20),
+            elevation: 1,
+            child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        element['title'] ?? '',
+                        style: const TextStyle(
+                          color: Color(0xff0f1728),
+                          fontSize: 18,
+                          fontFamily: "Inter",
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    children,
+                  ],
+                )),
+          ),
+        );
+      }
+      else {
+        return getElement(element);
+      }
+    }
+
+    ListView buildForm() {
+
+      ListView listView = ListView(
+        children: [
+          for (var element in page['elements'])
+            checkElement(element)
+        ],
+      );
+
+      return listView;
+    }
+
+    return buildForm();
+  }
+
+  /// Extend the custom widget functions
+
+  @override
+  Widget build(BuildContext context) {
+
+    visibleIf();
+    requiredIf();
+    // enableIf();
+
+    return Scaffold(
+      body: SafeArea(
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                // the tab bar with pages
+                SizedBox(
+                  height: 50,
+                  child: AppBar(
+                    elevation: 0,
+                    backgroundColor: Colors.white,
+                    bottom: TabBar(
+                      unselectedLabelStyle:
+                      const TextStyle(fontSize: 14.0, color: Color(0xff0062E1),fontWeight: FontWeight.w500),
+                      labelStyle: const TextStyle(fontSize: 14.0, color: Color(0xff101828),fontWeight: FontWeight.bold),
+                      labelColor: const Color(0xff0062E1),
+                      unselectedLabelColor: const Color(0xff101828),
+                      controller: tabController,
+                      isScrollable: true,
+                      tabs: [
+                        //// TODO: Some pages could be invisible
+
+                        for (var page in pages)
+                          FittedBox(
+                            fit: BoxFit.contain,
+                            child: Tab(
+                              text: page['title'],
                             ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                // create widgets for each tab bar here
+                Expanded(
+                  flex: 1,
+                  child:
+                  TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      controller: tabController,
+                      children:
+
+                      [
+                        for (var page in pages)
+                          formBuilderController(page)
+                      ]
+
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    border: Border(
+                      top: BorderSide(width: 1.0, color: Colors.grey.withOpacity(0.3)),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16, top:8, bottom: 8,left:16),
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Visibility(
+                            visible: initialIndex == 0 ? false : true,
+                            child: Previous(
+                              context: context,
+                              onPrevious: () {
+                                if (tabController.index > 0) {
+                                  setState(() {
+                                    initialIndex = initialIndex -1;
+                                  });
+                                  tabController.index -= 1;
+                                }
+                              }, formKey: formKey,),
+                          ),
+                          const Spacer(),
+                          (initialIndex +1)  == pages.length ? SubmitButton(
+                            context: context,
+                            formKey: formKey,
+                            onFormSubmit: () {
+                              // widget.onFormSubmit();
+                            },) : Next(
+                            context: context,
+                            onNext: () {
+                              if (tabController.index < pages.length - 1) {
+                                setState(() {
+                                  initialIndex = initialIndex +1;
+                                });
+                                tabController.index += 1;
+                              }
+                            }, formKey: formKey,)
                         ],
                       ),
                     ),
                   ),
-
-                  // create widgets for each tab bar here
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: EdgeInsets.only(top: 8),
-                      child: TabBarView(
-                      physics: NeverScrollableScrollPhysics(),
-                      controller: _controller,
-                      children: [
-                        // first tab bar view widget
-                        for (var page in widget.schema['service']['schema']['pages'])
-                          FormBuilder(
-                              elements: page['elements'],
-                              context: context,
-                              formResults: widget.formResults)
-                      ],
-                    ),
-                    )
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.1),
-                        border: Border(
-                          top: BorderSide(width: 1.0, color: Colors.grey.withOpacity(0.3)),
-                        ),
-                    ),
-                    child: Padding(
-                    padding: const EdgeInsets.only(right: 16, top:8, bottom: 8,left:16),
-                    child: 
-                    
-                     Align(
-                      alignment: Alignment.bottomRight,
-                      child: _controller.index == pages!.length - 1 ?
-                      Visibility(
-                                visible: _controller.index == pages!.length - 1 ,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end, children: [
-                                          Previous(
-                                      formKey: _formKey,
-                                      context: context,
-                                      onPrevious: () {
-                                          if (_controller.index > 0) {
-                                            _controller.index -= 1;
-                                          }
-                                        printSuccess("_controller.index");
-                                        printSuccess(_controller.index);
-                                      }),
-                                    Spacer(),
-                                    SubmitButton(
-                                        formKey: _formKey,
-                                        context: context,
-                                        onFormSubmit: widget.onFormSubmit),
-                                  ]),
-                              )
-                              :  _controller.index == 0 
-                          ? Visibility(
-                            visible: _controller.index == 0,
-                            child: Next(
-                                        formKey: _formKey,
-                                        context: context,
-                                        onNext: () {
-                                            if (_controller.index < pages!.length - 1) {
-                                              _controller.index += 1;
-                                            }
-                                          printSuccess("_controller.index");
-                                          printSuccess(_controller.index);
-                                          printSuccess(pages!.length - 1);
-                                        }),
-                          )
-                          : _controller.index > 0 && _controller.index < pages!.length
-                              ? Visibility(
-                                visible: _controller.index > 0 && _controller.index < pages!.length -1 ,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start, children: [
-                                         Previous(
-                                                  formKey: _formKey,
-                                                  context: context,
-                                                  onPrevious: () {
-                                                      if (_controller.index > 0) {
-                                                        _controller.index -= 1;
-                                                      }
-                                                    printSuccess("_controller.index");
-                                                    printSuccess(_controller.index);
-                                                  }),
-                                 Spacer(), 
-                                    Next(
-                                        formKey: _formKey,
-                                        context: context,
-                                        onNext: () {
-                                          if (_controller.index < (pages!.length - 1)) {
-                                                        _controller.index += 1;
-                                                      }
-                                                    printSuccess("_controller.index");
-                                                    printSuccess(_controller.index);
-                                                    printSuccess(pages!.length - 1);
-                                    
-                                        }),
-                                  ]),
-                              ) : SizedBox()   
-                              
-                              
-                                 
-                    ),
-                  ),
-),
-
-
-             
-                ],
-              ),
+                ),
+                // the buttons
+              ],
             ),
-
+          )
+      ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return createSurveyJSView();
+  /// All created elements should be added here
+  /// This is called when a form element is created
+  /// It updates the formValues map and formResults map
+  Map<String, dynamic> setUpElement(String name, Map<String, dynamic> value){
+
+    /// new element value
+    Map<String, dynamic> newValue = value;
+
+    /// add the element to the formValues map
+    if(valueFormResults.containsKey(name) == false){
+
+      setState(() {
+        /// Add the value
+        valueFormResults.putIfAbsent(name, () => newValue);
+        visibleIf();
+        requiredIf();
+        // enableIf();
+      });
+
+    }
+    /// return the new element
+    return newValue;
   }
+
+  /// Helper func
+  String trimCurly(String value) {
+    int start = value.indexOf("{") + 1;
+    int end = value.indexOf("}");
+    return value.substring(start, end);
+  }
+
+  List<String> trimListString(String value) {
+    try{
+      value.toLowerCase();
+      int start = value.indexOf("[") + 1;
+      int end = value.indexOf("]");
+      return value.substring(start, end)
+          .split(",").toList();
+    } catch(e){
+      printError(' ******* $e ********');
+      return [];
+    }
+  }
+
+  /// Use this to get the condition value
+  /// returns a string
+  String conditionValue(String value) {
+    int start = value.indexOf("=") + 2;
+    return value.substring(start);
+  }
+
+  /// Use this to split the string by [and, or]
+  /// and remove the ' from values
+  /// returns a list of strings
+  List splitStringList(String value) {
+    List splits = [];
+    /// check if the value contains [and, or]
+    if(value.contains(" or ") || value.contains(" and ")){
+      /// separate a string by or and remove the ' from values
+      if(value.contains(" or ")){
+        splits.addAll(value.split(" or ").map((str) => str.replaceAll("'", "")).toList());
+      }
+      /// separate a string by and and remove the ' from values
+      if(value.contains(" and ")){
+        splits.addAll(value.split(" and ").map((str) => str.replaceAll("'", "")).toList());
+      }
+    } else {
+      splits.add(value.replaceAll("'", ""));
+    }
+    return splits;
+  }
+
+  /// This function splits the enableIf string into a list of conditions
+  /// and updates its required state
+  enableIf() {
+
+    /// loop through the objects to get value element
+    valueFormResults.forEach((name, element) {
+
+      // printWarning( '$name --- *** --- $element');
+
+      /// check if the element has a name property
+      if (name != null) {
+        /// check if the element has a enable property
+        if (element['enable'] != null) {}
+        else if (element['enableIf'] != null) {
+          /// Drama follows here if the element has a visibleIf
+          /// property and no visible property is set
+
+          /// create a list of conditions
+          /// Handle or conditions
+          /// Handle and conditions
+          List enableIfConditions = splitStringList(element['enableIf']);
+
+          // printWarning( '$name --- @@@ --- $enableIfConditions');
+
+          /// New Map for conditional bools
+          List enabledStates = [];
+          /// loop through enableIf
+          for (var condition in enableIfConditions) {
+
+            printWarning( ' ENABLE --- $name --- %%% --- $condition');
+
+            /// Handle anyof conditionType
+            /// it should overwrite enable state from above
+            if (condition.toString().contains(' anyof ')) {
+
+              // printWarning( '$name --- anyof --- $condition');
+
+              /// Here we handle the many conditions in the enableIf that meet
+              /// the anyof condition type
+              if (valueFormResults[trimCurly(condition)] != null) {
+                /// get the values in the list
+                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                /// get the value of the element if element is not found
+                /// set it to an empty string
+                String trimCurlyValue =
+                valueFormResults[trimCurly(condition)]!['value'].toString();
+
+                /// data found, now check if trimCurly element
+                /// value is in getListString
+                if(getListString.contains(trimCurlyValue.toLowerCase())){
+
+                  enabledStates.add(true);
+                }
+                else {
+                  enabledStates.add(false);
+                }
+              }
+            }
+
+            /// Handle notempty conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains('notempty')) {
+
+              // printWarning( '$name --- notempty --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+
+              var trimCurlyValue =
+              valueFormResults[trimCurly(condition)] == null ? '' :
+              valueFormResults[trimCurly(condition)]!['value'];
+
+              // printWarning( '$name --- $trimCurlyValue --- $condition');
+
+
+              /// Here we handle the many conditions in the enableIf that meet
+              /// the notempty condition type
+              if(trimCurlyValue.toString().isNotEmpty){
+                enabledStates.add(true);
+              } else {
+                enabledStates.add(false);
+              }
+            }
+
+            /// Handle = conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains(' = ')) {
+
+              printWarning( ' ENABLE --- $name --- = --- $condition');
+              printWarning( ' ENABLE --- $name --- ${conditionValue(condition).toString()} --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+              var trimCurlyValue =
+              valueFormResults[trimCurly(condition)] == null ? '' :
+              valueFormResults[trimCurly(condition)]!['value'];
+
+              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+                enabledStates.add(true);
+              } else {
+                enabledStates.add(false);
+              }
+            }
+          }
+
+          /// Handle the and / or conditions state
+          if(element['enableIf'].toString().contains(' and ')){
+
+            printWarning( ' ENABLE --- $name --- FINAL --- $enabledStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['enable'] = !enabledStates.contains(false);
+              return value;
+            });
+
+          }
+          else if (element['enableIf'].toString().contains(' or ')){
+
+            printWarning( ' ENABLE --- $name --- FINAL --- $enabledStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['enable'] = enabledStates.contains(true);
+              return value;
+            });
+
+          }
+          else {
+
+            printWarning( ' ENABLE --- $name --- FINAL --- $enabledStates');
+
+            /// update the enable valueFormResults
+            valueFormResults.update(name, (value) {
+              value['enable'] = !enabledStates.contains(false);
+              return value;
+            });
+
+          }
+        }
+
+        else {
+          printWarning( ' ENABLE --- $name --- NO ENABLE FIELDS --- ${element['name']}');
+
+          /// Here we just let it go bro.
+          /// if the element has no visibleIf property and no visible property
+          /// its inevitable that it will be visible
+          /// remove the invisibilityMap
+          /// update the visible valueFormResults
+        }
+
+      }
+    });
+  }
+
+  /// This function splits the requiredIf string into a list of conditions
+  /// and updates its required state
+  requiredIf() {
+    /// loop through the objects to get value element
+    valueFormResults.forEach((name, element) {
+
+      // printWarning( '$name --- *** --- $element');
+
+      /// check if the element has a name property
+      if (name != null) {
+        /// check if the element has a visible property
+        if (element['required'] != null) {}
+        if (element['requiredIf'] != null) {
+          /// Drama follows here if the element has a requiredIf
+          /// property and no required property is set
+
+          /// create a list of conditions
+          /// Handle or conditions
+          /// Handle and conditions
+          List requiredIfConditions = splitStringList(element['requiredIf']);
+
+          // printWarning( '$name --- @@@ --- $requiredIfConditions');
+
+          /// New Map for conditional bools
+          List requiredStates = [];
+          /// loop through visibleIfConditions
+          for (var condition in requiredIfConditions) {
+
+            // printWarning( '$name --- %%% --- $condition');
+
+            /// Handle anyof conditionType
+            /// it should overwrite required state from above
+            if (condition.toString().contains(' anyof ')) {
+
+              // printWarning( '$name --- anyof --- $condition');
+
+              /// Here we handle the many conditions in the requiredIf that meet
+              /// the anyof condition type
+              if (valueFormResults[trimCurly(condition)] != null) {
+                /// get the values in the list
+                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                /// get the value of the element if element is not found
+                /// set it to an empty string
+                String trimCurlyValue =
+                valueFormResults[trimCurly(condition)]!['value'].toString();
+
+                /// data found, now check if trimCurly element
+                /// value is in getListString
+                if(getListString.contains(trimCurlyValue)){
+
+                  requiredStates.add(true);
+                }
+                else {
+                  requiredStates.add(false);
+                }
+              }
+            }
+
+            /// Handle notempty conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains('notempty')) {
+
+              // printWarning( '$name --- notempty --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+
+              var trimCurlyValue =
+              valueFormResults[trimCurly(condition)] == null ? '' :
+              valueFormResults[trimCurly(condition)]!['value'];
+
+              // printWarning( '$name --- $trimCurlyValue --- $condition');
+
+
+              /// Here we handle the many conditions in the requiredIf that meet
+              /// the notempty condition type
+              if(trimCurlyValue.toString().isNotEmpty){
+                requiredStates.add(true);
+              } else {
+                requiredStates.add(false);
+              }
+            }
+
+            /// Handle = conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains(' = ')) {
+
+              // printWarning( '$name --- = --- $condition');
+              // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+              var trimCurlyValue =
+              valueFormResults[trimCurly(condition)] == null ? '' :
+              valueFormResults[trimCurly(condition)]!['value'];
+
+              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+                requiredStates.add(true);
+              } else {
+                requiredStates.add(false);
+              }
+            }
+          }
+
+          /// Handle the and / or conditions state
+          if(element['requiredIf'].toString().contains(' and ')){
+
+            printWarning( '$name --- FINAL --- $requiredStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['required'] = !requiredStates.contains(false);
+              return value;
+            });
+
+          }
+          else if (element['requiredIf'].toString().contains(' or ')){
+
+            printWarning( '$name --- FINAL --- $requiredStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['required'] = requiredStates.contains(true);
+              return value;
+            });
+
+          }
+          else {
+
+            printWarning( '$name --- FINAL --- $requiredStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['required'] = !requiredStates.contains(false);
+              return value;
+            });
+
+          }
+        }
+        else {
+          // printWarning( '$name --- NO REQUIRED FIELDS --- ${element['name']}');
+
+          /// Here we just let it go bro.
+          /// if the element has no visibleIf property and no visible property
+          /// its inevitable that it will be visible
+          valueFormResults.update(name, (value) {
+            value['required'] = true;
+            return value;
+          });
+
+        }
+
+      }
+    });
+  }
+
+  /// This function splits the visibleIf string into a list of conditions
+  /// and updates its visibility
+  visibleIf() {
+    /// loop through the objects to get value element
+    valueFormResults.forEach((name, element) {
+
+      // printWarning( '$name --- *** --- $element');
+
+      /// check if the element has a name property
+      if (name != null) {
+        /// check if the element has a visible property
+        if (element['visible'] != null) {}
+        if (element['visibleIf'] != null) {
+          /// Drama follows here if the element has a visibleIf
+          /// property and no visible property is set
+
+          /// create a list of conditions
+          /// Handle or conditions
+          /// Handle and conditions
+          List visibleIfConditions = splitStringList(element['visibleIf']);
+
+          // printWarning( '$name --- @@@ --- $visibleIfConditions');
+
+          /// New Map for conditional bools
+          List visibilityStates = [];
+          /// loop through visibleIfConditions
+          for (var condition in visibleIfConditions) {
+
+            // printWarning( '$name --- %%% --- $condition');
+
+            /// Handle anyof conditionType
+            /// it should overwrite visible state from above
+            if (condition.toString().contains(' anyof ')) {
+
+              // printWarning( '$name --- anyof --- $condition');
+
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the anyof condition type
+              if (valueFormResults[trimCurly(condition)] != null) {
+                /// get the values in the list
+                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                /// get the value of the element if element is not found
+                /// set it to an empty string
+                String trimCurlyValue =
+                valueFormResults[trimCurly(condition)]!['value'].toString();
+
+                /// data found, now check if trimCurly element
+                /// value is in getListString
+                if(getListString.contains(trimCurlyValue)){
+
+                  visibilityStates.add(true);
+                }
+                else {
+                  visibilityStates.add(false);
+                }
+              }
+            }
+
+            /// Handle notempty conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains('notempty')) {
+
+              // printWarning( '$name --- notempty --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+
+              var trimCurlyValue =
+              valueFormResults[trimCurly(condition)] == null ? '' :
+              valueFormResults[trimCurly(condition)]!['value'];
+
+              // printWarning( '$name --- $trimCurlyValue --- $condition');
+
+
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the notempty condition type
+              if(trimCurlyValue.toString().isNotEmpty){
+                visibilityStates.add(true);
+              } else {
+                visibilityStates.add(false);
+              }
+            }
+
+            /// Handle = conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains(' = ')) {
+
+              // printWarning( '$name --- = --- $condition');
+              // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+              var trimCurlyValue =
+              valueFormResults[trimCurly(condition)] == null ? '' :
+              valueFormResults[trimCurly(condition)]!['value'];
+
+              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+                visibilityStates.add(true);
+              } else {
+                visibilityStates.add(false);
+              }
+            }
+          }
+
+          /// Handle the and / or conditions state
+          if(element['visibleIf'].toString().contains(' and ')){
+
+            printWarning( '$name --- FINAL --- $visibilityStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['visible'] = !visibilityStates.contains(false);
+              return value;
+            });
+
+          }
+          else if (element['visibleIf'].toString().contains(' or ')){
+
+            printWarning( '$name --- FINAL --- $visibilityStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['visible'] = visibilityStates.contains(true);
+              return value;
+            });
+
+          }
+          else {
+
+            printWarning( '$name --- FINAL --- $visibilityStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              value['visible'] = !visibilityStates.contains(false);
+              return value;
+            });
+
+          }
+        }
+        else {
+          // printWarning( '$name --- NO VISIBILITY FIELDS --- ${element['name']}');
+
+          /// Here we just let it go bro.
+          /// if the element has no visibleIf property and no visible property
+          /// its inevitable that it will be visible
+          /// remove the invisibilityMap
+          /// update the visible valueFormResults
+          valueFormResults.update(name, (value) {
+            value['visible'] = true;
+            return value;
+          });
+
+        }
+
+      }
+    });
+  }
+
+  printError(String error) {
+    print('ERROR: $error');
+  }
+
+  printWarning(String warning) {
+    print('WARNING: $warning');
+  }
+
+  printInfo(String info) {
+    print('INFO: $info');
+  }
+
+  printSuccess(String success) {
+    print('SUCCESS: $success');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 }
 
 class SubmitButton extends StatelessWidget {
-  const SubmitButton({
-    super.key,
+  const SubmitButton({super.key,
     required GlobalKey<FormState> formKey,
     required this.context,
     required this.onFormSubmit,
@@ -217,12 +1223,12 @@ class SubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
- 
+
       child: ElevatedButton(
-           style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff2F6CF6),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                textStyle: TextStyle(
+        style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xff2F6CF6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            textStyle: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold)),
         onPressed: () {
@@ -234,7 +1240,7 @@ class SubmitButton extends StatelessWidget {
             onFormSubmit.call();
           }
         },
-        child: Text("Submit"),
+        child: const Text("Submit"),
       ),
     );
   }
@@ -255,12 +1261,12 @@ class Next extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
- 
+
       child: ElevatedButton(
-           style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff2F6CF6),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                textStyle: TextStyle(
+        style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xff2F6CF6),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            textStyle: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold)),
         onPressed: () {
@@ -297,10 +1303,10 @@ class Previous extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-                 foregroundColor: Colors.black.withOpacity(0.6),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                textStyle: TextStyle(
+        style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.black.withOpacity(0.6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            textStyle: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold)),
         onPressed: () {
@@ -319,3 +1325,4 @@ class Previous extends StatelessWidget {
     );
   }
 }
+
