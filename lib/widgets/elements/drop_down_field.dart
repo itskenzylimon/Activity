@@ -41,14 +41,13 @@ List<String> choicesByUrl = [];
     callbackElement = valueFormResults[elementName]!;
     if(callbackElement['choices'] is List<String>) {
       choices.addAll(callbackElement['choices']);
-    }else if(callbackElement['choices'] is List<Map>){
+    }
+    else if(callbackElement['choices'] is List<Map>){
       printError(callbackElement['choices']);
       for(var i = 0; i < callbackElement['choices'].length; i++){
         choices.add(callbackElement['choices'][i]['value']);
       }
     }
-    printSuccess("these are choices");
-    printSuccess("these are choices $choices");
 
     if (callbackElement['renderAs'] != null && callbackElement['renderAs'] == 'select2') {
       return Visibility(
@@ -198,36 +197,49 @@ List<String> choicesByUrl = [];
           ));
     }
     else {
-      return Visibility(
-        visible: valueFormResults[elementName]!['visible'],
-        child: Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(top: 10, bottom: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              hint: Text(
-                  callbackElement['title'] + ' ' + (callbackElement['description'] ?? '')),
-              value: choice,
-              items: choices.map<DropdownMenuItem>((choice){
-                return DropdownMenuItem(
-                  child: Text(
-                    choice,
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                  value: choice,
-                );
-              }).toList(),
-              onChanged: (value) {
-                callbackElement['value'] = value;
-                onElementCallback(callbackElement);
 
-              },
+      printSuccess(callbackElement);
+
+      choice = ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
+      return Container(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                callbackElement['title'] + ' ' + (callbackElement['description'] ?? '')),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 10, bottom: 10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton(
+                  hint: Text(
+                      callbackElement['title'] + ' ' + (callbackElement['description'] ?? '')),
+                  value: choice,
+                  items: choices.map<DropdownMenuItem>((choice){
+                    return DropdownMenuItem(
+                      value: choice,
+                      child: Text(
+                        choice == 'Select' ? '\t - \t ${callbackElement['title']}' : '\t $choice',
+                        style: Theme.of(context).textTheme.caption,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+
+                    callbackElement['value'] = value;
+                    onElementCallback(callbackElement);
+
+                  },
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       );
     }
