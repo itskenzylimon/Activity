@@ -25,18 +25,18 @@ class RadioGroupWidget extends StatelessWidget {
     String selectedChoice = '';
     callbackElement = valueFormResults[elementName]!;
     print('??????? CHOICES');
-    print(elementName);
-    print(valueFormResults[elementName]!);
-    print(callbackElement);
     print(callbackElement['choices']);
     for (var i = 0; i < callbackElement['choices'].length; i++) {
       print(callbackElement['choices'][i]);
-      if (callbackElement['choices'][i].runtimeType == {}.runtimeType){
-
-        choices.add(callbackElement['choices'][i]['value']);
-      } else {
+      print('??CHOICE TYPE');
+      print(callbackElement['choices'][i].runtimeType);
+      if (callbackElement['choices'][i].runtimeType == String){
         print(callbackElement['choices'][i]);
         choices.add(callbackElement['choices'][i]);
+      } else {
+        print('??????? CHOICES OBJECT');
+        print(callbackElement['choices']);
+        choices.add(callbackElement['choices'][i]['value']);
       }
     }
 
