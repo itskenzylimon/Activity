@@ -10,6 +10,7 @@ import '../../widgets/elements/drop_down_field.dart';
 import '../../widgets/elements/radio_group_field.dart';
 import '../../widgets/elements/signature_pad_field.dart';
 import '../../widgets/elements/text_field.dart';
+import '../../widgets/elements/text_search_update_field.dart';
 import '../../widgets/elements/type_field.dart';
 
 class SurveyJSForm extends StatefulWidget {
@@ -136,7 +137,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
-      return Visibility(child: RadioGroupWidget(
+      return Visibility(
+          child: TextSearchUpdateFieldWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
             Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
@@ -145,7 +147,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           });
         },
         elementName: element['name'],
-        valueFormResults: valueFormResults,
+        valueFormResults: valueFormResults, customTheme: {},
       ));
 
     }
@@ -173,6 +175,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       ));
 
     }
+
     Visibility radioGroup(Map<String, dynamic> element){
 
       /// call setUpElement
@@ -180,6 +183,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
         'value': '',
       }..addAll(element);
 
+      print("???? ELEMENT");
+      print(element);
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
@@ -197,6 +202,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       ));
 
     }
+
     Visibility filePicker(Map<String, dynamic> element){
 
       /// call setUpElement

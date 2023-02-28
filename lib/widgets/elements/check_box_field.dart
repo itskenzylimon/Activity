@@ -19,30 +19,64 @@ class CheckBoxWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    List choices = [];
+    var selectedCheck = false;
     callbackElement = valueFormResults[elementName]!;
-    String selectedChoice = '';
-    // Call the callback function and pass the callback value
-    // onElementCallback(callbackElement);
+    for (var i = 0; i < callbackElement['choices'].length; i++) {
+      choices.add(callbackElement['choices'][i]);
+    }
+    if (callbackElement['value'] != '') {
+      selectedCheck = callbackElement['value'] ?? false;
 
-    // Return an empty Container widget (or any other widget)
-    return Column(
-      children: [
-        Wrap(
+    }
+
+    return Visibility(
+      visible:  true,
+      child: Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (var choice in callbackElement['choices'])
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                child: ChoiceChip(
-                  label: Text(choice),
-                  selected: selectedChoice == choice ? true : false,
-                  onSelected: (bool selected) {},
-                ),
-              )
+            Text(
+              callbackElement['title'],
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Column(
+              children: choices.map((choice) {
+                return Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 10,
+                    ),
+                    /** Checkbox Widget **/
+                    Checkbox(
+                      value: selectedCheck,
+                      onChanged: (value) {
+                        selectedCheck = value!;
+                        callbackElement['value'] = value;
+                        onElementCallback(callbackElement);
+                      },
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '$choice',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: false,
+                        maxLines: 2,
+                      ),
+                    ), //Text
+
+                  ], //<Widget>[]
+                ); //Row
+              }).toList(),
+            ),
           ],
         ),
-        Text("${callbackElement['title']}: $selectedChoice")
-      ],
+      ),
     );
   }
 }

@@ -22,27 +22,69 @@ class RadioGroupWidget extends StatelessWidget {
     // onElementCallback(callbackElement);
     List choices = [];
 
-    callbackElement = valueFormResults[elementName]!;
-
     String selectedChoice = '';
+    callbackElement = valueFormResults[elementName]!;
+    print('??????? CHOICES');
+    print(elementName);
+    print(valueFormResults[elementName]!);
+    print(callbackElement);
+    print(callbackElement['choices']);
+    for (var i = 0; i < callbackElement['choices'].length; i++) {
+      print(callbackElement['choices'][i]);
+      if (callbackElement['choices'][i].runtimeType == {}.runtimeType){
+
+        choices.add(callbackElement['choices'][i]['value']);
+      } else {
+        print(callbackElement['choices'][i]);
+        choices.add(callbackElement['choices'][i]);
+      }
+    }
+
+    if (callbackElement['value'] != '') {
+      selectedChoice = callbackElement['value'] ?? '';
+    }
+    else {
+      // callbackElement['value'] = choices[0];
+
+      selectedChoice = callbackElement['value'] ?? '';
+    }
     return Visibility(
-      visible: valueFormResults[elementName]!['visible'] ?? true,
+      visible: true,
       child: Container(
-        margin: const EdgeInsets.only(top: 10, bottom: 10),
+        margin: const EdgeInsets.only(top: 10, bottom: 10, left: 16),
         child: Column(
-          children: choices.map((choice) {
-            return RadioListTile(
-              title: Text(choice),
-              value: choice,
-              groupValue: selectedChoice,
-              onChanged: (value) {
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              callbackElement['title'],
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              callbackElement['isRequired'] ? '(Required)' : '(Optional)',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            Column(
+              children: choices.map((choice) {
+                return RadioListTile(
+                  title: Text(choice),
+                  value: choice,
+                  groupValue: selectedChoice,
+                  onChanged: (value) {
+                    selectedChoice = value;
+                    callbackElement['value'] = value;
+                    onElementCallback(callbackElement);
 
-                callbackElement['value'] = value;
-                onElementCallback(callbackElement);
-
-              },
-            );
-          }).toList(),
+                  },
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );
