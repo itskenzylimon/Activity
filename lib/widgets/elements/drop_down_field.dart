@@ -35,161 +35,209 @@ class DropDownWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     callbackElement = valueFormResults[elementName]!;
 
-    if (callbackElement['renderAs'] != null && callbackElement['renderAs'] == 'select2') {
-      final ValueNotifier<List<String>> _listNotifier = ValueNotifier<List<String>>(["Select"]);
-      List<String> choicesList = [..._listNotifier.value];
+    if (callbackElement['renderAs'] != null &&
+        callbackElement['renderAs'] == 'select2') {
       String? currentSelectedValue =
-          ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
-      return Visibility(
-          visible: valueFormResults[elementName]!['visible'],
-          child: Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Search ${callbackElement['title']}'),
-                Container(
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search ${callbackElement['title']}',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.only(bottom: 12, left: 16),
-                      ),
-                      controller: callbackElement['controller'],
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          if (_debounce?.isActive ?? false) _debounce?.cancel();
-                          _debounce = Timer(const Duration(milliseconds: 100), () async {
-                            var list = await getListItems(
-                              value,
-                              callbackElement['choicesByUrl']['url'],
-                            );
-                            for (var l in list) {
-                              choicesList.add(
-                                l['value'].toString(),
-                              );
-                              _listNotifier.value = choicesList;
-                            }
-
-                            printSuccess("after query");
-                            printSuccess(choiceList);
-                          });
-                        }
-                      }),
-                ),
-                ValueListenableBuilder(
-                    valueListenable: _listNotifier,
-                    builder: (BuildContext context, choicesList, Widget? child) {
-                      return Container(
-                        width: double.infinity,
-                        height: 40,
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton(
-                            key: key,
-                            isDense: true,
-                            hint: Text(callbackElement['title'] +
-                                ' ' +
-                                (callbackElement['description'] ?? '')),
-                            value: currentSelectedValue,
-                            items: choicesList.map((String val) {
-                              return DropdownMenuItem<String>(
-                                value: val,
-                                child: Text(val),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              currentSelectedValue = value;
-                              callbackElement['value'] = value;
-                              onElementCallback(callbackElement);
-                              _listNotifier.notifyListeners();
-                            },
-                          ),
-                        ),
-                      );
-                    }),
-              ],
-            ),
-          ));
-    } else if (callbackElement['renderAs'] == null && callbackElement['choicesByUrl'] != null) {
-       String? currentSelectedValue =
-          ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
-      final ValueNotifier<List<String>> _listNotifier = ValueNotifier<List<String>>([currentSelectedValue!]);
+          ['', null].contains(callbackElement['value'])
+              ? 'Select'
+              : callbackElement['value'];
+      final ValueNotifier<List<String>> _listNotifier =
+          ValueNotifier<List<String>>([currentSelectedValue!]);
       List<String> choicesList = [..._listNotifier.value];
-     
+      ScrollController scrollController = ScrollController();
       return Visibility(
           visible: valueFormResults[elementName]!['visible'],
-          child: Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search ${callbackElement['title']}',
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.only(bottom: 12, left: 16),
-                    ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty) {
-                        Timer? debounce;
-                        if (debounce?.isActive ?? false) debounce?.cancel();
-                        debounce = Timer(const Duration(milliseconds: 1000), () async {
-                          var list = await getChoicesByUrl(
-                            value,
-                            callbackElement['choicesByUrl']['url'],
-                          );
-                          for (var l in list) {
-                            choicesList.add(
-                              l['value'].toString(),
-                            );
-                            _listNotifier.value = choicesList;
-                          }
-                        });
-                      } else {
-                        choicesList = ["Select ${callbackElement['title']}"];
-                      }
-                    },
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${callbackElement['title']}",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(5.0),
                 ),
-                SizedBox(
-                    width: double.infinity,
-                    child: ValueListenableBuilder(
-                        valueListenable: _listNotifier,
-                        builder: (BuildContext context, choicesList, Widget? child) {
-                          return Expanded(child: ListView.separated(
-                            shrinkWrap: true,
-                            itemBuilder: (context, int index) {
-                              return ListTile(
-                                onTap: () {
-                                  callbackElement['value'] = choicesList[index];
-                                  onElementCallback(callbackElement);
-                                },
-                                title: Text(choicesList[index]),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(color: Colors.grey)),
+                      ),
+                      child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Search ${callbackElement['title']}',
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.only(bottom: 12, left: 16),
+                          ),
+                          controller: callbackElement['controller'],
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {
+                              if (_debounce?.isActive ?? false)
+                                _debounce?.cancel();
+                              _debounce = Timer(
+                                  const Duration(milliseconds: 100), () async {
+                                var list = await getListItems(
+                                  value,
+                                  callbackElement['choicesByUrl']['url'],
+                                );
+                                for (var l in list) {
+                                  choicesList.add(
+                                    l['value'].toString(),
+                                  );
+                                  _listNotifier.value = choicesList;
+                                }
+
+                                printSuccess("after query");
+                                printSuccess(choiceList);
+                              });
+                            } else {
+                              choiceList.clear();
+                              choicesList = [
+                                "Select ${callbackElement['title']}"
+                              ];
+                            }
+                          }),
+                    ),
+                    SizedBox(
+                        width: double.infinity,
+                        child: ValueListenableBuilder(
+                            valueListenable: _listNotifier,
+                            builder: (BuildContext context, choicesList,
+                                Widget? child) {
+                              return Expanded(
+                                child: SizedBox(
+                                  height: choicesList.length > 2 ? 250 : 40,
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    controller: scrollController,
+                                    itemBuilder: (context, int index) {
+                                      return ListTile(
+                                        onTap: () {
+                                          callbackElement['value'] =
+                                              choicesList[index];
+                                          onElementCallback(callbackElement);
+                                        },
+                                        title: Text(choicesList[index]),
+                                      );
+                                    },
+                                    separatorBuilder: (context, int index) =>
+                                        SizedBox(height: 10),
+                                    itemCount: choicesList.length,
+                                  ),
+                                ),
                               );
-                            },
-                            separatorBuilder: (context, int index) => SizedBox(height: 10),
-                            itemCount: choicesList.length,
-                          ));
-                        })),
-              ],
-            ),
+                            })),
+                  ],
+                ),
+              )
+            ],
+          ));
+    } else if (callbackElement['renderAs'] == null &&
+        callbackElement['choicesByUrl'] != null) {
+      String? currentSelectedValue =
+          ['', null].contains(callbackElement['value'])
+              ? 'Select'
+              : callbackElement['value'];
+      final ValueNotifier<List<String>> _listNotifier =
+          ValueNotifier<List<String>>([currentSelectedValue!]);
+      List<String> choicesList = [..._listNotifier.value];
+      ScrollController scrollController = ScrollController();
+      return Visibility(
+          visible: valueFormResults[elementName]!['visible'],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${callbackElement['title']}",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(color: Colors.grey)),
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search ${callbackElement['title']}',
+                          border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.only(bottom: 12, left: 16),
+                        ),
+                        onChanged: (value) {
+                          if (value.isNotEmpty) {
+                            Timer? debounce;
+                            if (debounce?.isActive ?? false) debounce?.cancel();
+                            debounce = Timer(const Duration(milliseconds: 1000),
+                                () async {
+                              var list = await getChoicesByUrl(
+                                value,
+                                callbackElement['choicesByUrl']['url'],
+                              );
+                              for (var l in list) {
+                                choicesList.add(
+                                  l['value'].toString(),
+                                );
+                                _listNotifier.value = choicesList;
+                              }
+                            });
+                          } else {
+                            choicesList = [
+                              "Select ${callbackElement['title']}"
+                            ];
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                        width: double.infinity,
+                        child: ValueListenableBuilder(
+                            valueListenable: _listNotifier,
+                            builder: (BuildContext context, choicesList,
+                                Widget? child) {
+                              return Expanded(
+                                  child: ListView.separated(
+                                shrinkWrap: true,
+                                controller: scrollController,
+                                itemBuilder: (context, int index) {
+                                  return ListTile(
+                                    onTap: () {
+                                      callbackElement['value'] =
+                                          choicesList[index];
+                                      onElementCallback(callbackElement);
+                                    },
+                                    title: Text(choicesList[index]),
+                                  );
+                                },
+                                separatorBuilder: (context, int index) =>
+                                    SizedBox(height: 10),
+                                itemCount: choicesList.length,
+                              ));
+                            })),
+                  ],
+                ),
+              )
+            ],
           ));
     } else {
       printSuccess(callbackElement);
@@ -204,44 +252,61 @@ class DropDownWidget extends StatelessWidget {
         }
       }
 
-      choice = ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
-      return Container(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              height: 40,
-              margin: const EdgeInsets.only(top: 10, bottom: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  hint:
-                      Text(callbackElement['title'] + ' ' + (callbackElement['description'] ?? '')),
-                  value: choice,
-                  items: choices.map<DropdownMenuItem>((choice) {
-                    return DropdownMenuItem(
+      choice = ['', null].contains(callbackElement['value'])
+          ? 'Select'
+          : callbackElement['value'];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "${callbackElement['title']}",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  height: 40,
+                  margin: const EdgeInsets.only(top: 10, bottom: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton(
+                      hint: Text(callbackElement['title'] +
+                          ' ' +
+                          (callbackElement['description'] ?? '')),
                       value: choice,
-                      child: Text(
-                        choice == 'Select' ? '\t - \t ${callbackElement['title']}' : '\t $choice',
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    callbackElement['value'] = value;
-                    onElementCallback(callbackElement);
-                  },
+                      items: choices.map<DropdownMenuItem>((choice) {
+                        return DropdownMenuItem(
+                          value: choice,
+                          child: Text(
+                            choice == 'Select'
+                                ? '\t - \t ${callbackElement['title']}'
+                                : '\t $choice',
+                            style: Theme.of(context).textTheme.caption,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        callbackElement['value'] = value;
+                        onElementCallback(callbackElement);
+                      },
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          )
+        ],
       );
     }
 
@@ -267,8 +332,9 @@ class DropDownWidget extends StatelessWidget {
     /// Handle httplookup
     /// Handle choicesByUrl
 
-    ActiveResponse activeResponse = await activeRequest
-        .getApi(Params(endpoint: request['url'], queryParameters: {"number": "${request['id']}"}));
+    ActiveResponse activeResponse = await activeRequest.getApi(Params(
+        endpoint: request['url'],
+        queryParameters: {"number": "${request['id']}"}));
     final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
     return convertedData;
   }
@@ -284,7 +350,8 @@ class DropDownWidget extends StatelessWidget {
       logResponse: true,
       withTrustedRoots: true,
     );
-    ActiveResponse userDataRes = await activeRequest.getApi(Params(endpoint: url, queryParameters: {
+    ActiveResponse userDataRes =
+        await activeRequest.getApi(Params(endpoint: url, queryParameters: {
       '': "",
     }));
 
@@ -292,8 +359,14 @@ class DropDownWidget extends StatelessWidget {
       var data = json.decode(userDataRes.data!);
       var filteredList = data
           .where((elem) =>
-              elem['value'].toString().toLowerCase().contains(query.toLowerCase()) ||
-              elem['text'].toString().toLowerCase().contains(query.toLowerCase()))
+              elem['value']
+                  .toString()
+                  .toLowerCase()
+                  .contains(query.toLowerCase()) ||
+              elem['text']
+                  .toString()
+                  .toLowerCase()
+                  .contains(query.toLowerCase()))
           .toList();
       list = filteredList.toSet().toList();
     } else {}
@@ -311,7 +384,8 @@ class DropDownWidget extends StatelessWidget {
       logResponse: true,
       withTrustedRoots: true,
     );
-    ActiveResponse userDataRes = await activeRequest.getApi(Params(endpoint: url, queryParameters: {
+    ActiveResponse userDataRes =
+        await activeRequest.getApi(Params(endpoint: url, queryParameters: {
       '': "",
     }));
 
@@ -330,7 +404,10 @@ class DropDownWidget extends StatelessWidget {
         }
       }
       var filteredList = listData
-          .where((elem) => elem['value'].toString().toLowerCase().contains(query.toLowerCase()))
+          .where((elem) => elem['value']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
           .toList();
       list = filteredList.toSet().toList();
     } else {}
