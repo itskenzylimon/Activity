@@ -20,8 +20,7 @@ class DropDownWidget extends StatelessWidget {
   // Perform some logic or user interaction that generates a callback value
   Map<String, dynamic> callbackElement = {};
   ActiveRequest activeRequest = ActiveRequest();
-  String choice = "Select";
-  List<String> choices = ['Select'];
+
   List<String> choiceList = [];
 
   TextEditingController textEditingController = TextEditingController();
@@ -35,14 +34,6 @@ class DropDownWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     callbackElement = valueFormResults[elementName]!;
-    if (callbackElement['choices'] is List<String>) {
-      choices.addAll(callbackElement['choices']);
-    } else if (callbackElement['choices'] is List<Map>) {
-      printError(callbackElement['choices']);
-      for (var i = 0; i < callbackElement['choices'].length; i++) {
-        choices.add(callbackElement['choices'][i]['value']);
-      }
-    }
 
     if (callbackElement['renderAs'] != null && callbackElement['renderAs'] == 'select2') {
       final ValueNotifier<List<String>> _listNotifier = ValueNotifier<List<String>>(["Select"]);
@@ -202,6 +193,16 @@ class DropDownWidget extends StatelessWidget {
           ));
     } else {
       printSuccess(callbackElement);
+      String choice = "";
+      List<String> choices = ['Select'];
+      if (callbackElement['choices'] is List<String>) {
+        choices.addAll(callbackElement['choices']);
+      } else if (callbackElement['choices'] is List<Map>) {
+        printError(callbackElement['choices']);
+        for (var i = 0; i < callbackElement['choices'].length; i++) {
+          choices.add(callbackElement['choices'][i]['value']);
+        }
+      }
 
       choice = ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
       return Container(
