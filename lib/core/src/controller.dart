@@ -257,7 +257,6 @@ abstract class ActiveController {
   /// Use this when you want to clear current state & event listeners
   /// that are connected and are active.
 
-  @mustCallSuper
   void resetActivities() {
     for (var sub in _subscriptions) {
       sub.cancel();

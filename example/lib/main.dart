@@ -133,7 +133,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                   schema: activeController.schema,
                   context: context,
                   formResults: formResults,
-                  onFormSubmit: () {
+                onFormValueSubmit: (Map results) {
                   /// At this point, the form has been submitted and the
                   /// results are available in the formResults variable
                   /// handle the results here

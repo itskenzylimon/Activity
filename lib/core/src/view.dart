@@ -45,7 +45,6 @@ abstract class ActiveView<T extends ActiveController> extends StatefulWidget {
   /// Avoid overriding this function. Overriding this function can have
   /// unintended exceptions.
 
-  @mustCallSuper
   @override
   State<StatefulWidget> createState() {
     // ignore: no_logic_in_create_state
@@ -120,7 +119,6 @@ abstract class ActiveState<T extends ActiveView, E extends ActiveController>
 
   /// [resetActivities]
   /// Reset States. It is what it is
-  @mustCallSuper
   void resetActivities() {
     activeController.resetActivities();
     super.dispose();

@@ -17,13 +17,13 @@ class SurveyJSForm extends StatefulWidget {
   final Map schema;
   final Map<String, Map<String, dynamic>> formResults;
   final BuildContext context;
-  final VoidCallback onFormSubmit;
+  final ValueChanged<Map<String, dynamic>> onFormValueSubmit;
 
   const SurveyJSForm({super.key,
     required this.schema,
     required this.context,
     required this.formResults,
-    required this.onFormSubmit,
+    required this.onFormValueSubmit,
   });
 
   @override
@@ -632,7 +632,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                             context: context,
                             formKey: formKey,
                             onFormSubmit: () {
-                              // widget.onFormSubmit();
+                              /// TODO: Validate the form
+                              widget.onFormValueSubmit(valueFormResults);
                             },) : Next(
                             context: context,
                             onNext: () {
@@ -1213,25 +1214,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
     });
   }
 
-  printError(String error) {
-    print('ERROR: $error');
-  }
-
-  printWarning(String warning) {
-    print('WARNING: $warning');
-  }
-
-  printInfo(String info) {
-    print('INFO: $info');
-  }
-
-  printSuccess(String success) {
-    print('SUCCESS: $success');
-  }
-
   @override
   void dispose() {
-    super.dispose();
+    // super.dispose();
   }
 
 }
@@ -1263,7 +1248,6 @@ class SubmitButton extends StatelessWidget {
             // If the form is valid, display a Snackbar.
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('Processing Data')));
-
             onFormSubmit.call();
           }
         },
