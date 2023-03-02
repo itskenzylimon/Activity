@@ -113,8 +113,7 @@ class DropDownWidget extends StatelessWidget {
                             valueListenable: _listNotifier,
                             builder: (BuildContext context, choicesList,
                                 Widget? child) {
-                              return Expanded(
-                                child: SizedBox(
+                              return  SizedBox(
                                   height: choicesList.length > 2 ? 250 : 40,
                                   child: ListView.separated(
                                     shrinkWrap: true,
@@ -133,7 +132,7 @@ class DropDownWidget extends StatelessWidget {
                                         SizedBox(height: 10),
                                     itemCount: choicesList.length,
                                   ),
-                                ),
+
                               );
                             })),
                   ],
@@ -215,8 +214,7 @@ class DropDownWidget extends StatelessWidget {
                             valueListenable: _listNotifier,
                             builder: (BuildContext context, choicesList,
                                 Widget? child) {
-                              return Expanded(
-                                  child: ListView.separated(
+                              return  ListView.separated(
                                 shrinkWrap: true,
                                 controller: scrollController,
                                 itemBuilder: (context, int index) {
@@ -232,7 +230,7 @@ class DropDownWidget extends StatelessWidget {
                                 separatorBuilder: (context, int index) =>
                                     SizedBox(height: 10),
                                 itemCount: choicesList.length,
-                              ));
+                              );
                             })),
                   ],
                 ),
@@ -240,21 +238,29 @@ class DropDownWidget extends StatelessWidget {
             ],
           ));
     } else {
+      printSuccess("--------------------------------");
       printSuccess(callbackElement);
-      String choice = "";
-      List<String> choices = ['Select'];
-      if (callbackElement['choices'] is List<String>) {
-        choices.addAll(callbackElement['choices']);
-      } else if (callbackElement['choices'] is List<Map>) {
-        printError(callbackElement['choices']);
-        for (var i = 0; i < callbackElement['choices'].length; i++) {
-          choices.add(callbackElement['choices'][i]['value']);
-        }
-      }
-
-      choice = ['', null].contains(callbackElement['value'])
+      String? currentSelectedValue =
+      ['', null].contains(callbackElement['value'])
           ? 'Select'
           : callbackElement['value'];
+      List choices = ["Select"];
+      List data = callbackElement['choices'];
+      printSuccess("==========================================================");
+      printSuccess(data.runtimeType);
+        for(int i = 0; i < data.length; i++) {
+          printWarning(data[i].runtimeType);
+          if (data[i].runtimeType == String) {
+            choices.add(data[i]);
+            printWarning("data as List<String>");
+            printError(choices);
+          } else {
+            printError(data);
+            choices.add(data[i]['value']);
+          }
+        }
+      printSuccess(choices);
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -266,7 +272,6 @@ class DropDownWidget extends StatelessWidget {
             height: 10,
           ),
           Container(
-            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -281,10 +286,15 @@ class DropDownWidget extends StatelessWidget {
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton(
-                      hint: Text(callbackElement['title'] +
-                          ' ' +
-                          (callbackElement['description'] ?? '')),
-                      value: choice,
+                      hint: SizedBox(
+                        width: 100,
+                        child: Text(callbackElement['title'] +
+                            ' ' +
+                            (callbackElement['description'] ?? ''),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      value: currentSelectedValue,
                       items: choices.map<DropdownMenuItem>((choice) {
                         return DropdownMenuItem(
                           value: choice,
@@ -297,6 +307,7 @@ class DropDownWidget extends StatelessWidget {
                         );
                       }).toList(),
                       onChanged: (value) {
+                        currentSelectedValue = value;
                         callbackElement['value'] = value;
                         onElementCallback(callbackElement);
                       },
