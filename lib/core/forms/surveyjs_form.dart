@@ -517,7 +517,50 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       }
     }
 
+
+    /// new Line function
+    /// check if next element has startWithNewLine = false
+    bool checkNextLine(Map element, int index){
+      bool startWithNewLine = true;
+      List fields = page['elements'];
+      Map nextElement = fields.length == (index + 1) ? {} : fields[index + 1];
+      if(nextElement.isNotEmpty){
+        startWithNewLine = nextElement['startWithNewLine'] ?? true;
+        printError(' @#@#@#@#@# : ${element['name']}');
+        printError('startWithNewLine: $startWithNewLine');
+        printError(' %^%^%^%^%^% : ${nextElement['name']}');
+      } else {
+        startWithNewLine = true;
+      }
+      printError('startWithNewLine: $startWithNewLine');
+      return startWithNewLine;
+    }
+
     ListView buildForm() {
+
+      // List<Widget> children = [];
+      // List<Widget> rowChildren = [];
+      // List fields = page['elements'];
+
+      /// Three columns in a row
+      // for(var element in fields){
+      //   if(rowChildren.isEmpty){
+      //     rowChildren.add(
+      //         checkElement(element)
+      //     );
+      //   } else {
+      //     rowChildren.add(checkElement(element));
+      //     children.add(Row(
+      //       children: [
+      //         for (var element in rowChildren)
+      //           element
+      //       ],
+      //     ));
+      //     printError('rowChildren: $rowChildren');
+      //     printError('children: ${children}');
+      //     rowChildren.clear();
+      //   }
+      // }
 
       ListView listView = ListView(
         children: [
