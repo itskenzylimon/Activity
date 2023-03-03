@@ -284,8 +284,7 @@ class DropDownWidget extends StatelessWidget {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(5.0),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton(
+                  child:  DropdownButtonFormField(
                       hint: SizedBox(
                         width: 100,
                         child: Text(callbackElement['title'] +
@@ -311,8 +310,14 @@ class DropDownWidget extends StatelessWidget {
                         callbackElement['value'] = value;
                         onElementCallback(callbackElement);
                       },
+                      validator: (value) {
+                        if (valueFormResults[elementName]!['isRequired'] == null) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter ${valueFormResults[elementName]!['title']}';
+                          }
+                        }
+                      },
                     ),
-                  ),
                 ),
               ],
             ),
