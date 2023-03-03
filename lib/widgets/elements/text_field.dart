@@ -26,8 +26,7 @@ class TextFieldWidget extends StatelessWidget {
     callbackElement = valueFormResults[elementName]!;
 
     /// label text for the text field is the title with a * if the field is required
-    String labelText = callbackElement['title'] +
-        (callbackElement['isRequired'] ?? false ? ' * ' : '');
+    String labelText = "${callbackElement['title']} ${(callbackElement['isRequired'] ?? false ? ' * ' : '')}";
 
     return Container(
         margin: const EdgeInsets.all(10),
