@@ -19,7 +19,8 @@ class SurveyJSForm extends StatefulWidget {
   final BuildContext context;
   final ValueChanged<Map<String, dynamic>> onFormValueSubmit;
 
-  const SurveyJSForm({super.key,
+  const SurveyJSForm({
+    super.key,
     required this.schema,
     required this.context,
     required this.formResults,
@@ -30,9 +31,8 @@ class SurveyJSForm extends StatefulWidget {
   State<SurveyJSForm> createState() => _SurveyJSFormState();
 }
 
-class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMixin{
-
-
+class _SurveyJSFormState extends State<SurveyJSForm>
+    with TickerProviderStateMixin {
   /// All themes map
   List<Map<String, dynamic>> themeStyle = [];
 
@@ -44,7 +44,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
 
   /// Theme map
   Map<String, dynamic> metaData = {
-    'theme' : {
+    'theme': {
       'theme': {
         'primaryColor': Colors.teal,
         'secondaryColor': Colors.teal,
@@ -52,13 +52,13 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       'textfield': {
         'showCursor': true,
       },
-      'button' : {
-        'type': 'outline' /// outline, filled
+      'button': {
+        'type': 'outline'
+
+        /// outline, filled
       },
     },
-    'customWidgets': {
-      'elementName':  SampleWidget
-    }
+    'customWidgets': {'elementName': SampleWidget}
   };
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -79,8 +79,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   void initState() {
     super.initState();
 
-    pages = widget.schema['pages'] ??
-        widget.schema['service']['schema']['pages'];
+    pages =
+        widget.schema['pages'] ?? widget.schema['service']['schema']['pages'];
 
     tabController = TabController(
       initialIndex: initialIndex,
@@ -107,28 +107,29 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   }
 
   Widget formBuilderController(page) {
-
     // assign formResults to formValues.
-    Visibility dropdownChoices(Map<String, dynamic> element){
-
+    Visibility dropdownChoices(Map<String, dynamic> element) {
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], element);
 
-      return Visibility(child: DropDownWidget(
+      return Visibility(
+          child: DropDownWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            Map<String, Map<String, dynamic>> newValueFormResults =
+                valueFormResults;
             newValueFormResults[element['name']] = value;
             valueFormResults = newValueFormResults;
           });
         },
         elementName: element['name'],
-        valueFormResults: valueFormResults, customTheme: metaData['theme'],
+        valueFormResults: valueFormResults,
+        customTheme: metaData['theme'],
       ));
-
     }
-    Visibility httpLookUp(Map<String, dynamic> element){
+
+    Visibility httpLookUp(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -141,70 +142,19 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           child: TextSearchUpdateFieldWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
-        },
-        elementName: element['name'],
-        valueFormResults: valueFormResults, customTheme: {},
-      ));
-
-    }
-    Visibility datepicker(Map<String, dynamic> element){
-
-      /// call setUpElement
-      Map<String, dynamic> newElement = {
-        'value': '',
-      }..addAll(element);
-
-      /// After setting up the element, add it to the elementData
-      /// use elementData in the rest of the function
-      setUpElement(element['name'], newElement);
-
-      return Visibility(child: DatePickerWidget(
-        onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
-        },
-        elementName: element['name'],
-        valueFormResults: valueFormResults, customTheme: metaData['theme'],
-      ));
-
-    }
-
-    Visibility radioGroup(Map<String, dynamic> element){
-
-      /// call setUpElement
-      Map<String, dynamic> newElement = {
-        'value': '',
-      }..addAll(element);
-
-      print("???? ELEMENT");
-      print(element);
-      /// After setting up the element, add it to the elementData
-      /// use elementData in the rest of the function
-      setUpElement(element['name'], newElement);
-
-      return Visibility(child: RadioGroupWidget(
-        onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            Map<String, Map<String, dynamic>> newValueFormResults =
+                valueFormResults;
             newValueFormResults[element['name']] = value;
             valueFormResults = newValueFormResults;
           });
         },
         elementName: element['name'],
         valueFormResults: valueFormResults,
+        customTheme: {},
       ));
-
     }
 
-    Visibility filePicker(Map<String, dynamic> element){
-
+    Visibility datepicker(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -215,10 +165,50 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       setUpElement(element['name'], newElement);
 
       return Visibility(
-          child: Container());
+          child: DatePickerWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults =
+                valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults,
+        customTheme: metaData['theme'],
+      ));
     }
-    Visibility checkbox(Map<String, dynamic> element){
 
+    Visibility radioGroup(Map<String, dynamic> element) {
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      print("???? ELEMENT");
+      print(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          child: RadioGroupWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults =
+                valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults,
+      ));
+    }
+
+    Visibility filePicker(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -228,21 +218,10 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
 
-      return Visibility(child: CheckBoxWidget(
-        onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
-        },
-        elementName: element['name'],
-        valueFormResults: valueFormResults, customTheme: metaData['theme'],
-      ));
-
+      return Visibility(child: Container());
     }
-    Visibility signaturePad(Map<String, dynamic> element){
 
+    Visibility checkbox(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -252,20 +231,49 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
 
-      return Visibility(child: SignatureFieldWidget(
+      return Visibility(
+          child: CheckBoxWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+            Map<String, Map<String, dynamic>> newValueFormResults =
+                valueFormResults;
             newValueFormResults[element['name']] = value;
             valueFormResults = newValueFormResults;
           });
         },
         elementName: element['name'],
-        valueFormResults: valueFormResults, customTheme: metaData['theme'],
+        valueFormResults: valueFormResults,
+        customTheme: metaData['theme'],
       ));
     }
-    Visibility ageCalculator(Map<String, dynamic> element){
 
+    Visibility signaturePad(Map<String, dynamic> element) {
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          child: SignatureFieldWidget(
+        onElementCallback: (Map<String, dynamic> value) {
+          setState(() {
+            Map<String, Map<String, dynamic>> newValueFormResults =
+                valueFormResults;
+            newValueFormResults[element['name']] = value;
+            valueFormResults = newValueFormResults;
+          });
+        },
+        elementName: element['name'],
+        valueFormResults: valueFormResults,
+        customTheme: metaData['theme'],
+      ));
+    }
+
+    Visibility ageCalculator(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -280,18 +288,19 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           child: AgeCalculatorWidget(
             onElementCallback: (Map<String, dynamic> value) {
               setState(() {
-                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                Map<String, Map<String, dynamic>> newValueFormResults =
+                    valueFormResults;
                 newValueFormResults[element['name']] = value;
                 valueFormResults = newValueFormResults;
               });
             },
             elementName: element['name'],
-            valueFormResults: valueFormResults, customTheme: metaData['theme'],
+            valueFormResults: valueFormResults,
+            customTheme: metaData['theme'],
           ));
-
     }
-    Visibility container(Map<String, dynamic> element){
 
+    Visibility container(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -306,10 +315,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           child: Container(
             padding: const EdgeInsets.all(10),
           ));
-
     }
-    Visibility textField(Map<String, dynamic> element) {
 
+    Visibility textField(Map<String, dynamic> element) {
       TextEditingController textEditingController = TextEditingController();
 
       /// call setUpElement
@@ -327,7 +335,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           child: TextFieldWidget(
             onElementCallback: (Map<String, dynamic> value) {
               setState(() {
-                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                Map<String, Map<String, dynamic>> newValueFormResults =
+                    valueFormResults;
                 newValueFormResults[element['name']] = value;
                 valueFormResults = newValueFormResults;
               });
@@ -336,10 +345,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             valueFormResults: valueFormResults,
             customTheme: metaData['theme'],
           ));
-
     }
-    Visibility textSearchUpdateField(Map<String, dynamic> element) {
 
+    Visibility textSearchUpdateField(Map<String, dynamic> element) {
       TextEditingController textEditingController = TextEditingController();
 
       /// call setUpElement
@@ -357,18 +365,19 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           child: TextFieldWidget(
             onElementCallback: (Map<String, dynamic> value) {
               setState(() {
-                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                Map<String, Map<String, dynamic>> newValueFormResults =
+                    valueFormResults;
                 newValueFormResults[element['name']] = value;
                 valueFormResults = newValueFormResults;
               });
             },
             elementName: element['name'],
-            valueFormResults: valueFormResults, customTheme: metaData['theme'],
+            valueFormResults: valueFormResults,
+            customTheme: metaData['theme'],
           ));
-
     }
-    Visibility customWidget(Map<String, dynamic> element){
 
+    Visibility customWidget(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
@@ -425,9 +434,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
     }
 
     Widget getElement(Map<String, dynamic> element) {
-
       switch (element['type']) {
-
         case 'text':
           return textField(element);
 
@@ -470,9 +477,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
     }
 
     Widget checkElement(Map<String, dynamic> element) {
-
       if (element['type'] == 'panel') {
-
         /// After setting up the element, add it to the elementData
         /// use elementData in the rest of the function
         setUpElement(element['name'], element);
@@ -511,62 +516,14 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
                 )),
           ),
         );
-      }
-      else {
+      } else {
         return getElement(element);
       }
     }
 
-
-    /// new Line function
-    /// check if next element has startWithNewLine = false
-    bool checkNextLine(Map element, int index){
-      bool startWithNewLine = true;
-      List fields = page['elements'];
-      Map nextElement = fields.length == (index + 1) ? {} : fields[index + 1];
-      if(nextElement.isNotEmpty){
-        startWithNewLine = nextElement['startWithNewLine'] ?? true;
-        printError(' @#@#@#@#@# : ${element['name']}');
-        printError('startWithNewLine: $startWithNewLine');
-        printError(' %^%^%^%^%^% : ${nextElement['name']}');
-      } else {
-        startWithNewLine = true;
-      }
-      printError('startWithNewLine: $startWithNewLine');
-      return startWithNewLine;
-    }
-
     ListView buildForm() {
-
-      // List<Widget> children = [];
-      // List<Widget> rowChildren = [];
-      // List fields = page['elements'];
-
-      /// Three columns in a row
-      // for(var element in fields){
-      //   if(rowChildren.isEmpty){
-      //     rowChildren.add(
-      //         checkElement(element)
-      //     );
-      //   } else {
-      //     rowChildren.add(checkElement(element));
-      //     children.add(Row(
-      //       children: [
-      //         for (var element in rowChildren)
-      //           element
-      //       ],
-      //     ));
-      //     printError('rowChildren: $rowChildren');
-      //     printError('children: ${children}');
-      //     rowChildren.clear();
-      //   }
-      // }
-
       ListView listView = ListView(
-        children: [
-          for (var element in page['elements'])
-            checkElement(element)
-        ],
+        children: [for (var element in page['elements']) checkElement(element)],
       );
 
       return listView;
@@ -581,15 +538,13 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
 
     return Visibility(
         visible: valueFormResults[page['name']]!['visible'] ?? true,
-        child: buildForm()
-    );
+        child: buildForm());
   }
 
   /// Extend the custom widget functions
 
   @override
   Widget build(BuildContext context) {
-
     visibleIf();
     isRequiredIf();
     enableIf();
@@ -597,120 +552,155 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
     return Scaffold(
       body: SafeArea(
           child: Form(
-            key: formKey,
-            child: Column(
-              children: <Widget>[
-                // the tab bar with pages
-                SizedBox(
-                  height: 50,
-                  child: AppBar(
-                    elevation: 0,
-                    backgroundColor: Colors.white,
-                    bottom: TabBar(
-                      unselectedLabelStyle:
-                      const TextStyle(fontSize: 14.0, color: Color(0xff0062E1),fontWeight: FontWeight.w500),
-                      labelStyle: const TextStyle(fontSize: 14.0, color: Color(0xff101828),fontWeight: FontWeight.bold),
-                      labelColor: const Color(0xff0062E1),
-                      unselectedLabelColor: const Color(0xff101828),
-                      controller: tabController,
-                      isScrollable: true,
-                      tabs: [
-                        //// TODO: Some pages could be invisible
-                        for (var page in pages)
-                          FittedBox(
-                            fit: BoxFit.contain,
-                            child: Tab(
-                              text: page['title'],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                // create widgets for each tab bar here
-                Expanded(
-                  flex: 1,
-                  child:
-                  TabBarView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      controller: tabController,
-                      children:
-
-                      [
-                        for (var page in pages)
-                          formBuilderController(page)
-                      ]
-
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    border: Border(
-                      top: BorderSide(width: 1.0, color: Colors.grey.withOpacity(0.3)),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16, top:8, bottom: 8,left:16),
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Visibility(
-                            visible: initialIndex == 0 ? false : true,
-                            child: Previous(
-                              context: context,
-                              onPrevious: () {
-                                if (tabController.index > 0) {
-                                  setState(() {
-                                    initialIndex = initialIndex -1;
-                                  });
-                                  tabController.index -= 1;
-                                }
-                              }, formKey: formKey,),
-                          ),
-                          const Spacer(),
-                          (initialIndex +1)  == pages.length ? SubmitButton(
-                            context: context,
-                            formKey: formKey,
-                            onFormSubmit: () {
-                              /// TODO: Validate the form
-                              widget.onFormValueSubmit(valueFormResults);
-                            },) : Next(
-                            context: context,
-                            onNext: () {
-                              if (tabController.index < pages.length - 1) {
-                                setState(() {
-                                  initialIndex = initialIndex +1;
-                                });
-                                tabController.index += 1;
-                              }
-                            }, formKey: formKey,)
-                        ],
+        key: formKey,
+        child: Column(
+          children: <Widget>[
+            // the tab bar with pages
+            SizedBox(
+              height: 50,
+              child: AppBar(
+                elevation: 0,
+                backgroundColor: Colors.white,
+                bottom: TabBar(
+                  unselectedLabelStyle: const TextStyle(
+                      fontSize: 14.0,
+                      color: Color(0xff0062E1),
+                      fontWeight: FontWeight.w500),
+                  labelStyle: const TextStyle(
+                      fontSize: 14.0,
+                      color: Color(0xff101828),
+                      fontWeight: FontWeight.bold),
+                  labelColor: const Color(0xff0062E1),
+                  unselectedLabelColor: const Color(0xff101828),
+                  controller: tabController,
+                  isScrollable: true,
+                  tabs: [
+                    //// TODO: Some pages could be invisible
+                    for (var page in pages)
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: Tab(
+                          text: page['title'],
+                        ),
                       ),
-                    ),
+                  ],
+                ),
+              ),
+            ),
+            // create widgets for each tab bar here
+            Expanded(
+              flex: 1,
+              child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  controller: tabController,
+                  children: [
+                    for (var page in pages) formBuilderController(page)
+                  ]),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                border: Border(
+                  top: BorderSide(
+                      width: 1.0, color: Colors.grey.withOpacity(0.3)),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    right: 16, top: 8, bottom: 8, left: 16),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Visibility(
+                        visible: initialIndex == 0 ? false : true,
+                        child: Previous(
+                          context: context,
+                          onPrevious: () {
+                            if (tabController.index > 0) {
+                              setState(() {
+                                initialIndex = initialIndex - 1;
+                              });
+                              tabController.index -= 1;
+                            }
+                          },
+                          formKey: formKey,
+                        ),
+                      ),
+                      const Spacer(),
+                      (initialIndex + 1) == pages.length
+                          ? SubmitButton(
+                              context: context,
+                              formKey: formKey,
+                              onFormSubmit: () {
+                                /// TODO: Validate the form
+                                var listValues = [];
+                                valueFormResults.forEach((key, value) {
+                                  if (value.containsKey("value") &&
+                                      value.containsKey("isRequired")) {
+                                    if (value['isRequired'] == true &&
+                                        value['value'] != "") {
+                                      listValues.add(true);
+                                    } else {
+                                      listValues.add(false);
+                                    }
+                                  }
+                                });
+                                var isValid = listValues
+                                    .any((element) => element == false);
+                                if (isValid == true) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                          backgroundColor: Colors.red,
+                                          content: Text(
+                                            "Fill all required fields",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400),
+                                          )));
+                                } else {
+                                  printError(
+                                      "valueFormResults--------------------");
+                                  widget.onFormValueSubmit(valueFormResults);
+                                  printError(valueFormResults);
+                                }
+                              },
+                            )
+                          : Next(
+                              context: context,
+                              onNext: () {
+                                if (tabController.index < pages.length - 1) {
+                                  setState(() {
+                                    initialIndex = initialIndex + 1;
+                                  });
+                                  tabController.index += 1;
+                                }
+                              },
+                              formKey: formKey,
+                            )
+                    ],
                   ),
                 ),
-                // the buttons
-              ],
+              ),
             ),
-          )
-      ),
+            // the buttons
+          ],
+        ),
+      )),
     );
   }
 
   /// All created elements should be added here
   /// This is called when a form element is created
   /// It updates the formValues map and formResults map
-  Map<String, dynamic> setUpElement(String name, Map<String, dynamic> value){
-
+  Map<String, dynamic> setUpElement(String name, Map<String, dynamic> value) {
     /// new element value
     Map<String, dynamic> newValue = value;
 
     /// add the element to the formValues map
-    if(valueFormResults.containsKey(name) == false){
-
+    if (valueFormResults.containsKey(name) == false) {
       setState(() {
         /// Add the value
         valueFormResults.putIfAbsent(name, () => newValue);
@@ -718,8 +708,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
         isRequiredIf();
         enableIf();
       });
-
     }
+
     /// return the new element
     return newValue;
   }
@@ -732,13 +722,12 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   }
 
   List<String> trimListString(String value) {
-    try{
+    try {
       value.toLowerCase();
       int start = value.indexOf("[") + 1;
       int end = value.indexOf("]");
-      return value.substring(start, end)
-          .split(",").toList();
-    } catch(e){
+      return value.substring(start, end).split(",").toList();
+    } catch (e) {
       printError(' ******* $e ********');
       return [];
     }
@@ -756,17 +745,23 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   /// returns a list of strings
   List splitStringList(String value) {
     List splits = [];
+
     /// check if the value contains [and, or]
-    if(value.contains(" or ") || value.contains(" and ")){
+    if (value.contains(" or ") || value.contains(" and ")) {
       /// separate a string by or and remove the ' from values
-      if(value.contains(" or ")){
-        splits.addAll(value.split(" or ").map((str) =>
-            str.replaceAll("'", "").replaceAll(", ", ",")).toList());
+      if (value.contains(" or ")) {
+        splits.addAll(value
+            .split(" or ")
+            .map((str) => str.replaceAll("'", "").replaceAll(", ", ","))
+            .toList());
       }
+
       /// separate a string by and and remove the ' from values
-      if(value.contains(" and ")){
-        splits.addAll(value.split(" and ").map((str) =>
-            str.replaceAll("'", "").replaceAll(", ", ",")).toList());
+      if (value.contains(" and ")) {
+        splits.addAll(value
+            .split(" and ")
+            .map((str) => str.replaceAll("'", "").replaceAll(", ", ","))
+            .toList());
       }
     } else {
       splits.add(value.replaceAll("'", "").replaceAll(", ", ","));
@@ -779,7 +774,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   enableIf() {
     /// loop through the objects to get value element
     valueFormResults.forEach((name, element) {
-
       // printWarning( '$name --- *** --- $element');
 
       /// check if the element has a name property
@@ -799,37 +793,37 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
 
           /// New Map for conditional bools
           List visibilityStates = [];
+
           /// loop through enableIfConditions
           for (var condition in enableIfConditions) {
-
             // printWarning( '$name --- %%% --- $condition');
 
             /// Handle anyof conditionType
             /// it should overwrite enable state from above
             if (condition.toString().contains(' anyof ')) {
-
-              printWarning( '$name --- anyof --- $condition');
+              printWarning('$name --- anyof --- $condition');
 
               /// Here we handle the many conditions in the enableIf that meet
               /// the anyof condition type
               if (valueFormResults[trimCurly(condition)] != null) {
                 /// get the values in the list
-                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                List<String> getListString =
+                    trimListString(condition.toString().toLowerCase());
+
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
                 String trimValue = trimCurly(condition);
 
-                String trimCurlyValue =
-                valueFormResults[trimValue]!['value'].toString().toLowerCase();
+                String trimCurlyValue = valueFormResults[trimValue]!['value']
+                    .toString()
+                    .toLowerCase();
 
                 /// data found, now check if trimCurly element
                 /// value is in getListString
-                if(getListString.contains(trimCurlyValue)){
-
+                if (getListString.contains(trimCurlyValue)) {
                   visibilityStates.add(true);
-                }
-                else {
+                } else {
                   visibilityStates.add(false);
                 }
               }
@@ -838,22 +832,21 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// Handle notempty conditions
             /// it should overwrite enabled state from above
             if (condition.toString().contains('notempty')) {
-
               // printWarning( '$name --- notempty --- $condition');
 
               /// get the value of the element if element is not found
               /// set it to an empty string
 
               var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
+                  valueFormResults[trimCurly(condition)] == null
+                      ? ''
+                      : valueFormResults[trimCurly(condition)]!['value'];
 
               // printWarning( '$name --- $trimCurlyValue --- $condition');
 
-
               /// Here we handle the many conditions in the enableIf that meet
               /// the notempty condition type
-              if(trimCurlyValue.toString().isNotEmpty){
+              if (trimCurlyValue.toString().isNotEmpty) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -863,17 +856,18 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// Handle = conditions
             /// it should overwrite enabled state from above
             if (condition.toString().contains(' = ')) {
-
               // printWarning( '$name --- = --- $condition');
               // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
 
               /// get the value of the element if element is not found
               /// set it to an empty string
               var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
+                  valueFormResults[trimCurly(condition)] == null
+                      ? ''
+                      : valueFormResults[trimCurly(condition)]!['value'];
 
-              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+              if (trimCurlyValue.toString() ==
+                  conditionValue(condition).toString()) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -882,41 +876,32 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
 
           /// Handle the and / or conditions state
-          if(element['enableIf'].toString().contains(' and ')){
-
-            printWarning( '$name --- FINAL AND --- $visibilityStates');
+          if (element['enableIf'].toString().contains(' and ')) {
+            printWarning('$name --- FINAL AND --- $visibilityStates');
 
             /// update the enable valueFormResults
             valueFormResults.update(name, (value) {
               value['enable'] = !visibilityStates.contains(false);
               return value;
             });
-
-          }
-          else if (element['enableIf'].toString().contains(' or ')){
-
-            printWarning( '$name --- FINAL OR --- $visibilityStates');
+          } else if (element['enableIf'].toString().contains(' or ')) {
+            printWarning('$name --- FINAL OR --- $visibilityStates');
 
             /// update the enable valueFormResults
             valueFormResults.update(name, (value) {
               value['enable'] = visibilityStates.contains(true);
               return value;
             });
-
-          }
-          else {
-
-            printWarning( '$name --- FINAL --- $visibilityStates');
+          } else {
+            printWarning('$name --- FINAL --- $visibilityStates');
 
             /// update the enable valueFormResults
             valueFormResults.update(name, (value) {
               value['enable'] = !visibilityStates.contains(false);
               return value;
             });
-
           }
-        }
-        else {
+        } else {
           // printWarning( '$name --- NO VISIBILITY FIELDS --- ${element['name']}');
 
           /// Here we just let it go bro.
@@ -928,9 +913,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             value['enable'] = true;
             return value;
           });
-
         }
-
       }
     });
   }
@@ -940,7 +923,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   isRequiredIf() {
     /// loop through the objects to get value element
     valueFormResults.forEach((name, element) {
-
       // printWarning( '$name --- *** --- $element');
 
       /// check if the element has a name property
@@ -954,43 +936,44 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           /// create a list of conditions
           /// Handle or conditions
           /// Handle and conditions
-          List isRequiredIfConditions = splitStringList(element['isRequiredIf']);
+          List isRequiredIfConditions =
+              splitStringList(element['isRequiredIf']);
 
           // printWarning( '$name --- @@@ --- $isRequiredIfConditions');
 
           /// New Map for conditional bools
           List visibilityStates = [];
+
           /// loop through isRequiredIfConditions
           for (var condition in isRequiredIfConditions) {
-
             // printWarning( '$name --- %%% --- $condition');
 
             /// Handle anyof conditionType
             /// it should overwrite isRequired state from above
             if (condition.toString().contains(' anyof ')) {
-
-              printWarning( '$name --- anyof --- $condition');
+              printWarning('$name --- anyof --- $condition');
 
               /// Here we handle the many conditions in the isRequiredIf that meet
               /// the anyof condition type
               if (valueFormResults[trimCurly(condition)] != null) {
                 /// get the values in the list
-                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                List<String> getListString =
+                    trimListString(condition.toString().toLowerCase());
+
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
                 String trimValue = trimCurly(condition);
 
-                String trimCurlyValue =
-                valueFormResults[trimValue]!['value'].toString().toLowerCase();
+                String trimCurlyValue = valueFormResults[trimValue]!['value']
+                    .toString()
+                    .toLowerCase();
 
                 /// data found, now check if trimCurly element
                 /// value is in getListString
-                if(getListString.contains(trimCurlyValue)){
-
+                if (getListString.contains(trimCurlyValue)) {
                   visibilityStates.add(true);
-                }
-                else {
+                } else {
                   visibilityStates.add(false);
                 }
               }
@@ -999,22 +982,21 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// Handle notempty conditions
             /// it should overwrite enabled state from above
             if (condition.toString().contains('notempty')) {
-
               // printWarning( '$name --- notempty --- $condition');
 
               /// get the value of the element if element is not found
               /// set it to an empty string
 
               var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
+                  valueFormResults[trimCurly(condition)] == null
+                      ? ''
+                      : valueFormResults[trimCurly(condition)]!['value'];
 
               // printWarning( '$name --- $trimCurlyValue --- $condition');
 
-
               /// Here we handle the many conditions in the isRequiredIf that meet
               /// the notempty condition type
-              if(trimCurlyValue.toString().isNotEmpty){
+              if (trimCurlyValue.toString().isNotEmpty) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -1024,17 +1006,18 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// Handle = conditions
             /// it should overwrite enabled state from above
             if (condition.toString().contains(' = ')) {
-
               // printWarning( '$name --- = --- $condition');
               // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
 
               /// get the value of the element if element is not found
               /// set it to an empty string
               var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
+                  valueFormResults[trimCurly(condition)] == null
+                      ? ''
+                      : valueFormResults[trimCurly(condition)]!['value'];
 
-              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+              if (trimCurlyValue.toString() ==
+                  conditionValue(condition).toString()) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -1043,41 +1026,32 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
 
           /// Handle the and / or conditions state
-          if(element['isRequiredIf'].toString().contains(' and ')){
-
-            printWarning( '$name --- FINAL AND --- $visibilityStates');
+          if (element['isRequiredIf'].toString().contains(' and ')) {
+            printWarning('$name --- FINAL AND --- $visibilityStates');
 
             /// update the isRequired valueFormResults
             valueFormResults.update(name, (value) {
               value['isRequired'] = !visibilityStates.contains(false);
               return value;
             });
-
-          }
-          else if (element['isRequiredIf'].toString().contains(' or ')){
-
-            printWarning( '$name --- FINAL OR --- $visibilityStates');
+          } else if (element['isRequiredIf'].toString().contains(' or ')) {
+            printWarning('$name --- FINAL OR --- $visibilityStates');
 
             /// update the isRequired valueFormResults
             valueFormResults.update(name, (value) {
               value['isRequired'] = visibilityStates.contains(true);
               return value;
             });
-
-          }
-          else {
-
-            printWarning( '$name --- FINAL --- $visibilityStates');
+          } else {
+            printWarning('$name --- FINAL --- $visibilityStates');
 
             /// update the isRequired valueFormResults
             valueFormResults.update(name, (value) {
               value['isRequired'] = !visibilityStates.contains(false);
               return value;
             });
-
           }
-        }
-        else {
+        } else {
           // printWarning( '$name --- NO VISIBILITY FIELDS --- ${element['name']}');
 
           /// Here we just let it go bro.
@@ -1089,9 +1063,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             value['isRequired'] = true;
             return value;
           });
-
         }
-
       }
     });
   }
@@ -1101,7 +1073,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   visibleIf() {
     /// loop through the objects to get value element
     valueFormResults.forEach((name, element) {
-
       // printWarning( '$name --- *** --- $element');
 
       /// check if the element has a name property
@@ -1121,37 +1092,37 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
 
           /// New Map for conditional bools
           List visibilityStates = [];
+
           /// loop through visibleIfConditions
           for (var condition in visibleIfConditions) {
-
             // printWarning( '$name --- %%% --- $condition');
 
             /// Handle anyof conditionType
             /// it should overwrite visible state from above
             if (condition.toString().contains(' anyof ')) {
-
-              printWarning( '$name --- anyof --- $condition');
+              printWarning('$name --- anyof --- $condition');
 
               /// Here we handle the many conditions in the visibleIf that meet
               /// the anyof condition type
               if (valueFormResults[trimCurly(condition)] != null) {
                 /// get the values in the list
-                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                List<String> getListString =
+                    trimListString(condition.toString().toLowerCase());
+
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
                 String trimValue = trimCurly(condition);
 
-                String trimCurlyValue =
-                valueFormResults[trimValue]!['value'].toString().toLowerCase();
+                String trimCurlyValue = valueFormResults[trimValue]!['value']
+                    .toString()
+                    .toLowerCase();
 
                 /// data found, now check if trimCurly element
                 /// value is in getListString
-                if(getListString.contains(trimCurlyValue)){
-
+                if (getListString.contains(trimCurlyValue)) {
                   visibilityStates.add(true);
-                }
-                else {
+                } else {
                   visibilityStates.add(false);
                 }
               }
@@ -1160,22 +1131,21 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// Handle notempty conditions
             /// it should overwrite enabled state from above
             if (condition.toString().contains('notempty')) {
-
               // printWarning( '$name --- notempty --- $condition');
 
               /// get the value of the element if element is not found
               /// set it to an empty string
 
               var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
+                  valueFormResults[trimCurly(condition)] == null
+                      ? ''
+                      : valueFormResults[trimCurly(condition)]!['value'];
 
               // printWarning( '$name --- $trimCurlyValue --- $condition');
 
-
               /// Here we handle the many conditions in the visibleIf that meet
               /// the notempty condition type
-              if(trimCurlyValue.toString().isNotEmpty){
+              if (trimCurlyValue.toString().isNotEmpty) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -1185,17 +1155,18 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// Handle = conditions
             /// it should overwrite enabled state from above
             if (condition.toString().contains(' = ')) {
-
               // printWarning( '$name --- = --- $condition');
               // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
 
               /// get the value of the element if element is not found
               /// set it to an empty string
               var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
+                  valueFormResults[trimCurly(condition)] == null
+                      ? ''
+                      : valueFormResults[trimCurly(condition)]!['value'];
 
-              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+              if (trimCurlyValue.toString() ==
+                  conditionValue(condition).toString()) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -1204,41 +1175,32 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
 
           /// Handle the and / or conditions state
-          if(element['visibleIf'].toString().contains(' and ')){
-
-            printWarning( '$name --- FINAL AND --- $visibilityStates');
+          if (element['visibleIf'].toString().contains(' and ')) {
+            printWarning('$name --- FINAL AND --- $visibilityStates');
 
             /// update the visible valueFormResults
             valueFormResults.update(name, (value) {
               value['visible'] = !visibilityStates.contains(false);
               return value;
             });
-
-          }
-          else if (element['visibleIf'].toString().contains(' or ')){
-
-            printWarning( '$name --- FINAL OR --- $visibilityStates');
+          } else if (element['visibleIf'].toString().contains(' or ')) {
+            printWarning('$name --- FINAL OR --- $visibilityStates');
 
             /// update the visible valueFormResults
             valueFormResults.update(name, (value) {
               value['visible'] = visibilityStates.contains(true);
               return value;
             });
-
-          }
-          else {
-
-            printWarning( '$name --- FINAL --- $visibilityStates');
+          } else {
+            printWarning('$name --- FINAL --- $visibilityStates');
 
             /// update the visible valueFormResults
             valueFormResults.update(name, (value) {
               value['visible'] = !visibilityStates.contains(false);
               return value;
             });
-
           }
-        }
-        else {
+        } else {
           // printWarning( '$name --- NO VISIBILITY FIELDS --- ${element['name']}');
 
           /// Here we just let it go bro.
@@ -1250,9 +1212,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             value['visible'] = true;
             return value;
           });
-
         }
-
       }
     });
   }
@@ -1261,11 +1221,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
   void dispose() {
     // super.dispose();
   }
-
 }
 
 class SubmitButton extends StatelessWidget {
-  const SubmitButton({super.key,
+  const SubmitButton({
+    super.key,
     required GlobalKey<FormState> formKey,
     required this.context,
     required this.onFormSubmit,
@@ -1278,21 +1238,15 @@ class SubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xff2F6CF6),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold)),
+            textStyle:
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            // If the form is valid, display a Snackbar.
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Processing Data')));
-            onFormSubmit.call();
-          }
+          onFormSubmit.call();
+
         },
         child: const Text("Submit"),
       ),
@@ -1315,25 +1269,13 @@ class Next extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xff2F6CF6),
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold)),
+            textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         onPressed: () {
-          onNext();
-          // Validate returns true if the form is valid, or false
-          // otherwise.
-          // if (_formKey.currentState!.validate()) {
-          //   // If the form is valid, display a Snackbar.
-          //   ScaffoldMessenger.of(context)
-          //       .showSnackBar(const SnackBar(content: Text('Processing Data')));
-
-          //   onNext.call();
-          // }
+          onNext.call();
         },
         child: const Text('Next'),
       ),
@@ -1360,23 +1302,13 @@ class Previous extends StatelessWidget {
         style: OutlinedButton.styleFrom(
             foregroundColor: Colors.black.withOpacity(0.6),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold)),
+            textStyle:
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         onPressed: () {
           onPrevious.call();
-          // Validate returns true if the form is valid, or false
-          // otherwise.
-          // if (_formKey.currentState!.validate()) {
-          //   // If the form is valid, display a Snackbar.
-          //   ScaffoldMessenger.of(context)
-          //       .showSnackBar(const SnackBar(content: Text('Processing Data')));
-
-          // }
         },
         child: const Text('Previous'),
       ),
     );
   }
 }
-
