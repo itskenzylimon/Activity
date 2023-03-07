@@ -1276,11 +1276,6 @@ class _SurveyJSFormState extends State<SurveyJSForm>
           /// its inevitable that it will be visible
           /// remove the invisibilityMap
           /// update the visible valueFormResults
-          valueFormResults.update(name, (value) {
-            value['visible'] = true;
-            return value;
-          });
-
           /// check if the element has a visible property
           if (element['visible'] == null) {
             valueFormResults.update(name, (value) {
