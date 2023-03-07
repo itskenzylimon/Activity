@@ -15,6 +15,7 @@ import '../../widgets/elements/type_field.dart';
 
 class SurveyJSForm extends StatefulWidget {
   final Map schema;
+  final Map<String, dynamic> defaultValues;
   final Map<String, Map<String, dynamic>> formResults;
   final BuildContext context;
   final ValueChanged<Map<String, dynamic>> onFormValueSubmit;
@@ -22,6 +23,7 @@ class SurveyJSForm extends StatefulWidget {
   const SurveyJSForm({
     super.key,
     required this.schema,
+    required this.defaultValues,
     required this.context,
     required this.formResults,
     required this.onFormValueSubmit,
@@ -328,6 +330,7 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
+      textEditingController.text = newElement['value'] ?? '';
 
       return Visibility(
           visible: valueFormResults[element['name']]!['visible'],
@@ -744,6 +747,11 @@ class _SurveyJSFormState extends State<SurveyJSForm>
   Map<String, dynamic> setUpElement(String name, Map<String, dynamic> value) {
     /// new element value
     Map<String, dynamic> newValue = value;
+
+    /// Do a update value check
+    if(widget.defaultValues.containsKey(value['name'])){
+      newValue['value'] = widget.defaultValues[value['name']];
+    }
 
     /// add the element to the formValues map
     if (valueFormResults.containsKey(name) == false) {
