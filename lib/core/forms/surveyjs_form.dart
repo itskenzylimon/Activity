@@ -237,19 +237,22 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       setUpElement(element['name'], newElement);
 
       return Visibility(
-          child: CheckBoxWidget(
+          child: Padding(
+            padding: const EdgeInsets.only(left:16,right: 16),
+            child: CheckBoxWidget(
         onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
+            setState(() {
+              Map<String, Map<String, dynamic>> newValueFormResults =
+                  valueFormResults;
+              newValueFormResults[element['name']] = value;
+              valueFormResults = newValueFormResults;
+            });
         },
         elementName: element['name'],
         valueFormResults: valueFormResults,
         customTheme: metaData['theme'],
-      ));
+      ),
+          ));
     }
 
     Visibility signaturePad(Map<String, dynamic> element) {
