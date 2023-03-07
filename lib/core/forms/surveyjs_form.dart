@@ -509,6 +509,34 @@ class _SurveyJSFormState extends State<SurveyJSForm>
     }
 
     Widget checkElement(Map<String, dynamic> element) {
+      List<List> result = [];
+      List temp = [];
+      printError( element['elements']);
+      if( element['elements'] == null){
+        printError( element['elements']);
+      }else{
+        for (Map char in element['elements']) {
+          if (char["startWithNewLine"] == null) {
+            if (temp.isNotEmpty) {
+              result.add(temp);
+            }
+            temp = [char];
+          } else {
+            temp.add(char);
+          }
+        }
+        if (temp.isNotEmpty) {
+          result.add(temp);
+        }
+      }
+
+
+      printSuccess('{{{{{{{{{panelresult}}}}}}}}}');
+      printSuccess(result);
+      // printSuccess(result[0].length);
+      // printSuccess(result.length);
+      printSuccess('{{{{{{{{{{{{panelresult}}}}}}}}}}}}');
+
 
       if (element['type'] == 'panel') {
 
@@ -517,9 +545,17 @@ class _SurveyJSFormState extends State<SurveyJSForm>
         setUpElement(element['name'], element);
 
         // visibleMap.add(element['name'], true);
+
+
         Column children = Column(
-          children: [
-            for (var element in element['elements']) checkElement(element)
+          children: [for (List rowElements in result)
+            rowElements.length >= 2 ?
+            Row(
+              children: [
+                for (var element in rowElements)
+                  Expanded(child: checkElement(element))
+              ],
+            ) : checkElement(rowElements[0])
           ],
         );
 
@@ -601,8 +637,39 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       //   }
       // }
 
+      List<List> result = [];
+      List temp = [];
+      for (Map char in page['elements']) {
+        if (char["startWithNewLine"] == null) {
+          if (temp.isNotEmpty) {
+            result.add(temp);
+          }
+          temp = [char];
+        } else {
+          temp.add(char);
+        }
+      }
+      if (temp.isNotEmpty) {
+        result.add(temp);
+      }
+
+      printSuccess('{{{{{{{{{result}}}}}}}}}');
+      printSuccess(result);
+      printSuccess(result[0].length);
+      printSuccess(result.length);
+      printSuccess('{{{{{{{{{{{{result}}}}}}}}}}}}');
+
       ListView listView = ListView(
-        children: [for (var element in page['elements']) checkElement(element)],
+        children: [for (List rowElements in result)
+
+          rowElements.length >= 2 ?
+          Row(
+            children: [
+              for (var element in rowElements)
+                Expanded(child: checkElement(element))
+            ],
+          ) : checkElement(rowElements[0])
+        ],
       );
 
       return listView;
@@ -1025,8 +1092,6 @@ class _SurveyJSFormState extends State<SurveyJSForm>
 
       /// check if the element has a name property
       if (name != null) {
-        /// check if the element has a isRequired property
-        if (element['isRequired'] != null) {}
         if (element['isRequiredIf'] != null) {
           /// Drama follows here if the element has a isRequiredIf
           /// property and no isRequired property is set
@@ -1163,8 +1228,10 @@ class _SurveyJSFormState extends State<SurveyJSForm>
           /// its inevitable that it will be isRequired
           /// remove the invisibilityMap
           /// update the isRequired valueFormResults
+
+          /// check if the element has a isRequired property
           valueFormResults.update(name, (value) {
-            value['isRequired'] = true;
+            value['isRequired'] = false;
             return value;
           });
         }
