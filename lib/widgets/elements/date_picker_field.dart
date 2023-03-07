@@ -18,8 +18,8 @@ class DatePickerWidget extends StatelessWidget {
   Map<String, dynamic> callbackElement = {};
 
   final TextEditingController textEditingController = TextEditingController();
-  DateTime selectedDate = DateTime(1950);
-  DateTime maxDays = DateTime.now();
+  DateTime selectedDate = DateTime.now();
+  DateTime maxDays = DateTime(1950);
 
   @override
   Widget build(BuildContext context) {

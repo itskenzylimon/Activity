@@ -183,8 +183,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
         'value': '',
       }..addAll(element);
 
-      print("???? ELEMENT");
-      print(element);
+      // print("???? ELEMENT");
+      // print(element);
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
@@ -526,13 +526,13 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       Map nextElement = fields.length == (index + 1) ? {} : fields[index + 1];
       if(nextElement.isNotEmpty){
         startWithNewLine = nextElement['startWithNewLine'] ?? true;
-        printError(' @#@#@#@#@# : ${element['name']}');
-        printError('startWithNewLine: $startWithNewLine');
-        printError(' %^%^%^%^%^% : ${nextElement['name']}');
+        // printError(' @#@#@#@#@# : ${element['name']}');
+        // printError('startWithNewLine: $startWithNewLine');
+        // printError(' %^%^%^%^%^% : ${nextElement['name']}');
       } else {
         startWithNewLine = true;
       }
-      printError('startWithNewLine: $startWithNewLine');
+      // printError('startWithNewLine: $startWithNewLine');
       return startWithNewLine;
     }
 
@@ -739,7 +739,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
       return value.substring(start, end)
           .split(",").toList();
     } catch(e){
-      printError(' ******* $e ********');
+      // printError(' ******* $e ********');
       return [];
     }
   }
@@ -808,7 +808,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// it should overwrite enable state from above
             if (condition.toString().contains(' anyof ')) {
 
-              printWarning( '$name --- anyof --- $condition');
+              // printWarning( '$name --- anyof --- $condition');
 
               /// Here we handle the many conditions in the enableIf that meet
               /// the anyof condition type
@@ -884,7 +884,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           /// Handle the and / or conditions state
           if(element['enableIf'].toString().contains(' and ')){
 
-            printWarning( '$name --- FINAL AND --- $visibilityStates');
+            // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
             /// update the enable valueFormResults
             valueFormResults.update(name, (value) {
@@ -895,7 +895,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
           else if (element['enableIf'].toString().contains(' or ')){
 
-            printWarning( '$name --- FINAL OR --- $visibilityStates');
+            // printWarning( '$name --- FINAL OR --- $visibilityStates');
 
             /// update the enable valueFormResults
             valueFormResults.update(name, (value) {
@@ -906,7 +906,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
           else {
 
-            printWarning( '$name --- FINAL --- $visibilityStates');
+            // printWarning( '$name --- FINAL --- $visibilityStates');
 
             /// update the enable valueFormResults
             valueFormResults.update(name, (value) {
@@ -969,7 +969,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
             /// it should overwrite isRequired state from above
             if (condition.toString().contains(' anyof ')) {
 
-              printWarning( '$name --- anyof --- $condition');
+              // printWarning( '$name --- anyof --- $condition');
 
               /// Here we handle the many conditions in the isRequiredIf that meet
               /// the anyof condition type
@@ -1045,7 +1045,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           /// Handle the and / or conditions state
           if(element['isRequiredIf'].toString().contains(' and ')){
 
-            printWarning( '$name --- FINAL AND --- $visibilityStates');
+            // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
             /// update the isRequired valueFormResults
             valueFormResults.update(name, (value) {
@@ -1056,7 +1056,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
           else if (element['isRequiredIf'].toString().contains(' or ')){
 
-            printWarning( '$name --- FINAL OR --- $visibilityStates');
+            // printWarning( '$name --- FINAL OR --- $visibilityStates');
 
             /// update the isRequired valueFormResults
             valueFormResults.update(name, (value) {
@@ -1067,7 +1067,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           }
           else {
 
-            printWarning( '$name --- FINAL --- $visibilityStates');
+            // printWarning( '$name --- FINAL --- $visibilityStates');
 
             /// update the isRequired valueFormResults
             valueFormResults.update(name, (value) {
@@ -1106,135 +1106,133 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
 
       /// check if the element has a name property
       if (name != null) {
-        /// check if the element has a visible property
-        if (element['visible'] != null) {}
         if (element['visibleIf'] != null) {
           /// Drama follows here if the element has a visibleIf
           /// property and no visible property is set
 
-          /// create a list of conditions
-          /// Handle or conditions
-          /// Handle and conditions
-          List visibleIfConditions = splitStringList(element['visibleIf']);
+            /// create a list of conditions
+            /// Handle or conditions
+            /// Handle and conditions
+            List visibleIfConditions = splitStringList(element['visibleIf']);
 
-          // printWarning( '$name --- @@@ --- $visibleIfConditions');
+            // printWarning( '$name --- @@@ --- $visibleIfConditions');
 
-          /// New Map for conditional bools
-          List visibilityStates = [];
-          /// loop through visibleIfConditions
-          for (var condition in visibleIfConditions) {
+            /// New Map for conditional bools
+            List visibilityStates = [];
+            /// loop through visibleIfConditions
+            for (var condition in visibleIfConditions) {
 
-            // printWarning( '$name --- %%% --- $condition');
+              // printWarning( '$name --- %%% --- $condition');
 
-            /// Handle anyof conditionType
-            /// it should overwrite visible state from above
-            if (condition.toString().contains(' anyof ')) {
+              /// Handle anyof conditionType
+              /// it should overwrite visible state from above
+              if (condition.toString().contains(' anyof ')) {
 
-              printWarning( '$name --- anyof --- $condition');
+                // printWarning( '$name --- anyof --- $condition');
 
-              /// Here we handle the many conditions in the visibleIf that meet
-              /// the anyof condition type
-              if (valueFormResults[trimCurly(condition)] != null) {
-                /// get the values in the list
-                List<String> getListString = trimListString(condition.toString().toLowerCase());
+                /// Here we handle the many conditions in the visibleIf that meet
+                /// the anyof condition type
+                if (valueFormResults[trimCurly(condition)] != null) {
+                  /// get the values in the list
+                  List<String> getListString = trimListString(condition.toString().toLowerCase());
+                  /// get the value of the element if element is not found
+                  /// set it to an empty string
+
+                  String trimValue = trimCurly(condition);
+
+                  String trimCurlyValue =
+                  valueFormResults[trimValue]!['value'].toString().toLowerCase();
+
+                  /// data found, now check if trimCurly element
+                  /// value is in getListString
+                  if(getListString.contains(trimCurlyValue)){
+
+                    visibilityStates.add(true);
+                  }
+                  else {
+                    visibilityStates.add(false);
+                  }
+                }
+              }
+
+              /// Handle notempty conditions
+              /// it should overwrite enabled state from above
+              if (condition.toString().contains('notempty')) {
+
+                // printWarning( '$name --- notempty --- $condition');
+
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
-                String trimValue = trimCurly(condition);
+                var trimCurlyValue =
+                valueFormResults[trimCurly(condition)] == null ? '' :
+                valueFormResults[trimCurly(condition)]!['value'];
 
-                String trimCurlyValue =
-                valueFormResults[trimValue]!['value'].toString().toLowerCase();
+                // printWarning( '$name --- $trimCurlyValue --- $condition');
 
-                /// data found, now check if trimCurly element
-                /// value is in getListString
-                if(getListString.contains(trimCurlyValue)){
 
+                /// Here we handle the many conditions in the visibleIf that meet
+                /// the notempty condition type
+                if(trimCurlyValue.toString().isNotEmpty){
                   visibilityStates.add(true);
+                } else {
+                  visibilityStates.add(false);
                 }
-                else {
+              }
+
+              /// Handle = conditions
+              /// it should overwrite enabled state from above
+              if (condition.toString().contains(' = ')) {
+
+                // printWarning( '$name --- = --- $condition');
+                // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
+
+                /// get the value of the element if element is not found
+                /// set it to an empty string
+                var trimCurlyValue =
+                valueFormResults[trimCurly(condition)] == null ? '' :
+                valueFormResults[trimCurly(condition)]!['value'];
+
+                if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+                  visibilityStates.add(true);
+                } else {
                   visibilityStates.add(false);
                 }
               }
             }
 
-            /// Handle notempty conditions
-            /// it should overwrite enabled state from above
-            if (condition.toString().contains('notempty')) {
+            /// Handle the and / or conditions state
+            if(element['visibleIf'].toString().contains(' and ')){
 
-              // printWarning( '$name --- notempty --- $condition');
+              // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
-              /// get the value of the element if element is not found
-              /// set it to an empty string
+              /// update the visible valueFormResults
+              valueFormResults.update(name, (value) {
+                value['visible'] = !visibilityStates.contains(false);
+                return value;
+              });
 
-              var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
-
-              // printWarning( '$name --- $trimCurlyValue --- $condition');
-
-
-              /// Here we handle the many conditions in the visibleIf that meet
-              /// the notempty condition type
-              if(trimCurlyValue.toString().isNotEmpty){
-                visibilityStates.add(true);
-              } else {
-                visibilityStates.add(false);
-              }
             }
+            else if (element['visibleIf'].toString().contains(' or ')){
 
-            /// Handle = conditions
-            /// it should overwrite enabled state from above
-            if (condition.toString().contains(' = ')) {
+              // printWarning( '$name --- FINAL OR --- $visibilityStates');
 
-              // printWarning( '$name --- = --- $condition');
-              // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
+              /// update the visible valueFormResults
+              valueFormResults.update(name, (value) {
+                value['visible'] = visibilityStates.contains(true);
+                return value;
+              });
 
-              /// get the value of the element if element is not found
-              /// set it to an empty string
-              var trimCurlyValue =
-              valueFormResults[trimCurly(condition)] == null ? '' :
-              valueFormResults[trimCurly(condition)]!['value'];
-
-              if(trimCurlyValue.toString() == conditionValue(condition).toString()){
-                visibilityStates.add(true);
-              } else {
-                visibilityStates.add(false);
-              }
             }
-          }
+            else {
 
-          /// Handle the and / or conditions state
-          if(element['visibleIf'].toString().contains(' and ')){
+              // printWarning( '$name --- FINAL --- $visibilityStates');
 
-            printWarning( '$name --- FINAL AND --- $visibilityStates');
-
-            /// update the visible valueFormResults
-            valueFormResults.update(name, (value) {
-              value['visible'] = !visibilityStates.contains(false);
-              return value;
-            });
-
-          }
-          else if (element['visibleIf'].toString().contains(' or ')){
-
-            printWarning( '$name --- FINAL OR --- $visibilityStates');
-
-            /// update the visible valueFormResults
-            valueFormResults.update(name, (value) {
-              value['visible'] = visibilityStates.contains(true);
-              return value;
-            });
-
-          }
-          else {
-
-            printWarning( '$name --- FINAL --- $visibilityStates');
-
-            /// update the visible valueFormResults
-            valueFormResults.update(name, (value) {
-              value['visible'] = !visibilityStates.contains(false);
-              return value;
-            });
+              /// update the visible valueFormResults
+              valueFormResults.update(name, (value) {
+                value['visible'] = !visibilityStates.contains(false);
+                return value;
+              });
 
           }
         }
@@ -1246,10 +1244,21 @@ class _SurveyJSFormState extends State<SurveyJSForm> with TickerProviderStateMix
           /// its inevitable that it will be visible
           /// remove the invisibilityMap
           /// update the visible valueFormResults
-          valueFormResults.update(name, (value) {
-            value['visible'] = true;
-            return value;
-          });
+
+          /// check if the element has a visible property
+          if (element['visible'] == null) {
+            valueFormResults.update(name, (value) {
+              value['visible'] = true;
+              return value;
+            });
+          } else {
+            valueFormResults.update(name, (value) {
+              value['visible'] = value['visible'];
+              return value;
+            });
+          }
+
+
 
         }
 
