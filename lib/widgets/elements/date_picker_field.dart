@@ -28,7 +28,9 @@ class DatePickerWidget extends StatelessWidget {
     if (callbackElement['maxDays'] != null) {
       maxDays.add(Duration(days: callbackElement['maxDays']));
     }
-
+    textEditingController.text = ['', null].contains(callbackElement['value'])
+        ? callbackElement['title']
+        : callbackElement['value'];
     // Return an empty Container widget (or any other widget)
     return Ink(
         child: Container(
@@ -76,6 +78,8 @@ class DatePickerWidget extends StatelessWidget {
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
       textEditingController.text = selectedDate.toString();
+      callbackElement['value'] = selectedDate.toString();
+      onElementCallback(callbackElement);
     }
   }
 

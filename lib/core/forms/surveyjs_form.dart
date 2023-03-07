@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 import '../../widgets/elements/age_calculator_field.dart';
 import '../../widgets/elements/check_box_field.dart';
@@ -116,19 +117,22 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       setUpElement(element['name'], element);
 
       return Visibility(
-          child: DropDownWidget(
+          child: Padding(
+            padding: const EdgeInsets.only(left:16,right: 16,top: 16),
+            child: DropDownWidget(
         onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
+            setState(() {
+              Map<String, Map<String, dynamic>> newValueFormResults =
+                  valueFormResults;
+              newValueFormResults[element['name']] = value;
+              valueFormResults = newValueFormResults;
+            });
         },
         elementName: element['name'],
         valueFormResults: valueFormResults,
         customTheme: metaData['theme'],
-      ));
+      ),
+          ));
     }
 
     Visibility httpLookUp(Map<String, dynamic> element) {
@@ -233,19 +237,22 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       setUpElement(element['name'], newElement);
 
       return Visibility(
-          child: CheckBoxWidget(
+          child: Padding(
+            padding: const EdgeInsets.only(left:16,right: 16),
+            child: CheckBoxWidget(
         onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
+            setState(() {
+              Map<String, Map<String, dynamic>> newValueFormResults =
+                  valueFormResults;
+              newValueFormResults[element['name']] = value;
+              valueFormResults = newValueFormResults;
+            });
         },
         elementName: element['name'],
         valueFormResults: valueFormResults,
         customTheme: metaData['theme'],
-      ));
+      ),
+          ));
     }
 
     Visibility signaturePad(Map<String, dynamic> element) {
@@ -315,6 +322,26 @@ class _SurveyJSFormState extends State<SurveyJSForm>
           visible: valueFormResults[element['name']]!['visible'],
           child: Container(
             padding: const EdgeInsets.all(10),
+          ));
+    }
+    Visibility html(Map<String, dynamic> element) {
+      /// call setUpElement
+      Map<String, dynamic> newElement = {
+        'value': '',
+      }..addAll(element);
+
+      /// After setting up the element, add it to the elementData
+      /// use elementData in the rest of the function
+      setUpElement(element['name'], newElement);
+
+      return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child:Padding(
+              padding: const EdgeInsets.only(left:16,right: 16),
+              child: Html(data: element['html']),
+            ),
           ));
     }
 
@@ -472,6 +499,9 @@ class _SurveyJSFormState extends State<SurveyJSForm>
 
         case 'container':
           return container(element);
+
+          case 'html':
+          return html(element);
 
         default:
           return customWidget(element);
@@ -685,35 +715,40 @@ class _SurveyJSFormState extends State<SurveyJSForm>
                               onFormSubmit: () {
                                 /// TODO: Validate the form
                                 var listValues = [];
-                                valueFormResults.forEach((key, value) {
-                                  if (value.containsKey("value") &&
-                                      value.containsKey("isRequired")) {
-                                    if (value['isRequired'] == true &&
-                                        value['value'] != "") {
-                                      listValues.add(true);
-                                    } else {
-                                      listValues.add(false);
+                                printWarning(valueFormResults['InformantFullName']);
+                                if(formKey.currentState!.validate()) {
+                                  valueFormResults.forEach((key, value) {
+                                    if (value.containsKey("value") &&
+                                        value.containsKey("isRequired")) {
+                                      if (value['isRequired'] == true &&
+                                          value['value'] != "") {
+                                        listValues.add(true);
+                                        printWarning(true);
+                                      } else {
+                                        listValues.add(false);
+                                        printError(false);
+                                      }
                                     }
+                                  });
+                                  var isValid = listValues
+                                      .any((element) => element == false);
+                                  if (isValid == true) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                        backgroundColor: Colors.red,
+                                        content: Text(
+                                          "Fill all required fields",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400),
+                                        )));
+                                  } else {
+                                    printError(
+                                        "valueFormResults--------------------");
+                                    widget.onFormValueSubmit(valueFormResults);
+                                    printError(valueFormResults);
                                   }
-                                });
-                                var isValid = listValues
-                                    .any((element) => element == false);
-                                if (isValid == true) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                          backgroundColor: Colors.red,
-                                          content: Text(
-                                            "Fill all required fields",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400),
-                                          )));
-                                } else {
-                                  printError(
-                                      "valueFormResults--------------------");
-                                  widget.onFormValueSubmit(valueFormResults);
-                                  printError(valueFormResults);
                                 }
                               },
                             )
@@ -1332,12 +1367,7 @@ class SubmitButton extends StatelessWidget {
             textStyle:
                 const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            // If the form is valid, display a Snackbar.
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Processing Data')));
             onFormSubmit.call();
-          }
         },
         child: const Text("Submit"),
       ),
