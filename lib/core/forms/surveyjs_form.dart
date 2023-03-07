@@ -715,6 +715,7 @@ class _SurveyJSFormState extends State<SurveyJSForm>
                               onFormSubmit: () {
                                 /// TODO: Validate the form
                                 var listValues = [];
+                                printWarning(valueFormResults['InformantFullName']);
                                 if(formKey.currentState!.validate()) {
                                   valueFormResults.forEach((key, value) {
                                     if (value.containsKey("value") &&
@@ -722,8 +723,10 @@ class _SurveyJSFormState extends State<SurveyJSForm>
                                       if (value['isRequired'] == true &&
                                           value['value'] != "") {
                                         listValues.add(true);
+                                        printWarning(true);
                                       } else {
                                         listValues.add(false);
+                                        printError(false);
                                       }
                                     }
                                   });
@@ -1364,12 +1367,7 @@ class SubmitButton extends StatelessWidget {
             textStyle:
                 const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            // If the form is valid, display a Snackbar.
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Processing Data')));
             onFormSubmit.call();
-          }
         },
         child: const Text("Submit"),
       ),
