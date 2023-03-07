@@ -137,7 +137,7 @@ class _SurveyJSFormState extends State<SurveyJSForm>
 
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
-      setUpElement(element['name'], newElement);
+      setUpElement('${element['name']}-${element['outputs'][0]['value']}', newElement);
       return Visibility(
           child: TextSearchUpdateFieldWidget(
         onElementCallback: (Map<String, dynamic> value) {
@@ -148,7 +148,7 @@ class _SurveyJSFormState extends State<SurveyJSForm>
             valueFormResults = newValueFormResults;
           });
         },
-        elementName: element['name'],
+        elementName: '${element['name']}-${element['outputs'][0]['value']}',
         valueFormResults: valueFormResults,
         customTheme: {},
       ));

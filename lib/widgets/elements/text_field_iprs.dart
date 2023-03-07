@@ -24,8 +24,7 @@ class TextFieldIPRSWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     callbackElement = valueFormResults[elementName]!;
-    print("?????? IPRS TEXT FIELD");
-    print(callbackElement);
+
 
     /// label text for the text field is the title with a * if the field is required
     String labelText = callbackElement['label'];

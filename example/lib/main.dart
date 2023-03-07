@@ -115,6 +115,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   @override
   Widget build(BuildContext context) {
     activeController.reOrganizeData();
+    debugPrint('activeController.schema.toString()');
+    debugPrint(activeController.schema.toString());
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
