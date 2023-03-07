@@ -1104,9 +1104,6 @@ class _SurveyJSFormState extends State<SurveyJSForm>
           } else {
             printWarning('$name --- FINAL --- $visibilityStates');
 
-          }
-          else {
-
             // printWarning( '$name --- FINAL --- $visibilityStates');
 
             /// update the isRequired valueFormResults
