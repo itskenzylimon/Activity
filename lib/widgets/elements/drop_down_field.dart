@@ -285,6 +285,12 @@ class DropDownWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                   child:  DropdownButtonFormField(
+                    decoration: new InputDecoration(
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,),
                       hint: SizedBox(
                         width: 100,
                         child: Text(callbackElement['title'] +
@@ -426,7 +432,10 @@ class DropDownWidget extends StatelessWidget {
               .contains(query.toLowerCase()))
           .toList();
       list = filteredList.toSet().toList();
-    } else {}
-    return list;
+      return list;
+    } else {
+      return [];
+    }
+
   }
 }

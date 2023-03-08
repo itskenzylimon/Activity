@@ -337,11 +337,9 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       return Visibility(
           visible: valueFormResults[element['name']]!['visible'],
           child: Container(
-            padding: const EdgeInsets.all(10),
-            child:Padding(
-              padding: const EdgeInsets.only(left:16,right: 16),
-              child: Html(data: element['html']),
-            ),
+            padding: const EdgeInsets.only(left:10,right: 10,bottom: 20),
+            height: 70,
+            child:Html(data: element['html']),
           ));
     }
 
@@ -790,10 +788,8 @@ class _SurveyJSFormState extends State<SurveyJSForm>
                                       if (value['isRequired'] == true &&
                                           value['value'] != "") {
                                         listValues.add(true);
-                                        printWarning(true);
                                       } else {
                                         listValues.add(false);
-                                        printError(false);
                                       }
                                     }
                                   });
