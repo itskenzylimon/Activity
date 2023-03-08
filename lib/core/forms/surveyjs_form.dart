@@ -235,6 +235,9 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
+      
+      print("newElement-------------------------------->");
+      print(newElement);
 
       return Visibility(
           child: Padding(
@@ -779,40 +782,42 @@ class _SurveyJSFormState extends State<SurveyJSForm>
                               formKey: formKey,
                               onFormSubmit: () {
                                 /// TODO: Validate the form
+                                ///
+                                widget.onFormValueSubmit(valueFormResults);
                                 var listValues = [];
-                                printWarning(valueFormResults['InformantFullName']);
-                                if(formKey.currentState!.validate()) {
-                                  valueFormResults.forEach((key, value) {
-                                    if (value.containsKey("value") &&
-                                        value.containsKey("isRequired")) {
-                                      if (value['isRequired'] == true &&
-                                          value['value'] != "") {
-                                        listValues.add(true);
-                                      } else {
-                                        listValues.add(false);
-                                      }
-                                    }
-                                  });
-                                  var isValid = listValues
-                                      .any((element) => element == false);
-                                  if (isValid == true) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                          "Fill all required fields",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400),
-                                        )));
-                                  } else {
-                                    printError(
-                                        "valueFormResults--------------------");
-                                    widget.onFormValueSubmit(valueFormResults);
-                                    printError(valueFormResults);
-                                  }
-                                }
+                                // printWarning(valueFormResults['InformantFullName']);
+                                // if(formKey.currentState!.validate()) {
+                                //   valueFormResults.forEach((key, value) {
+                                //     if (value.containsKey("value") &&
+                                //         value.containsKey("isRequired")) {
+                                //       if (value['isRequired'] == true &&
+                                //           value['value'] != "") {
+                                //         listValues.add(true);
+                                //       } else {
+                                //         listValues.add(false);
+                                //       }
+                                //     }
+                                //   });
+                                //   var isValid = listValues
+                                //       .any((element) => element == false);
+                                //   if (isValid == true) {
+                                //     ScaffoldMessenger.of(context)
+                                //         .showSnackBar(SnackBar(
+                                //         backgroundColor: Colors.red,
+                                //         content: Text(
+                                //           "Fill all required fields",
+                                //           style: TextStyle(
+                                //               color: Colors.white,
+                                //               fontSize: 16,
+                                //               fontWeight: FontWeight.w400),
+                                //         )));
+                                //   } else {
+                                //     printError(
+                                //         "valueFormResults--------------------");
+                                //     widget.onFormValueSubmit(valueFormResults);
+                                //     printError(valueFormResults);
+                                //   }
+                                // }
                               },
                             )
                           : Next(

@@ -214,22 +214,25 @@ class DropDownWidget extends StatelessWidget {
                             valueListenable: _listNotifier,
                             builder: (BuildContext context, choicesList,
                                 Widget? child) {
-                              return  ListView.separated(
-                                shrinkWrap: true,
-                                controller: scrollController,
-                                itemBuilder: (context, int index) {
-                                  return ListTile(
-                                    onTap: () {
-                                      callbackElement['value'] =
-                                          choicesList[index];
-                                      onElementCallback(callbackElement);
-                                    },
-                                    title: Text(choicesList[index]),
-                                  );
-                                },
-                                separatorBuilder: (context, int index) =>
-                                    SizedBox(height: 10),
-                                itemCount: choicesList.length,
+                              return  SizedBox(
+                                height: choicesList.length > 2 ? 250 : 40,
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  controller: scrollController,
+                                  itemBuilder: (context, int index) {
+                                    return ListTile(
+                                      onTap: () {
+                                        callbackElement['value'] =
+                                            choicesList[index];
+                                        onElementCallback(callbackElement);
+                                      },
+                                      title: Text(choicesList[index]),
+                                    );
+                                  },
+                                  separatorBuilder: (context, int index) =>
+                                      SizedBox(height: 10),
+                                  itemCount: choicesList.length,
+                                ),
                               );
                             })),
                   ],
@@ -384,12 +387,10 @@ class DropDownWidget extends StatelessWidget {
               elem['value']
                   .toString()
                   .toLowerCase()
-                  .contains(query.toLowerCase()) ||
-              elem['text']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.toLowerCase()))
+                  .contains(query.toLowerCase())
+             )
           .toList();
+      list.clear();
       list = filteredList.toSet().toList();
     } else {}
     return list;
@@ -431,6 +432,7 @@ class DropDownWidget extends StatelessWidget {
               .toLowerCase()
               .contains(query.toLowerCase()))
           .toList();
+      list.clear();
       list = filteredList.toSet().toList();
       return list;
     } else {
