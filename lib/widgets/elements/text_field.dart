@@ -29,7 +29,7 @@ class TextFieldWidget extends StatelessWidget {
     String labelText = "${callbackElement['title']} ${(callbackElement['isRequired'] ?? false ? ' * ' : '')}";
 
     return Container(
-        margin: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(left:10,right:10,top: 30),
         child: TextFormField(
           controller: valueFormResults[elementName]!['controller'],
           keyboardType: FormController().checkInputType(valueFormResults[elementName]!),
