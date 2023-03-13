@@ -393,6 +393,7 @@ class MainController extends ActiveController {
     getMemory();
   }
 
+
   getMemory() async {
     printSuccess(await memory.readMemory('hellos'));
     printSuccess(await memory.readMemory('Jambos'));
