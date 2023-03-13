@@ -34,8 +34,7 @@ class SurveyJSForm extends StatefulWidget {
   State<SurveyJSForm> createState() => _SurveyJSFormState();
 }
 
-class _SurveyJSFormState extends State<SurveyJSForm>
-    with TickerProviderStateMixin {
+class _SurveyJSFormState extends State<SurveyJSForm> {
   /// All themes map
   List<Map<String, dynamic>> themeStyle = [];
 
@@ -66,11 +65,11 @@ class _SurveyJSFormState extends State<SurveyJSForm>
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  late TabController tabController;
-
   int initialIndex = 0;
 
   List pages = [];
+  List<Widget> pageList = [];
+  List<Widget> tabList = [];
 
   late Timer debounce;
 
@@ -84,29 +83,7 @@ class _SurveyJSFormState extends State<SurveyJSForm>
 
     pages =
         widget.schema['pages'] ?? widget.schema['service']['schema']['pages'];
-
-    tabController = TabController(
-      initialIndex: initialIndex,
-      length: pages.length,
-      vsync: this,
-    );
-
-    tabController.index = initialIndex;
-
-    /// set the current page view
-    setPageChangeListeners();
-
     // metaData.putIfAbsent('customWidgets', () => customWidgets());
-  }
-
-  setPageChangeListeners() {
-    tabController.addListener(() {
-      if (tabController.indexIsChanging) {
-        setState(() {
-          initialIndex = tabController.index;
-        });
-      }
-    });
   }
 
   Widget formBuilderController(page) {
@@ -593,25 +570,6 @@ class _SurveyJSFormState extends State<SurveyJSForm>
       }
     }
 
-
-    /// new Line function
-    /// check if next element has startWithNewLine = false
-    bool checkNextLine(Map element, int index){
-      bool startWithNewLine = true;
-      List fields = page['elements'];
-      Map nextElement = fields.length == (index + 1) ? {} : fields[index + 1];
-      if(nextElement.isNotEmpty){
-        startWithNewLine = nextElement['startWithNewLine'] ?? true;
-        printError(' @#@#@#@#@# : ${element['name']}');
-        printError('startWithNewLine: $startWithNewLine');
-        printError(' %^%^%^%^%^% : ${nextElement['name']}');
-      } else {
-        startWithNewLine = true;
-      }
-      printError('startWithNewLine: $startWithNewLine');
-      return startWithNewLine;
-    }
-
     ListView buildForm() {
 
       // List<Widget> children = [];
@@ -688,159 +646,175 @@ class _SurveyJSFormState extends State<SurveyJSForm>
         child: buildForm());
   }
 
+  setUpTabview(){
+    /// After setting up the element, add it to the elementData
+    /// use elementData in the rest of the function
+
+    tabList.clear();
+    pageList.clear();
+
+    for(var page in pages){
+      setUpElement(page['name'], {
+        'visible': page['visible'] ?? true,
+        'name': page['name'],
+      });
+
+      int index = pages.indexOf(page);
+
+      tabList.add(Expanded(
+        child: Visibility(
+          visible: valueFormResults[page['name']]!['visible'] ?? true,
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                border: initialIndex == index
+                    ? const Border(bottom: BorderSide(width: 1)) : null,
+              color: initialIndex == index
+                  ? Colors.grey.withOpacity(0.05)
+                  : Colors.grey.withOpacity(0.02),),
+            child: TextButton(
+              onPressed: () {
+                setState(() {
+                  initialIndex = index;
+                });
+              },
+              child: Text(page['title'], style: TextStyle(
+                fontSize: 11,
+                color:
+              initialIndex == index
+                  ? Colors.blue
+                  : Colors.blueGrey,),
+            ),
+          ),
+        ),
+      ),));
+
+      pageList.add(Visibility(
+          visible: valueFormResults[page['name']]!['visible'] ?? true,
+          child: formBuilderController(page)));
+
+    }
+  }
+
   /// Extend the custom widget functions
 
   @override
   Widget build(BuildContext context) {
+
+    printWarning('{{{tabList}}}');
+    printSuccess(tabList);
+
+    setUpTabview();
+
     visibleIf();
     isRequiredIf();
     enableIf();
 
-    return Scaffold(
-      body: SafeArea(
-          child: Form(
-        key: formKey,
-        child: Column(
-          children: <Widget>[
-            // the tab bar with pages
-            SizedBox(
-              height: 50,
-              child: AppBar(
-                elevation: 0,
-                backgroundColor: Colors.white,
-                bottom: TabBar(
-                  unselectedLabelStyle: const TextStyle(
-                      fontSize: 14.0,
-                      color: Color(0xff0062E1),
-                      fontWeight: FontWeight.w500),
-                  labelStyle: const TextStyle(
-                      fontSize: 14.0,
-                      color: Color(0xff101828),
-                      fontWeight: FontWeight.bold),
-                  labelColor: const Color(0xff0062E1),
-                  unselectedLabelColor: const Color(0xff101828),
-                  controller: tabController,
-                  isScrollable: true,
-                  tabs: [
-                    //// TODO: Some pages could be invisible
-                    for (var page in pages)
-                      FittedBox(
-                        fit: BoxFit.contain,
-                        child: Tab(
-                          text: page['title'],
-                        ),
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Row(
+            children: tabList,
+          ),
+          Expanded(
+            child: SizedBox(
+              child: pageList[initialIndex],
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              border: Border(
+                top: BorderSide(
+                    width: 1.0, color: Colors.grey.withOpacity(0.3)),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  right: 16, top: 8, bottom: 8, left: 16),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Visibility(
+                      visible: initialIndex == 0 ? false : true,
+                      child: Previous(
+                        context: context,
+                        onPrevious: () {
+                          if (initialIndex > 0) {
+                            setState(() {
+                              initialIndex = initialIndex - 1;
+                            });
+                          }
+                        },
+                        formKey: formKey,
                       ),
+                    ),
+                    const Spacer(),
+                    (initialIndex + 1) == pages.length
+                        ? SubmitButton(
+                      context: context,
+                      formKey: formKey,
+                      onFormSubmit: () {
+                        /// TODO: Validate the form
+                        ///
+                        widget.onFormValueSubmit(valueFormResults);
+                        var listValues = [];
+                        // printWarning(valueFormResults['InformantFullName']);
+                        // if(formKey.currentState!.validate()) {
+                        //   valueFormResults.forEach((key, value) {
+                        //     if (value.containsKey("value") &&
+                        //         value.containsKey("isRequired")) {
+                        //       if (value['isRequired'] == true &&
+                        //           value['value'] != "") {
+                        //         listValues.add(true);
+                        //       } else {
+                        //         listValues.add(false);
+                        //       }
+                        //     }
+                        //   });
+                        //   var isValid = listValues
+                        //       .any((element) => element == false);
+                        //   if (isValid == true) {
+                        //     ScaffoldMessenger.of(context)
+                        //         .showSnackBar(SnackBar(
+                        //         backgroundColor: Colors.red,
+                        //         content: Text(
+                        //           "Fill all required fields",
+                        //           style: TextStyle(
+                        //               color: Colors.white,
+                        //               fontSize: 16,
+                        //               fontWeight: FontWeight.w400),
+                        //         )));
+                        //   } else {
+                        //     printError(
+                        //         "valueFormResults--------------------");
+                        //     widget.onFormValueSubmit(valueFormResults);
+                        //     printError(valueFormResults);
+                        //   }
+                        // }
+                      },
+                    )
+                        : Next(
+                      context: context,
+                      onNext: () {
+                        if (initialIndex < pages.length - 1) {
+                          setState(() {
+                            initialIndex = initialIndex + 1;
+                          });
+                        }
+                      },
+                      formKey: formKey,
+                    )
                   ],
                 ),
               ),
             ),
-            // create widgets for each tab bar here
-            Expanded(
-              flex: 1,
-              child: TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  controller: tabController,
-                  children: [
-                    for (var page in pages) formBuilderController(page)
-                  ]),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                border: Border(
-                  top: BorderSide(
-                      width: 1.0, color: Colors.grey.withOpacity(0.3)),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    right: 16, top: 8, bottom: 8, left: 16),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Visibility(
-                        visible: initialIndex == 0 ? false : true,
-                        child: Previous(
-                          context: context,
-                          onPrevious: () {
-                            if (tabController.index > 0) {
-                              setState(() {
-                                initialIndex = initialIndex - 1;
-                              });
-                              tabController.index -= 1;
-                            }
-                          },
-                          formKey: formKey,
-                        ),
-                      ),
-                      const Spacer(),
-                      (initialIndex + 1) == pages.length
-                          ? SubmitButton(
-                              context: context,
-                              formKey: formKey,
-                              onFormSubmit: () {
-                                /// TODO: Validate the form
-                                ///
-                                widget.onFormValueSubmit(valueFormResults);
-                                var listValues = [];
-                                // printWarning(valueFormResults['InformantFullName']);
-                                // if(formKey.currentState!.validate()) {
-                                //   valueFormResults.forEach((key, value) {
-                                //     if (value.containsKey("value") &&
-                                //         value.containsKey("isRequired")) {
-                                //       if (value['isRequired'] == true &&
-                                //           value['value'] != "") {
-                                //         listValues.add(true);
-                                //       } else {
-                                //         listValues.add(false);
-                                //       }
-                                //     }
-                                //   });
-                                //   var isValid = listValues
-                                //       .any((element) => element == false);
-                                //   if (isValid == true) {
-                                //     ScaffoldMessenger.of(context)
-                                //         .showSnackBar(SnackBar(
-                                //         backgroundColor: Colors.red,
-                                //         content: Text(
-                                //           "Fill all required fields",
-                                //           style: TextStyle(
-                                //               color: Colors.white,
-                                //               fontSize: 16,
-                                //               fontWeight: FontWeight.w400),
-                                //         )));
-                                //   } else {
-                                //     printError(
-                                //         "valueFormResults--------------------");
-                                //     widget.onFormValueSubmit(valueFormResults);
-                                //     printError(valueFormResults);
-                                //   }
-                                // }
-                              },
-                            )
-                          : Next(
-                              context: context,
-                              onNext: () {
-                                if (tabController.index < pages.length - 1) {
-                                  setState(() {
-                                    initialIndex = initialIndex + 1;
-                                  });
-                                  tabController.index += 1;
-                                }
-                              },
-                              formKey: formKey,
-                            )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // the buttons
-          ],
-        ),
-      )),
+          ),
+        ],
+      ),
     );
   }
 
