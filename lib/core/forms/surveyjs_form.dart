@@ -63,7 +63,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     'customWidgets': {'elementName': SampleWidget}
   };
 
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  List<GlobalKey<FormState>> listGlobalKey = [];
 
   int initialIndex = 0;
 
@@ -660,6 +660,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       });
 
       int index = pages.indexOf(page);
+      GlobalKey<FormState> key = GlobalKey<FormState>();
+      listGlobalKey.add(key);
 
       tabList.add(Expanded(
         child: Visibility(
@@ -691,7 +693,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
       pageList.add(Visibility(
           visible: valueFormResults[page['name']]!['visible'] ?? true,
-          child: formBuilderController(page)));
+          child: Form(
+            key: listGlobalKey[index],
+              child: formBuilderController(page))));
 
     }
   }
@@ -713,106 +717,109 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     return Container(
       color: Colors.white,
       child: Column(
-        children: [
-          Row(
-            children: tabList,
+      children: [
+      Row(
+        children: tabList,
+      ),
+      Expanded(
+        child: SizedBox(
+          child: pageList[initialIndex],
+        ),
+      ),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.1),
+          border: Border(
+            top: BorderSide(
+                width: 1.0, color: Colors.grey.withOpacity(0.3)),
           ),
-          Expanded(
-            child: SizedBox(
-              child: pageList[initialIndex],
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
-              border: Border(
-                top: BorderSide(
-                    width: 1.0, color: Colors.grey.withOpacity(0.3)),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  right: 16, top: 8, bottom: 8, left: 16),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Visibility(
-                      visible: initialIndex == 0 ? false : true,
-                      child: Previous(
-                        context: context,
-                        onPrevious: () {
-                          if (initialIndex > 0) {
-                            setState(() {
-                              initialIndex = initialIndex - 1;
-                            });
-                          }
-                        },
-                        formKey: formKey,
-                      ),
-                    ),
-                    const Spacer(),
-                    (initialIndex + 1) == pages.length
-                        ? SubmitButton(
-                      context: context,
-                      formKey: formKey,
-                      onFormSubmit: () {
-                        /// TODO: Validate the form
-                        ///
-                        widget.onFormValueSubmit(valueFormResults);
-                        var listValues = [];
-                        // printWarning(valueFormResults['InformantFullName']);
-                        // if(formKey.currentState!.validate()) {
-                        //   valueFormResults.forEach((key, value) {
-                        //     if (value.containsKey("value") &&
-                        //         value.containsKey("isRequired")) {
-                        //       if (value['isRequired'] == true &&
-                        //           value['value'] != "") {
-                        //         listValues.add(true);
-                        //       } else {
-                        //         listValues.add(false);
-                        //       }
-                        //     }
-                        //   });
-                        //   var isValid = listValues
-                        //       .any((element) => element == false);
-                        //   if (isValid == true) {
-                        //     ScaffoldMessenger.of(context)
-                        //         .showSnackBar(SnackBar(
-                        //         backgroundColor: Colors.red,
-                        //         content: Text(
-                        //           "Fill all required fields",
-                        //           style: TextStyle(
-                        //               color: Colors.white,
-                        //               fontSize: 16,
-                        //               fontWeight: FontWeight.w400),
-                        //         )));
-                        //   } else {
-                        //     printError(
-                        //         "valueFormResults--------------------");
-                        //     widget.onFormValueSubmit(valueFormResults);
-                        //     printError(valueFormResults);
-                        //   }
-                        // }
-                      },
-                    )
-                        : Next(
-                      context: context,
-                      onNext: () {
-                        if (initialIndex < pages.length - 1) {
-                          setState(() {
-                            initialIndex = initialIndex + 1;
-                          });
-                        }
-                      },
-                      formKey: formKey,
-                    )
-                  ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(
+              right: 16, top: 8, bottom: 8, left: 16),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Visibility(
+                  visible: initialIndex == 0 ? false : true,
+                  child: Previous(
+                    context: context,
+                    onPrevious: () {
+                      if (initialIndex > 0) {
+                        setState(() {
+                          initialIndex = initialIndex - 1;
+                        });
+                      }
+                    },
+                    formKey: GlobalKey(),
+                  ),
                 ),
-              ),
+                const Spacer(),
+                (initialIndex + 1) == pages.length
+                    ? SubmitButton(
+                  context: context,
+                  formKey: GlobalKey(),
+                  onFormSubmit: () {
+                    /// TODO: Validate the form
+                    ///
+                    widget.onFormValueSubmit(valueFormResults);
+                    var listValues = [];
+                    // printWarning(valueFormResults['InformantFullName']);
+                    // if(formKey.currentState!.validate()) {
+                    //   valueFormResults.forEach((key, value) {
+                    //     if (value.containsKey("value") &&
+                    //         value.containsKey("isRequired")) {
+                    //       if (value['isRequired'] == true &&
+                    //           value['value'] != "") {
+                    //         listValues.add(true);
+                    //       } else {
+                    //         listValues.add(false);
+                    //       }
+                    //     }
+                    //   });
+                    //   var isValid = listValues
+                    //       .any((element) => element == false);
+                    //   if (isValid == true) {
+                    //     ScaffoldMessenger.of(context)
+                    //         .showSnackBar(SnackBar(
+                    //         backgroundColor: Colors.red,
+                    //         content: Text(
+                    //           "Fill all required fields",
+                    //           style: TextStyle(
+                    //               color: Colors.white,
+                    //               fontSize: 16,
+                    //               fontWeight: FontWeight.w400),
+                    //         )));
+                    //   } else {
+                    //     printError(
+                    //         "valueFormResults--------------------");
+                    //     widget.onFormValueSubmit(valueFormResults);
+                    //     printError(valueFormResults);
+                    //   }
+                    // }
+                  },
+                )
+                    : Next(
+                  context: context,
+                  onNext: () {
+                    if (initialIndex < pages.length - 1) {
+                      GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                      if (formKey.currentState!.validate()){
+                        setState(() {
+                          initialIndex = initialIndex + 1;
+                        });
+                      }
+                    }
+                  },
+                  formKey: GlobalKey(),
+                )
+              ],
             ),
           ),
+        ),
+      ),
         ],
       ),
     );
