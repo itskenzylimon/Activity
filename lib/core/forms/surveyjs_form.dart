@@ -655,7 +655,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     for(var page in pages){
       setUpElement(page['name'], {
-        'visible': page['visible'] ?? true,
         'name': page['name'],
       });
 
@@ -663,39 +662,38 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       GlobalKey<FormState> key = GlobalKey<FormState>();
       listGlobalKey.add(key);
 
-      tabList.add(Expanded(
-        child: Visibility(
-          visible: valueFormResults[page['name']]!['visible'] ?? true,
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                border: initialIndex == index
-                    ? const Border(bottom: BorderSide(width: 1)) : null,
-              color: initialIndex == index
-                  ? Colors.grey.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.02),),
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  initialIndex = index;
-                });
-              },
-              child: Text(page['title'], style: TextStyle(
-                fontSize: 11,
-                color:
-              initialIndex == index
-                  ? Colors.blue
-                  : Colors.blueGrey,),
-            ),
-          ),
-        ),
-      ),));
-
       pageList.add(Visibility(
           visible: valueFormResults[page['name']]!['visible'] ?? true,
           child: Form(
             key: listGlobalKey[index],
               child: formBuilderController(page))));
+
+      visibleIf();
+
+      printSuccess('{{{{valueFormResults[page[]]}}}}');
+      printSuccess(valueFormResults[page['name']]);
+      printSuccess('{{{valueFormResults[page[]]}}}');
+
+      tabList.add(Expanded(
+        child: Visibility(
+          visible: valueFormResults[page['name']]!['visible'] ?? false,
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: initialIndex == index
+                  ? const Border(bottom: BorderSide(width: 1)) : null,
+              color: initialIndex == index
+                  ? Colors.grey.withOpacity(0.05)
+                  : Colors.grey.withOpacity(0.02),),
+            child: Text(page['title'], style: TextStyle(
+                fontSize: 11,
+                color: initialIndex == index
+                    ? Colors.blue
+                    : Colors.blueGrey,),
+              ),
+          ),
+        ),));
 
     }
   }
@@ -708,11 +706,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     printWarning('{{{tabList}}}');
     printSuccess(tabList);
 
-    setUpTabview();
-
     visibleIf();
     isRequiredIf();
     enableIf();
+
+    setUpTabview();
 
     return Container(
       color: Colors.white,
