@@ -67,7 +67,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
     callbackElement = widget.valueFormResults[widget.elementName]!;
 
     if (callbackElement['type'] == 'signaturepad') {
-      printInfo(callbackElement['type']);
+      // printInfo(callbackElement['type']);
       return widget.valueFormResults[widget.elementName]!['visible']
           ? Container(
               height: 450,
@@ -146,7 +146,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
                     ),
             );
     } else if (callbackElement['type'] == 'file') {
-      printError(callbackElement['type']);
+      // printError(callbackElement['type']);
       return Padding(
         padding: const EdgeInsets.only(
           top: 20,
@@ -177,7 +177,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
 
   String getBase64FormateFile(String path) {
     File file = File(path);
-    print('File is = ' + file.toString());
+    // print('File is = ' + file.toString());
     List<int> fileInByte = file.readAsBytesSync();
     String fileInBase64 = base64Encode(fileInByte);
     setState(() {
@@ -186,7 +186,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
     callbackElement['value'] = fileInBase64;
     widget.onElementCallback(callbackElement);
     signed = true;
-    printWarning(callbackElement['value']);
+    // printWarning(callbackElement['value']);
     return fileInBase64;
   }
 

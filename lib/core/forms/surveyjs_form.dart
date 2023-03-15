@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import '../../core/helpers/strings.dart';
 
 import '../../widgets/elements/age_calculator_field.dart';
 import '../../widgets/elements/check_box_field.dart';
@@ -13,6 +15,7 @@ import '../../widgets/elements/signature_pad_field.dart';
 import '../../widgets/elements/text_field.dart';
 import '../../widgets/elements/text_search_update_field.dart';
 import '../../widgets/elements/type_field.dart';
+import 'form_controller.dart';
 
 class SurveyJSForm extends StatefulWidget {
   final Map schema;
@@ -213,8 +216,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
       
-      print("newElement-------------------------------->");
-      print(newElement);
+      // print("newElement-------------------------------->");
+      // print(newElement);
 
       return Visibility(
           child: Padding(
@@ -489,9 +492,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     Widget checkElement(Map<String, dynamic> element) {
       List<List> result = [];
       List temp = [];
-      printError( element['elements']);
+      // printError( element['elements']);
       if( element['elements'] == null){
-        printError( element['elements']);
+        // printError( element['elements']);
       }else{
         for (Map char in element['elements']) {
           if (char["startWithNewLine"] == null) {
@@ -509,11 +512,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       }
 
 
-      printSuccess('{{{{{{{{{panelresult}}}}}}}}}');
-      printSuccess(result);
+      // printSuccess('{{{{{{{{{panelresult}}}}}}}}}');
+      // printSuccess(result);
       // printSuccess(result[0].length);
       // printSuccess(result.length);
-      printSuccess('{{{{{{{{{{{{panelresult}}}}}}}}}}}}');
+      // printSuccess('{{{{{{{{{{{{panelresult}}}}}}}}}}}}');
 
 
       if (element['type'] == 'panel') {
@@ -612,11 +615,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
         result.add(temp);
       }
 
-      printSuccess('{{{{{{{{{result}}}}}}}}}');
-      printSuccess(result);
-      printSuccess(result[0].length);
-      printSuccess(result.length);
-      printSuccess('{{{{{{{{{{{{result}}}}}}}}}}}}');
+      // printSuccess('{{{{{{{{{result}}}}}}}}}');
+      // printSuccess(result);
+      // printSuccess(result[0].length);
+      // printSuccess(result.length);
+      // printSuccess('{{{{{{{{{{{{result}}}}}}}}}}}}');
 
       ListView listView = ListView(
         children: [for (List rowElements in result)
@@ -670,9 +673,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
       visibleIf();
 
-      printSuccess('{{{{valueFormResults[page[]]}}}}');
-      printSuccess(valueFormResults[page['name']]);
-      printSuccess('{{{valueFormResults[page[]]}}}');
+      // printSuccess('{{{{valueFormResults[page[]]}}}}');
+      // printSuccess(valueFormResults[page['name']]);
+      // printSuccess('{{{valueFormResults[page[]]}}}');
 
       tabList.add(Expanded(
         child: Visibility(
@@ -703,8 +706,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
   @override
   Widget build(BuildContext context) {
 
-    printWarning('{{{tabList}}}');
-    printSuccess(tabList);
+    // printWarning('{{{tabList}}}');
+    // printSuccess(tabList);
 
     visibleIf();
     isRequiredIf();
@@ -760,43 +763,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                   context: context,
                   formKey: GlobalKey(),
                   onFormSubmit: () {
-                    /// TODO: Validate the form
-                    ///
-                    widget.onFormValueSubmit(valueFormResults);
-                    var listValues = [];
-                    // printWarning(valueFormResults['InformantFullName']);
-                    // if(formKey.currentState!.validate()) {
-                    //   valueFormResults.forEach((key, value) {
-                    //     if (value.containsKey("value") &&
-                    //         value.containsKey("isRequired")) {
-                    //       if (value['isRequired'] == true &&
-                    //           value['value'] != "") {
-                    //         listValues.add(true);
-                    //       } else {
-                    //         listValues.add(false);
-                    //       }
-                    //     }
-                    //   });
-                    //   var isValid = listValues
-                    //       .any((element) => element == false);
-                    //   if (isValid == true) {
-                    //     ScaffoldMessenger.of(context)
-                    //         .showSnackBar(SnackBar(
-                    //         backgroundColor: Colors.red,
-                    //         content: Text(
-                    //           "Fill all required fields",
-                    //           style: TextStyle(
-                    //               color: Colors.white,
-                    //               fontSize: 16,
-                    //               fontWeight: FontWeight.w400),
-                    //         )));
-                    //   } else {
-                    //     printError(
-                    //         "valueFormResults--------------------");
-                    //     widget.onFormValueSubmit(valueFormResults);
-                    //     printError(valueFormResults);
-                    //   }
-                    // }
+                    /// Validate the data saved in the form
+                    showConfirmDialog(context);
                   },
                 )
                     : Next(
@@ -820,6 +788,337 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       ),
         ],
       ),
+    );
+  }
+
+  showConfirmDialog(context) {
+
+    Map<String ,List> formPagePreviewData = {};
+
+    for (int x = 0; x < pages.length; x++) {
+      valueFormResults.forEach((key, value) {
+        printError('{{{{{{value}}}}}}');
+        printError(value);
+        printError('{{{{{{value}}}}}}');
+        /// Map check if formPageData has the key page
+        if(pages[x].toString().contains(key)) {
+          List currentValues = formPagePreviewData['${pages[x]['name']}'] ?? [];
+          if(currentValues.isEmpty) {
+
+            if(![null, '', ' '].contains(value['value'])){
+              formPagePreviewData['${pages[x]['title']}'] = [{
+                'value': value['value'],
+                'name': key
+              }];
+            }
+          } else {
+
+            if(![null, '', ' '].contains(value['value'])){
+              currentValues.add({
+                'value': value['value'],
+                'name': key
+              });
+            }
+          }
+        }
+      });
+    }
+
+    List<List> pageValues = formPagePreviewData.values.toList();
+    List<String> pageTitles = formPagePreviewData.keys.toList();
+
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          Container(
+            margin: const EdgeInsets.only(top: 100, bottom: 50, right: 20, left: 20),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Container(
+                margin: const EdgeInsets.only(top: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xffE3E5EE)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            for (int x = 0; x < pageTitles.length; x++)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 18, top: 15),
+                                    child: Text(pageTitles[x],
+                                      style: const TextStyle(
+                                        color: Color(0xff111827),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  const Divider(
+                                    color: Color(0xffE5E7EB),
+                                    thickness: 1,
+                                    height: 0,
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  for (int y = 0; y < pageValues[x].length; y++)
+                                    SizedBox(
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 26, right: 26),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(pageValues[x][y]['name'],
+                                                    style: const TextStyle(
+                                                      color: Color(0xff6B7280),
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  pageValues[x][y]['value'].runtimeType == String &&
+                                                      pageValues[x][y]['value'].toString().length > 100 &&
+                                                      FormController().base64RegExp(pageValues[x][y]['value']) ?
+                                                  SizedBox(
+                                                      height: 250,
+                                                      width: 250,
+                                                      child: Image.memory(
+                                                          const Base64Decoder().convert(pageValues[x][y]['value'])
+                                                      )) :
+                                                  Text(pageValues[x][y]['value'].toString(),
+                                                    style: const TextStyle(
+                                                      color: Color(0xff111827),
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.only(
+                                                bottom: 13, top: 13,
+                                                left: 26, right: 26),
+                                            child: Divider(
+                                              color: Color(0xffE5E7EB),
+                                              thickness: 1,
+                                              height: 0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                ],
+                              )
+                          ],
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          margin: EdgeInsets.all(10),
+                          child: GestureDetector(
+                            onTap: () => showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)
+                                  ),
+                                  content: Container(
+                                    height: 190,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: 56,
+                                              height: 56,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(28),
+                                                border: Border.all(color: const Color(0xffeaf3ff), width: 10, ),
+                                                color: const Color(0xffc6dfff),
+                                              ),
+                                              padding: const EdgeInsets.all(5),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children:[
+                                                  Container(
+                                                    width: 24,
+                                                    height: 24,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.check_circle_outline_rounded, color: Colors.blue, size: 24,),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            InkWell(
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Icon(Icons.close))
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: 16,
+                                        ),
+                                        const Text(
+                                          'Complete Application',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 4,
+                                        ),
+                                        const Text(
+                                          'Are you sure you want to complete this application?',
+                                          style: TextStyle(
+                                            color: Color(0xff475467),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 30,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 5,
+                                              child: InkWell(
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Container(
+                                                  height: 44,
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(color: const Color(0xffD0D5DD)),
+                                                      borderRadius: BorderRadius.circular(8)),
+                                                  child: const Center(
+                                                    child: Text(
+                                                      'Cancel',
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12,),
+                                            Expanded(
+                                              flex: 5,
+                                              child: InkWell(
+                                                onTap: (){
+                                                  Navigator.pop(context);
+                                                  widget.onFormValueSubmit(valueFormResults);
+                                                },
+                                                child: Container(
+                                                  height: 44,
+                                                  decoration: BoxDecoration(
+                                                      color: const Color(0xff006FFF),
+                                                      borderRadius: BorderRadius.circular(8)),
+                                                  child: const Center(
+                                                    child: Text(
+                                                      'Complete',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  )),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                  width: 148,
+                                  height: 44,
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(color: const Color(0xffD0D5DD)),
+                                          borderRadius: BorderRadius.circular(8)),
+                                      child: const Center(
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 50,),
+                                Container(
+                                  height: 44,
+                                  width: 148,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xff006FFF),
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: const Center(
+                                    child: Text(
+                                      'Complete',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+              ),
+            ),
+          )
     );
   }
 
@@ -1190,7 +1489,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               return value;
             });
           } else {
-            printWarning('$name --- FINAL --- $visibilityStates');
+            // printWarning('$name --- FINAL --- $visibilityStates');
 
             // printWarning( '$name --- FINAL --- $visibilityStates');
 
@@ -1348,7 +1647,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           }
           else {
 
-            printWarning( '$name --- FINAL --- $visibilityStates');
+            // printWarning( '$name --- FINAL --- $visibilityStates');
 
               /// update the visible valueFormResults
               valueFormResults.update(name, (value) {

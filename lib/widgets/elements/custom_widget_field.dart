@@ -75,7 +75,7 @@ class CustomWidgetModel {
 
   Function makeOnElementCallback(){
     return (Map<String, dynamic> value) {
-      print('{{{{object}}}}');
+      // print('{{{{object}}}}');
       onElementCallback(value);
     };
   }

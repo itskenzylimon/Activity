@@ -96,8 +96,8 @@ class DropDownWidget extends StatelessWidget {
                                   _listNotifier.value = choicesList;
                                 }
 
-                                printSuccess("after query");
-                                printSuccess(choiceList);
+                                // printSuccess("after query");
+                                // printSuccess(choiceList);
                               });
                             } else {
                               choiceList.clear();
@@ -241,28 +241,28 @@ class DropDownWidget extends StatelessWidget {
             ],
           ));
     } else {
-      printSuccess("--------------------------------");
-      printSuccess(callbackElement);
+      // printSuccess("--------------------------------");
+      // printSuccess(callbackElement);
       String? currentSelectedValue =
       ['', null].contains(callbackElement['value'])
           ? 'Select'
           : callbackElement['value'];
       List choices = ["Select"];
       List data = callbackElement['choices'];
-      printSuccess("==========================================================");
-      printSuccess(data.runtimeType);
+      // printSuccess("==========================================================");
+      // printSuccess(data.runtimeType);
         for(int i = 0; i < data.length; i++) {
-          printWarning(data[i].runtimeType);
+          // printWarning(data[i].runtimeType);
           if (data[i].runtimeType == String) {
             choices.add(data[i]);
-            printWarning("data as List<String>");
-            printError(choices);
+            // printWarning("data as List<String>");
+            // printError(choices);
           } else {
-            printError(data);
+            // printError(data);
             choices.add(data[i]['value']);
           }
         }
-      printSuccess(choices);
+      // printSuccess(choices);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

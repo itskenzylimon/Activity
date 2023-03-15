@@ -9,7 +9,7 @@ class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
 
   /// Initialise area
-  Memory memory = Memory(filename: 'activity-data.act');
+  Memory memory = Memory(filename: '${Directory.current.path}activity-data.act');
 
   /// Assign Active values
   /// You can ideally check

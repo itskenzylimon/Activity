@@ -23,8 +23,8 @@ class FormController{
       }
 
       /// Email
-      if (element.containsValue(" Email") ||
-          element.containsValue(" abc@xyz.com")) {
+      if (element.containsValue("email") ||
+          element.containsValue("abc@xyz.com")) {
         type = TextInputType.emailAddress;
       }
     }
@@ -44,6 +44,14 @@ class FormController{
     }
 
     return null;
+  }
+
+  /// Check if a string is base64
+  ///  Use this if you are unsure if a string is a valid base64 format string
+  bool base64RegExp(String base64) {
+    RegExp regExp =
+    RegExp(r'^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$');
+    return regExp.hasMatch(base64);
   }
 
 }

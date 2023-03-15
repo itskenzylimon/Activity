@@ -56,7 +56,7 @@ class TextFieldWidget extends StatelessWidget {
             hintText: callbackElement['placeholder'] ?? '',
           ),
           validator: (value) {
-
+            /// check if value is required
             if (valueFormResults[elementName]!['isRequired'] == null) {
               if (value == null || value.isEmpty) {
                 return 'Please enter ${valueFormResults[elementName]!['title']}';
@@ -80,6 +80,12 @@ class TextFieldWidget extends StatelessWidget {
                   }
                 }
                 //
+              }
+              /// input validator for email
+              if (valueFormResults[elementName]!['inputType'] == 'email') {
+                if (!value!.contains('@')) {
+                  return 'Please enter a valid email';
+                }
               }
             }
             if (value == null || value.isEmpty) {

@@ -33,10 +33,10 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
   Widget build(BuildContext context) {
 
     callbackElement = widget.valueFormResults[widget.elementName]!;
-    print('????ELEMNT NAME IPRS ???>>>>>>');
-    print(widget.elementName);
-    print(callbackElement);
-    print(callbackElement['lookup']);
+    // print('????ELEMNT NAME IPRS ???>>>>>>');
+    // print(widget.elementName);
+    // print(callbackElement);
+    // print(callbackElement['lookup']);
 
 
     return SizedBox(
@@ -60,14 +60,14 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: item['parameters'].length,
                   itemBuilder: (BuildContext context, int index) {
-                    print('????ELEMNT NAME IPRS');
-                    print(item['parameters'][index]);
-                    print(item['parameters']);
-                    print('Outpurs ????');
-                    print(callbackElement['outputs']);
-                    print(callbackElement['outputs'][0]);
-                    print(callbackElement['outputs'][0]['value']);
-                    print('${item['parameters'][index]['name']}-${callbackElement['outputs'][0]['value']}');
+                    // print('????ELEMNT NAME IPRS');
+                    // print(item['parameters'][index]);
+                    // print(item['parameters']);
+                    // print('Outpurs ????');
+                    // print(callbackElement['outputs']);
+                    // print(callbackElement['outputs'][0]);
+                    // print(callbackElement['outputs'][0]['value']);
+                    // print('${item['parameters'][index]['name']}-${callbackElement['outputs'][0]['value']}');
                     final parameters = item['parameters'][index];
                     TextEditingController textEditingController = TextEditingController();
 
@@ -115,7 +115,7 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                       child: parameters['type'] == 'dropdown'
                           ? DropDownIPRSWidget(
                         onElementCallback: (Map<String, dynamic> value) {
-                          print(value);
+                          // print(value);
                           setState(() {
 
                             Map<String, Map<String, dynamic>> newValueFormResults = widget.valueFormResults;
@@ -129,7 +129,7 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                           :
                       TextFieldIPRSWidget(
                         onElementCallback: (Map<String, dynamic> value) {
-                          print(value);
+                          // print(value);
                           setState(() {
                             Map<String, Map<String, dynamic>> newValueFormResults = widget.valueFormResults;
 
