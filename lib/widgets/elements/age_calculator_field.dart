@@ -22,8 +22,13 @@ class AgeCalculatorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    callbackElement = valueFormResults[elementName]!;
     String labelText = valueFormResults[elementName]!['title'];
+    if(valueFormResults[elementName]!['value'].isNotEmpty) {
+      agecalcEditingController.text =
+      agecalcEditingController.text == ""?
+      "": calculateAge(valueFormResults[elementName]!['value']).toString();
+    }
 
     // Return an empty Container widget (or any other widget)
     return Column(
@@ -40,6 +45,7 @@ class AgeCalculatorWidget extends StatelessWidget {
         height: 10,
       ),
       TextFormField(
+        controller: agecalcEditingController,
         keyboardType: FormController().
         checkInputType(valueFormResults[elementName]!),
         readOnly: true,
@@ -56,5 +62,25 @@ class AgeCalculatorWidget extends StatelessWidget {
         },
       ),
     ]);
+  }
+
+  calculateAge(birthDate) {
+    // 9/30/1993
+    birthDate = birthDate.split(" ").first;
+    birthDate = birthDate.split("/");
+    DateTime currentDate = DateTime.now();
+    num age = currentDate.year - num.parse(birthDate[2]);
+    int month1 = currentDate.month;
+    int month2 = int.parse(birthDate[0]);
+    if (month2 > month1) {
+      age--;
+    } else if (month1 == month2) {
+      int day1 = currentDate.day;
+      int day2 = int.parse(birthDate[1]);
+      if (day2 > day1) {
+        age--;
+      }
+    }
+    return age;
   }
 }

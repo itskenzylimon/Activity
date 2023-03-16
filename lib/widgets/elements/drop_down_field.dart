@@ -96,8 +96,6 @@ class DropDownWidget extends StatelessWidget {
                                   _listNotifier.value = choicesList;
                                 }
 
-                                // printSuccess("after query");
-                                // printSuccess(choiceList);
                               });
                             } else {
                               choiceList.clear();

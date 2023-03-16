@@ -28,25 +28,24 @@ class TextSearchUpdateFieldWidget extends StatefulWidget {
 class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidget> {
   // Perform some logic or user interaction that generates a callback value
   Map<String, dynamic> callbackElement = {};
+  var searchStatus = false;
 
   @override
   Widget build(BuildContext context) {
 
     callbackElement = widget.valueFormResults[widget.elementName]!;
-    // print('????ELEMNT NAME IPRS ???>>>>>>');
-    // print(widget.elementName);
-    // print(callbackElement);
-    // print(callbackElement['lookup']);
+
 
 
     return SizedBox(
-        height: 270,
+        height: 320,
         child: ListView.builder(
         physics: NeverScrollableScrollPhysics(),
         itemCount: callbackElement['lookup'].length,
         itemBuilder: (BuildContext context, int index) {
           final item = callbackElement['lookup'][index];
-          return Column(
+          return searchStatus == false ?
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
@@ -55,19 +54,11 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                     style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600)),
               ),
               SizedBox(
-                height: 195,
+                height: 250,
                 child: ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: item['parameters'].length,
                   itemBuilder: (BuildContext context, int index) {
-                    // print('????ELEMNT NAME IPRS');
-                    // print(item['parameters'][index]);
-                    // print(item['parameters']);
-                    // print('Outpurs ????');
-                    // print(callbackElement['outputs']);
-                    // print(callbackElement['outputs'][0]);
-                    // print(callbackElement['outputs'][0]['value']);
-                    // print('${item['parameters'][index]['name']}-${callbackElement['outputs'][0]['value']}');
                     final parameters = item['parameters'][index];
                     TextEditingController textEditingController = TextEditingController();
 
@@ -115,7 +106,6 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                       child: parameters['type'] == 'dropdown'
                           ? DropDownIPRSWidget(
                         onElementCallback: (Map<String, dynamic> value) {
-                          // print(value);
                           setState(() {
 
                             Map<String, Map<String, dynamic>> newValueFormResults = widget.valueFormResults;
@@ -129,7 +119,6 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                           :
                       TextFieldIPRSWidget(
                         onElementCallback: (Map<String, dynamic> value) {
-                          // print(value);
                           setState(() {
                             Map<String, Map<String, dynamic>> newValueFormResults = widget.valueFormResults;
 
@@ -144,9 +133,13 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                   },
                 ),
               ),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 16), child:
-              OutlinedButton(
+              Padding(padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: OutlinedButton(
                 onPressed: () async {
+
+                  setState(() {
+                    searchStatus = true;
+                  });
                   TextEditingController idEditingController =
                   TextEditingController();
                   TextEditingController firstNameController =
@@ -161,6 +154,7 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                   var idType;
                   if (widget.valueFormResults.containsKey(
                       'id_type-${callbackElement['outputs'][0]['value']}')) {
+
                     if (widget.valueFormResults[
                     'id_type-${callbackElement['outputs'][0]['value']}'] !=
                         null) {
@@ -176,42 +170,73 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                duration: const Duration(milliseconds: 250),
+                                duration: const Duration(milliseconds: 500),
                                 content: Text('Processing Data')));
                         var resData;
+
                         if (data['first_name'].toLowerCase().contains(
                             firstNameController.text.toLowerCase())) {
-                          for (var i = 0;
-                          i < callbackElement['outputs'].length;
-                          i++) {
+                          for (var i in callbackElement['outputs']) {
                             TextEditingController textEditingController =
                             TextEditingController();
 
-                            if (widget.valueFormResults.containsKey(
-                                callbackElement['outputs'][i]['value'])) {
-                              resData = _textSelect(
-                                  callbackElement['outputs'][i]['text']);
+                            if (widget.valueFormResults.containsKey(i['value']))
+                            {
 
+                              resData = _textSelect(i['text']);
 
                               textEditingController.text =
                                   data['$resData'] ?? '';
                               callbackElement['value'] = textEditingController.text;
                               widget.onElementCallback(callbackElement);
 
-                              setState(() {
-                                widget
-                                    .valueFormResults[callbackElement['outputs'][i]
-                                ['value']]!['controller']
-                                    .text = data['$resData'] ?? '';
-                              });
+
+                                setState(() {
+
+                                  searchStatus = false;
+                                  switch  (_textSelect(i['text'])) {
+                                    case 'dob':
+                                       widget
+                                          .valueFormResults[i['value']]!['value']
+                                      = calculateAge(data['$resData']) ?? '';
+                                       break;
+
+                                    case 'gender':
+                                       widget
+                                          .valueFormResults[i['value']]!['value']
+                                      = data['$resData'] ?? '';
+                                       break;
+
+                                    default:
+                                      widget
+                                            .valueFormResults[i['value']]!['controller']
+                                            .text = data['$resData'] ?? '';
+                                       widget
+                                          .valueFormResults[i['value']]!['value']
+                                      = data['$resData'] ?? '';
+                                  }
+
+
+
+
+
+                                });
+
+                              // });
+
                             }
                           }
-                        } else {
+                        }
+                        else {
+                          setState(() {
+                            searchStatus = false;
+                          });
                           ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text(
                                       'First Name does not match particulars')));
                         }
+
                       } else if (idType == 'AlienIdentification') {
                         var data = await httpLookUpUrl({
                           "url": "http://197.248.4.134/iprs/databyalienid",
@@ -223,9 +248,12 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                   }
                 },
                 child: const Text('Search'),
-              ),)
+              )
+
+              )
             ],
-          );
+          ) :
+          Center(child: CircularProgressIndicator());
         }));
 
   }
@@ -272,5 +300,25 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
     final Map<String, dynamic> convertedData =
     jsonDecode(activeResponse.data!);
     return convertedData;
+  }
+
+  calculateAge(birthDate) {
+    // 9/30/1993
+    birthDate = birthDate.split(" ").first;
+    birthDate = birthDate.split("/");
+    DateTime currentDate = DateTime.now();
+    num age = currentDate.year - num.parse(birthDate[2]);
+    int month1 = currentDate.month;
+    int month2 = int.parse(birthDate[0]);
+    if (month2 > month1) {
+      age--;
+    } else if (month1 == month2) {
+      int day1 = currentDate.day;
+      int day2 = int.parse(birthDate[1]);
+      if (day2 > day1) {
+        age--;
+      }
+    }
+    return age.toString();
   }
 }

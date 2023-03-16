@@ -1542,6 +1542,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             List visibilityStates = [];
             /// loop through visibleIfConditions
             for (var condition in visibleIfConditions) {
+              print('???? Conditions');
+              print(condition);
 
               // printWarning( '$name --- %%% --- $condition');
 

@@ -33,17 +33,11 @@ class DropDownIPRSWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    // print("IPRS DROP DOWN");
-    // print(elementName);
-    // print(valueFormResults[elementName]!);
     callbackElement = valueFormResults[elementName]!;
 
 
     Key dropdownKey = Key(callbackElement['name']);
 
-    // print("?????? CALLBACK DROP");
-    // print(callbackElement);
-    // print(callbackElement['label']);
 
     final List<DropdownMenuItem> choiceList = [
       DropdownMenuItem(
@@ -60,7 +54,7 @@ class DropDownIPRSWidget extends StatelessWidget {
 
 
 
-    String vl = callbackElement['options'][0]['value'];
+    var vl ;
     return Container(
       height: 48.0,
       margin: EdgeInsets.only(bottom:8,top:10,right: 16,left: 16),
