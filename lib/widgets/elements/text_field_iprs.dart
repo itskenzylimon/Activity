@@ -60,7 +60,7 @@ class TextFieldIPRSWidget extends StatelessWidget {
 
             if (valueFormResults[elementName]!['isRequired'] == null) {
               if (value == null || value.isEmpty) {
-                return 'Please enter ${valueFormResults[elementName]!['title']}';
+                return 'Please enter ${valueFormResults[elementName]!['title'] ?? ''}';
               }
             }
             /// check if value is required
