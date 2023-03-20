@@ -659,44 +659,53 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     for(var page in pages){
       setUpElement(page['name'], {
         'name': page['name'],
+        'visibleIf': page['visibleIf'] ?? null,
       });
-
+      // if(page['visibleIf'] == false){
+      //   visibleIf();
+      // }
       int index = pages.indexOf(page);
       GlobalKey<FormState> key = GlobalKey<FormState>();
       listGlobalKey.add(key);
 
-      pageList.add(Visibility(
-          visible: valueFormResults[page['name']]!['visible'] ?? true,
-          child: Form(
-            key: listGlobalKey[index],
-              child: formBuilderController(page))));
+      // page.removeWhere((item) => item['visibleIf'] == true);
+
+        pageList.add(Visibility(
+            visible: valueFormResults[page['name']]!['visible'] ?? true,
+            replacement: const SizedBox(),
+            child: Form(
+                key: listGlobalKey[index],
+                child: formBuilderController(page))));
+
+
+
 
       visibleIf();
 
       // printSuccess('{{{{valueFormResults[page[]]}}}}');
       // printSuccess(valueFormResults[page['name']]);
       // printSuccess('{{{valueFormResults[page[]]}}}');
-
-      tabList.add(Expanded(
-        child: Visibility(
-          visible: valueFormResults[page['name']]!['visible'] ?? false,
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: initialIndex == index
-                  ? const Border(bottom: BorderSide(width: 1)) : null,
-              color: initialIndex == index
-                  ? Colors.grey.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.02),),
-            child: Text(page['title'], style: TextStyle(
+        tabList.add(Visibility(
+            visible: valueFormResults[page['name']]!['visible'] ?? false,
+            replacement: const SizedBox(),
+            child: Container(
+              margin: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                border: initialIndex == index
+                    ? const Border(bottom: BorderSide(width: 1)) : null,
+                color: initialIndex == index
+                    ? Colors.grey.withOpacity(0.05)
+                    : Colors.grey.withOpacity(0.02),),
+              child: Text(page['title'], style: TextStyle(
                 fontSize: 11,
                 color: initialIndex == index
                     ? Colors.blue
                     : Colors.blueGrey,),
               ),
-          ),
-        ),));
+            ),
+          ));
+
 
     }
   }
@@ -719,8 +728,19 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       color: Colors.white,
       child: Column(
       children: [
-      Row(
-        children: tabList,
+        // SizedBox(
+        //   width: double.infinity,
+        // height: 50,
+        //   child: ListView(
+        //     scrollDirection: Axis.horizontal,
+        //     children: tabList,
+        //   ),
+        // ),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: tabList,
+        ),
       ),
       Expanded(
         child: SizedBox(
@@ -1624,10 +1644,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               }
             }
 
+            // "visibleIf": "{MotherMaritalStatus} anyof ['Divorced', 'Widowed', 'Married'] and {IsthechildAbandoned} anyof ['NO']"
             /// Handle the and / or conditions state
             if(element['visibleIf'].toString().contains(' and ')){
 
-              // printWarning( '$name --- FINAL AND --- $visibilityStates');
+              printWarning( '$name --- FINAL AND --- $visibilityStates');
 
               /// update the visible valueFormResults
               valueFormResults.update(name, (value) {
