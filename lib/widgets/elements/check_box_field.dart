@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 
 class CheckBoxWidget extends StatelessWidget {
   final ValueChanged<Map<String, dynamic>> onElementCallback;
@@ -39,7 +39,7 @@ class CheckBoxWidget extends StatelessWidget {
           children: [
             Text(
               callbackElement['title'],
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -48,23 +48,23 @@ class CheckBoxWidget extends StatelessWidget {
               children: choices.map((choice) {
                 return Row(
                   children: <Widget>[
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     /** Checkbox Widget **/
                     Checkbox(
-                      value: selectedCheck,
+                      checked: selectedCheck,
                       onChanged: (value) {
                         selectedCheck = value!;
                         callbackElement['value'] = value;
                         onElementCallback(callbackElement);
                       },
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         '$choice',
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                         softWrap: false,
                         maxLines: 2,
                       ),

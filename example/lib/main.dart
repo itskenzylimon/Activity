@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:example/controller.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
@@ -16,27 +14,29 @@ void main() async {
   // print(currentPath);
   // print(envSetup.readENVFile('.env'));
 
-  // try {
-  //
-  //   ActiveSocket activeSocket = WebSocket();
-  //   activeSocket.open('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
-  //   activeSocket.onSuccess(() {
-  //     print("onSuccess");
-  //   });
-  //   activeSocket.onFailure(() {
-  //     print("onFailure");
-  //   });
-  //   activeSocket.onMessage((data) {
-  //     print('onMessage @@@');
-  //     print(data);
-  //     if(data == 'Wewe ni'){
-  //       activeSocket.send('Fala....');
-  //     }
-  //     print('onMessage');
-  //   });
-  //   activeSocket.onClose(() {
-  //     print('onClose');
-  //   });
+  try {
+
+    ActiveSocket activeSocket = WebSocket();
+    activeSocket.open('ws://127.0.0.1:2454');
+    activeSocket.send('data');
+
+    activeSocket.onSuccess(() {
+      print("onSuccess");
+    });
+    activeSocket.onFailure(() {
+      print("onFailure");
+    });
+    activeSocket.onMessage((data) {
+      print('onMessage @@@');
+      print(data);
+      if(data == 'Wewe ni'){
+        activeSocket.send('Fala....');
+      }
+      print('onMessage');
+    });
+    activeSocket.onClose(() {
+      print('onClose');
+    });
   //
   //   ActiveRequest activeRequest =  ActiveRequest();
   //   activeRequest.setUp = RequestSetUp(
@@ -52,9 +52,9 @@ void main() async {
   //   printError(activeResponse.data);
 
   //
-  // } catch (error){
-  //   printError(error);
-  // }
+  } catch (error){
+    printError(error);
+  }
 
   runApp(const MyApp());
 }
@@ -97,11 +97,11 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
     super.initState();
 
     // activeController.memory.resetMemory();
-    activeController.createMemory();
+    // activeController.createMemory();
     // activeController.getMemory();
 
-    activeController.initCalculations();
-    activeController.validateJSON();
+    // activeController.initCalculations();
+    // activeController.validateJSON();
     activeController.startServer();
   }
 

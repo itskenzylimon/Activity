@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:activity/activity.dart';
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as mat;
 import 'package:flutter_html/flutter_html.dart';
 import '../../core/helpers/strings.dart';
 
@@ -75,6 +76,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
   List<Widget> pageList = [];
   List<Widget> tabList = [];
 
+  List<List<String>> dataKeyList = [];
+  List<String> dataKeys = [];
+
   late Timer debounce;
 
   String? path;
@@ -87,6 +91,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     pages =
         widget.schema['pages'] ?? widget.schema['service']['schema']['pages'];
+    for(var page in pages){
+      dataKeyList.add([]);
+    }
     // metaData.putIfAbsent('customWidgets', () => customWidgets());
   }
 
@@ -310,6 +317,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             padding: const EdgeInsets.all(10),
           ));
     }
+
     Visibility html(Map<String, dynamic> element) {
       /// call setUpElement
       Map<String, dynamic> newElement = {
@@ -547,7 +555,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           visible: valueFormResults[element['name']]!['visible'] ?? true,
           child: Card(
             margin: const EdgeInsets.all(20),
-            elevation: 1,
+            borderColor: Colors.grey.withOpacity(0.3),
             child: Container(
                 padding: const EdgeInsets.all(10),
                 child: Column(
@@ -661,7 +669,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     var lst = {};
     for(var page in pages){
-      printWarning( '${page['name']} --- *** ---');
+      // printWarning( '${page['name']} --- *** ---');
       setUpElement(page['name'], {
         'name': page['name'],
         'visibleIf': page['visibleIf'] ?? null,
@@ -710,7 +718,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                 fontSize: 11,
                 color: initialIndex == index
                     ? Colors.blue
-                    : Colors.blueGrey,),
+                    : Colors.grey,),
               ),
             ),
           ));
@@ -733,141 +741,195 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     setUpTabview();
 
-    return Container(
-      color: Colors.white,
-      child: Column(
-      children: [
-        // SizedBox(
-        //   width: double.infinity,
-        // height: 50,
-        //   child: ListView(
-        //     scrollDirection: Axis.horizontal,
-        //     children: tabList,
-        //   ),
-        // ),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: tabList,
+    return  FluentApp(
+      themeMode: ThemeMode.light,
+      debugShowCheckedModeBanner: false,
+      color: Colors.teal.darkest,
+      darkTheme: FluentThemeData(
+        brightness: Brightness.dark,
+        accentColor: Colors.blue,
+        visualDensity: VisualDensity.standard,
+        focusTheme: FocusThemeData(
+          glowFactor: is10footScreen() ? 2.0 : 0.0,
         ),
       ),
-      Expanded(
-        child: SizedBox(
-          child: pageList[initialIndex],
+      theme: FluentThemeData(
+        accentColor: Colors.blue,
+        visualDensity: VisualDensity.standard,
+        focusTheme: FocusThemeData(
+          glowFactor: is10footScreen() ? 2.0 : 0.0,
         ),
       ),
-      Container(
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.1),
-          border: Border(
-            top: BorderSide(
-                width: 1.0, color: Colors.grey.withOpacity(0.3)),
+      locale: const Locale('en'),
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: NavigationPaneTheme(
+            data: const NavigationPaneThemeData(
+              backgroundColor: Colors.transparent,
+            ),
+            child: child!,
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(
-              right: 16, top: 8, bottom: 8, left: 16),
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Visibility(
-                  visible: initialIndex == 0 ? false : true,
-                  child: Previous(
-                    context: context,
-                    onPrevious: () {
-                      for(var i=0; i <= pagesListData.length; i++) {
-                        if (initialIndex > 0) {
+        );
+      },
+      home: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            // SizedBox(
+            //   width: double.infinity,
+            // height: 50,
+            //   child: ListView(
+            //     scrollDirection: Axis.horizontal,
+            //     children: tabList,
+            //   ),
+            // ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: tabList,
+              ),
+            ),
+            Expanded(
+              child: SizedBox(
+                child: pageList[initialIndex],
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                border: Border(
+                  top: BorderSide(
+                      width: 1.0, color: Colors.grey.withOpacity(0.3)),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    right: 16, top: 8, bottom: 8, left: 16),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Visibility(
+                        visible: initialIndex == 0 ? false : true,
+                        child: Previous(
+                          context: context,
+                          onPrevious: () {
+                            for(var i=0; i <= pagesListData.length; i++) {
+                              if (initialIndex > 0) {
 
-                          if(pagesListData[initialIndex-1]['visibility']) {
+                                if(pagesListData[initialIndex-1]['visibility']) {
 
-                            GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                            if (formKey.currentState!.validate()){
-                              printWarning('"Index + 1"');
-                              printWarning(initialIndex);
-                              printWarning(initialIndex-1);
-                              printWarning(pagesListData[initialIndex-1]);
-                              setState(() {
-                                initialIndex = initialIndex - 1;
-                              });
-                            }
-                            break;
+                                  GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                  if (formKey.currentState!.validate()){
+                                    printWarning('"Index + 1"');
+                                    printWarning(initialIndex);
+                                    printWarning(initialIndex-1);
+                                    printWarning(pagesListData[initialIndex-1]);
+                                    setState(() {
+                                      initialIndex = initialIndex - 1;
+                                    });
+                                  }
+                                  break;
 
-                          } else {
-                            if (initialIndex > 0) {
-                              GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                              if (formKey.currentState!.validate()){
-                                printWarning('"Index - 2"');
-                                printWarning(initialIndex);
-                                printWarning(initialIndex-2);
-                                printWarning(pagesListData[initialIndex-2]);
-                                setState(() {
-                                  initialIndex = initialIndex - 2;
-                                });
+                                } else {
+                                  if (initialIndex > 0) {
+                                    GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                    if (formKey.currentState!.validate()){
+                                      printWarning('"Index - 2"');
+                                      printWarning(initialIndex);
+                                      printWarning(initialIndex-2);
+                                      printWarning(pagesListData[initialIndex-2]);
+                                      setState(() {
+                                        initialIndex = initialIndex - 2;
+                                      });
+                                    }
+                                  }
+                                  break;
+                                }
                               }
                             }
-                            break;
-                          }
-                        }
-                      }
 
-                    },
-                    formKey: GlobalKey(),
+                          },
+                          formKey: GlobalKey(),
+                        ),
+                      ),
+                      const Spacer(),
+                      (initialIndex + 1) == pagesListData.length
+                          ? SubmitButton(
+                        context: context,
+                        formKey: GlobalKey(),
+                        onFormSubmit: () {
+                          /// Validate the data saved in the form
+                          ///
+
+                          printNormal(dataKeyList.toString());
+                          showConfirmDialog(context);
+                        },
+                      )
+                          : Next(
+                        context: context,
+                        onNext: () {
+                          for(var i=0; i<=pagesListData.length; i++) {
+                            if (initialIndex < pagesListData.length - 1) {
+
+                              if(pagesListData[initialIndex+1]['visibility']) {
+
+                                GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                if (formKey.currentState!.validate()){
+                                  setState(() {
+                                    initialIndex = initialIndex + 1;
+                                  });
+                                }
+                                break;
+
+                              } else {
+                                if (initialIndex < pagesListData.length - 1) {
+                                  GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                  if (formKey.currentState!.validate()){
+                                    setState(() {
+                                      initialIndex = initialIndex + 2;
+                                    });
+                                  }
+                                }
+                                break;
+                              }
+                            }
+                          }
+
+
+                        },
+                        formKey: GlobalKey(),
+                      )
+                    ],
                   ),
                 ),
-                const Spacer(),
-                (initialIndex + 1) == pagesListData.length
-                    ? SubmitButton(
-                  context: context,
-                  formKey: GlobalKey(),
-                  onFormSubmit: () {
-                    /// Validate the data saved in the form
-                    showConfirmDialog(context);
-                  },
-                )
-                    : Next(
-                  context: context,
-                  onNext: () {
-                    for(var i=0; i<=pagesListData.length; i++) {
-                      if (initialIndex < pagesListData.length - 1) {
-
-                      if(pagesListData[initialIndex+1]['visibility']) {
-
-                          GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                          if (formKey.currentState!.validate()){
-                            setState(() {
-                              initialIndex = initialIndex + 1;
-                            });
-                          }
-                          break;
-
-                      } else {
-                        if (initialIndex < pagesListData.length - 1) {
-                          GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                          if (formKey.currentState!.validate()){
-                            setState(() {
-                              initialIndex = initialIndex + 2;
-                            });
-                          }
-                        }
-                        break;
-                      }
-                      }
-                    }
-
-
-                  },
-                  formKey: GlobalKey(),
-                )
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ),
-        ],
-      ),
+      )
     );
+  }
+
+  setVisibleKeys(String name, bool visible){
+    if(!dataKeys.contains(name) && visible == true){
+        dataKeys.add(name);
+    } else if (dataKeys.contains(name) && visible == false){
+      dataKeys.remove(name);
+    }
+  }
+
+  loopThroughElements(List elements, String name, bool visible){
+    setVisibleKeys(name, visible);
+    for(var element in elements){
+     if(element['elements'] != null){
+       loopThroughElements(element['elements'], element['name'], visible);
+     } else {
+       setVisibleKeys(element['name'], visible);
+     }
+    }
   }
 
   showConfirmDialog(context) {
@@ -876,9 +938,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     for (int x = 0; x < pages.length; x++) {
       valueFormResults.forEach((key, value) {
-        printError('{{{{{{value}}}}}}');
-        printError(value);
-        printError('{{{{{{value}}}}}}');
+        // printError('{{{{{{value}}}}}}');
+        // printError(value);
+        // printError('{{{{{{value}}}}}}');
         /// Map check if formPageData has the key page
         if(pages[x].toString().contains(key)) {
           List currentValues = formPagePreviewData['${pages[x]['name']}'] ?? [];
@@ -911,291 +973,292 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       pageBuilder: (context, animation, secondaryAnimation) =>
           Container(
             margin: const EdgeInsets.only(top: 100, bottom: 50, right: 20, left: 20),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Container(
-                margin: const EdgeInsets.only(top: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: const Color(0xffE3E5EE)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: ListView(
-                          children: [
-                            for (int x = 0; x < pageTitles.length; x++)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 18, top: 15),
-                                    child: Text(pageTitles[x],
-                                      style: const TextStyle(
-                                        color: Color(0xff111827),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+            child: Container(
+              margin: const EdgeInsets.only(top: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: const Color(0xffE3E5EE)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          for (int x = 0; x < pageTitles.length; x++)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 18, top: 15),
+                                  child: Text(pageTitles[x],
+                                    style: const TextStyle(
+                                      color: Color(0xff111827),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  const Divider(
-                                    color: Color(0xffE5E7EB),
-                                    thickness: 1,
-                                    height: 0,
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  for (int y = 0; y < pageValues[x].length; y++)
-                                    SizedBox(
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 26, right: 26),
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Text(pageValues[x][y]['name'],
-                                                    style: const TextStyle(
-                                                      color: Color(0xff6B7280),
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                  pageValues[x][y]['value'].runtimeType == String &&
-                                                      pageValues[x][y]['value'].toString().length > 100 &&
-                                                      FormController().base64RegExp(pageValues[x][y]['value']) ?
-                                                  SizedBox(
-                                                      height: 250,
-                                                      width: 250,
-                                                      child: Image.memory(
-                                                          const Base64Decoder().convert(pageValues[x][y]['value'])
-                                                      )) :
-                                                  Text(pageValues[x][y]['value'].toString(),
-                                                    style: const TextStyle(
-                                                      color: Color(0xff111827),
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          const Padding(
-                                            padding: EdgeInsets.only(
-                                                bottom: 13, top: 13,
-                                                left: 26, right: 26),
-                                            child: Divider(
-                                              color: Color(0xffE5E7EB),
-                                              thickness: 1,
-                                              height: 0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                ],
-                              )
-                          ],
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          margin: EdgeInsets.all(10),
-                          child: GestureDetector(
-                            onTap: () => showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)
-                                  ),
-                                  content: Container(
-                                    height: 190,
+                                ),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                const Divider(
+                                    direction: Axis.vertical,
+                                    size: 0,
+                                    style: DividerThemeData(
+                                        thickness: 1.0,
+                                    ),
+                                ),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                for (int y = 0; y < pageValues[x].length; y++)
+                                  SizedBox(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Container(
-                                              width: 56,
-                                              height: 56,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(28),
-                                                border: Border.all(color: const Color(0xffeaf3ff), width: 10, ),
-                                                color: const Color(0xffc6dfff),
-                                              ),
-                                              padding: const EdgeInsets.all(5),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                children:[
-                                                  Container(
-                                                    width: 24,
-                                                    height: 24,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(8),
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.check_circle_outline_rounded, color: Colors.blue, size: 24,),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            InkWell(
-                                                onTap: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Icon(Icons.close))
-                                          ],
-                                        ),
-                                        const SizedBox(
-                                          height: 16,
-                                        ),
-                                        const Text(
-                                          'Complete Application',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 4,
-                                        ),
-                                        const Text(
-                                          'Are you sure you want to complete this application?',
-                                          style: TextStyle(
-                                            color: Color(0xff475467),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 30,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: InkWell(
-                                                onTap: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Container(
-                                                  height: 44,
-                                                  decoration: BoxDecoration(
-                                                      border: Border.all(color: const Color(0xffD0D5DD)),
-                                                      borderRadius: BorderRadius.circular(8)),
-                                                  child: const Center(
-                                                    child: Text(
-                                                      'Cancel',
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.w600,
-                                                      ),
-                                                    ),
+                                        SizedBox(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 26, right: 26),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(pageValues[x][y]['name'],
+                                                  style: const TextStyle(
+                                                    color: Color(0xff6B7280),
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12,),
-                                            Expanded(
-                                              flex: 5,
-                                              child: InkWell(
-                                                onTap: (){
-                                                  Navigator.pop(context);
-                                                  widget.onFormValueSubmit(valueFormResults);
-                                                },
-                                                child: Container(
-                                                  height: 44,
-                                                  decoration: BoxDecoration(
-                                                      color: const Color(0xff006FFF),
-                                                      borderRadius: BorderRadius.circular(8)),
-                                                  child: const Center(
-                                                    child: Text(
-                                                      'Complete',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.w600,
-                                                      ),
-                                                    ),
+                                                pageValues[x][y]['value'].runtimeType == String &&
+                                                    pageValues[x][y]['value'].toString().length > 100 &&
+                                                    FormController().base64RegExp(pageValues[x][y]['value']) ?
+                                                SizedBox(
+                                                    height: 250,
+                                                    width: 250,
+                                                    child: Image.memory(
+                                                        const Base64Decoder().convert(pageValues[x][y]['value'])
+                                                    )) :
+                                                Text(pageValues[x][y]['value'].toString(),
+                                                  style: const TextStyle(
+                                                    color: Color(0xff111827),
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
-                                              ),
+                                              ],
                                             ),
-
-                                          ],
-                                        )
+                                          ),
+                                        ),
+                                        const Padding(
+                                          padding: EdgeInsets.only(
+                                              bottom: 13, top: 13,
+                                              left: 26, right: 26),
+                                          child: Divider(
+                                            direction: Axis.vertical,
+                                            size: 0,
+                                            style: DividerThemeData(
+                                              thickness: 1.0,
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                  )),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                SizedBox(
-                                  width: 148,
-                                  height: 44,
-                                  child: InkWell(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Container(
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(color: const Color(0xffD0D5DD)),
-                                          borderRadius: BorderRadius.circular(8)),
-                                      child: const Center(
-                                        child: Text(
-                                          'Cancel',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
+                                  )
+                              ],
+                            )
+                        ],
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () => showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) => mat.AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)
+                                ),
+                                content: Container(
+                                  height: 190,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(
+                                            width: 56,
+                                            height: 56,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(28),
+                                              border: Border.all(color: const Color(0xffeaf3ff), width: 10, ),
+                                              color: const Color(0xffc6dfff),
+                                            ),
+                                            padding: const EdgeInsets.all(5),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children:[
+                                                Container(
+                                                  width: 24,
+                                                  height: 24,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Icon(
+                                                    FluentIcons.status_circle_outer, color: Colors.blue, size: 24,),
+                                                ),
+                                              ],
+                                            ),
                                           ),
+                                          GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Icon(FluentIcons.close_pane))
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 16,
+                                      ),
+                                      const Text(
+                                        'Complete Application',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 4,
+                                      ),
+                                      const Text(
+                                        'Are you sure you want to complete this application?',
+                                        style: TextStyle(
+                                          color: Color(0xff475467),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 30,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 5,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Container(
+                                                height: 44,
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(color: const Color(0xffD0D5DD)),
+                                                    borderRadius: BorderRadius.circular(8)),
+                                                child: const Center(
+                                                  child: Text(
+                                                    'Cancel',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12,),
+                                          Expanded(
+                                            flex: 5,
+                                            child: GestureDetector(
+                                              onTap: (){
+                                                Navigator.pop(context);
+                                                widget.onFormValueSubmit(valueFormResults);
+                                              },
+                                              child: Container(
+                                                height: 44,
+                                                decoration: BoxDecoration(
+                                                    color: const Color(0xff006FFF),
+                                                    borderRadius: BorderRadius.circular(8)),
+                                                child: const Center(
+                                                  child: Text(
+                                                    'Complete',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                )),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: 148,
+                                height: 44,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: const Color(0xffD0D5DD)),
+                                        borderRadius: BorderRadius.circular(8)),
+                                    child: const Center(
+                                      child: Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 50,),
-                                Container(
-                                  height: 44,
-                                  width: 148,
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xff006FFF),
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: const Center(
-                                    child: Text(
-                                      'Complete',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              ),
+                              const SizedBox(width: 50,),
+                              Container(
+                                height: 44,
+                                width: 148,
+                                decoration: BoxDecoration(
+                                    color: const Color(0xff006FFF),
+                                    borderRadius: BorderRadius.circular(8)),
+                                child: const Center(
+                                  child: Text(
+                                    'Complete',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  )
-              ),
+                    ),
+                  ],
+                )
             ),
           )
     );
@@ -1603,9 +1666,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
   /// This function splits the visibleIf string into a list of conditions
   /// and updates its visibility
   visibleIf() {
-    printWarning('??????? BVISIBILITYYYYYYY');
     /// loop through the objects to get value element
     valueFormResults.forEach((name, element) {
+      // printWarning( '$name --- *** --- $element');
 
       /// check if the element has a name property
       if (name != null) {
@@ -1626,10 +1689,10 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             List visibilityStates = [];
             /// loop through visibleIfConditions
             for (var condition in visibleIfConditions) {
+              // print('???? Conditions');
+              // print(condition);
 
-
-
-
+              // printWarning( '$name --- %%% --- $condition');
 
               /// Handle anyof conditionType
               /// it should overwrite visible state from above
@@ -1712,11 +1775,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             /// Handle the and / or conditions state
             if(element['visibleIf'].toString().contains(' and ')){
 
-
               // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
               /// update the visible valueFormResults
               valueFormResults.update(name, (value) {
+                loopThroughElements(element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
                 value['visible'] = !visibilityStates.contains(false);
                 return value;
               });
@@ -1728,6 +1791,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
             /// update the visible valueFormResults
             valueFormResults.update(name, (value) {
+              loopThroughElements(element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
               value['visible'] = visibilityStates.contains(true);
               return value;
             });
@@ -1739,6 +1803,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
               /// update the visible valueFormResults
               valueFormResults.update(name, (value) {
+                loopThroughElements(element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
                 value['visible'] = !visibilityStates.contains(false);
                 return value;
               });
@@ -1756,18 +1821,17 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           /// check if the element has a visible property
           if (element['visible'] == null) {
             valueFormResults.update(name, (value) {
+              loopThroughElements(element['elements'] ?? [], element['name'], true);
               value['visible'] = true;
               return value;
             });
           } else {
             valueFormResults.update(name, (value) {
+              loopThroughElements(element['elements'] ?? [], element['name'], value['visible']);
               value['visible'] = value['visible'];
               return value;
             });
           }
-
-
-
         }
       }
 
@@ -1783,6 +1847,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
 
     });
+
   }
 
   @override
@@ -1806,17 +1871,28 @@ class SubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xff2F6CF6),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle:
-                const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        onPressed: () {
-            onFormSubmit.call();
+      child: FilledButton(
+        onPressed: (){
+          onFormSubmit.call();
         },
-        child: const Text("Submit"),
-      ),
+        child: const Padding(
+        padding: EdgeInsets.only(
+    bottom: 3, top: 3,
+    right: 8.0, left: 8.0),
+    child:  Text('Submit')),
+      )
+
+      // ElevatedButton(
+      //   style: ElevatedButton.styleFrom(
+      //       backgroundColor: const Color(0xff2F6CF6),
+      //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      //       textStyle:
+      //           const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      //   onPressed: () {
+      //       onFormSubmit.call();
+      //   },
+      //   child: const Text("Submit"),
+      // ),
     );
   }
 }
@@ -1836,16 +1912,26 @@ class Next extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xff2F6CF6),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        onPressed: () {
+      child: FilledButton(
+        onPressed: (){
           onNext.call();
         },
-        child: const Text('Next'),
-      ),
+        child: const Padding(
+        padding: EdgeInsets.only(
+    bottom: 3, top: 3,
+    right: 8.0, left: 8.0),
+    child: Text('Next')),
+      )
+      // ElevatedButton(
+      //   style: ElevatedButton.styleFrom(
+      //       backgroundColor: Color(0xff2F6CF6),
+      //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      //       textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      //   onPressed: () {
+      //     onNext.call();
+      //   },
+      //   child: const Text('Next'),
+      // ),
     );
   }
 }
@@ -1865,17 +1951,28 @@ class Previous extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.black.withOpacity(0.6),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle:
-                const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        onPressed: () {
+      child: FilledButton(
+        onPressed: (){
           onPrevious.call();
         },
-        child: const Text('Previous'),
-      ),
+        child: const Padding(
+          padding: EdgeInsets.only(
+              bottom: 3, top: 3,
+              right: 8.0, left: 8.0),
+          child: Text('Previous'),
+        ),
+      )
+      // OutlinedButton(
+      //   style: OutlinedButton.styleFrom(
+      //       foregroundColor: Colors.black.withOpacity(0.6),
+      //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      //       textStyle:
+      //           const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      //   onPressed: () {
+      //     onPrevious.call();
+      //   },
+      //   child: const Text('Previous'),
+      // ),
     );
   }
 }

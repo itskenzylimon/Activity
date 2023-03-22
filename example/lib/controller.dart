@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get_ip_address/get_ip_address.dart';
 import 'model.dart';
 
 class MainController extends ActiveController {
@@ -355,8 +356,18 @@ class MainController extends ActiveController {
     }
   }
 
-  startServer() {
-    HttpServer.bind(InternetAddress.anyIPv4, 3000).then((server) {
+  startServer() async {
+
+    var anyIPv4 = InternetAddress.anyIPv4;
+    printSuccess('{{{anyIPv4}}}');
+    printSuccess(anyIPv4.address);
+
+    // var ipAddress = IpAddress(type: RequestType.json);
+    // dynamic data = await ipAddress.getIpAddress();
+    // printSuccess(data['ip']);
+    // printSuccess('{{{anyIPv4}}}');
+
+    HttpServer.bind('169.254.238.60', 1996).then((server) {
       printInfo('Listening on localhost:${server.port}');
 
       /// Start a server
