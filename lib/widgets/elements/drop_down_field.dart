@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:activity/activity.dart';
 import 'package:activity/core/networks/active_request.dart';
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as mat;
 
 class DropDownWidget extends StatelessWidget {
   ValueChanged<Map<String, dynamic>> onElementCallback;
@@ -31,6 +32,7 @@ class DropDownWidget extends StatelessWidget {
   // }
   List<String> choicesByUrl = [];
   Timer? _debounce;
+
   @override
   Widget build(BuildContext context) {
     callbackElement = valueFormResults[elementName]!;
@@ -68,69 +70,63 @@ class DropDownWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: Colors.grey)),
-                      ),
-                      child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search ${callbackElement['title']}',
-                            border: InputBorder.none,
-                            contentPadding:
-                                EdgeInsets.only(bottom: 12, left: 16),
-                          ),
-                          controller: callbackElement['controller'],
-                          onChanged: (value) {
-                            if (value.isNotEmpty) {
-                              if (_debounce?.isActive ?? false)
-                                _debounce?.cancel();
-                              _debounce = Timer(
-                                  const Duration(milliseconds: 100), () async {
-                                var list = await getListItems(
-                                  value,
-                                  callbackElement['choicesByUrl']['url'],
-                                );
-                                for (var l in list) {
-                                  choicesList.add(
-                                    l['value'].toString(),
+                        decoration: const BoxDecoration(
+                          border:
+                              Border(bottom: BorderSide(color: Colors.grey)),
+                        ),
+                        child: TextBox(
+                            controller: callbackElement['controller'],
+                            placeholder: 'Search ${callbackElement['title']}',
+                            onChanged: (value) {
+                              if (value.isNotEmpty) {
+                                if (_debounce?.isActive ?? false)
+                                  _debounce?.cancel();
+                                _debounce =
+                                    Timer(const Duration(milliseconds: 100),
+                                        () async {
+                                  var list = await getListItems(
+                                    value,
+                                    callbackElement['choicesByUrl']['url'],
                                   );
-                                  _listNotifier.value = choicesList;
-                                }
-
-                              });
-                            } else {
-                              choiceList.clear();
-                              choicesList = [
-                                "Select ${callbackElement['title']}"
-                              ];
-                            }
-                          }),
-                    ),
+                                  for (var l in list) {
+                                    choicesList.add(
+                                      l['value'].toString(),
+                                    );
+                                    _listNotifier.value = choicesList;
+                                  }
+                                });
+                              } else {
+                                choiceList.clear();
+                                choicesList = [
+                                  "Select ${callbackElement['title']}"
+                                ];
+                              }
+                            })),
                     SizedBox(
                         width: double.infinity,
                         child: ValueListenableBuilder(
                             valueListenable: _listNotifier,
                             builder: (BuildContext context, choicesList,
                                 Widget? child) {
-                              return  SizedBox(
-                                  height: choicesList.length > 2 ? 250 : 40,
-                                  child: ListView.separated(
-                                    shrinkWrap: true,
-                                    controller: scrollController,
-                                    itemBuilder: (context, int index) {
-                                      return ListTile(
-                                        onTap: () {
-                                          callbackElement['value'] =
-                                              choicesList[index];
-                                          onElementCallback(callbackElement);
-                                        },
-                                        title: Text(choicesList[index]),
-                                      );
-                                    },
-                                    separatorBuilder: (context, int index) =>
-                                        SizedBox(height: 10),
-                                    itemCount: choicesList.length,
-                                  ),
-
+                              return SizedBox(
+                                height: choicesList.length > 2 ? 250 : 40,
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  controller: scrollController,
+                                  itemBuilder: (context, int index) {
+                                    return ListTile(
+                                      onPressed: () {
+                                        callbackElement['value'] =
+                                            choicesList[index];
+                                        onElementCallback(callbackElement);
+                                      },
+                                      title: Text(choicesList[index]),
+                                    );
+                                  },
+                                  separatorBuilder: (context, int index) =>
+                                      SizedBox(height: 10),
+                                  itemCount: choicesList.length,
+                                ),
                               );
                             })),
                   ],
@@ -174,13 +170,8 @@ class DropDownWidget extends StatelessWidget {
                       decoration: const BoxDecoration(
                         border: Border(bottom: BorderSide(color: Colors.grey)),
                       ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search ${callbackElement['title']}',
-                          border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.only(bottom: 12, left: 16),
-                        ),
+                      child: TextBox(
+                        placeholder: 'Search ${callbackElement['title']}',
                         onChanged: (value) {
                           if (value.isNotEmpty) {
                             Timer? debounce;
@@ -212,14 +203,14 @@ class DropDownWidget extends StatelessWidget {
                             valueListenable: _listNotifier,
                             builder: (BuildContext context, choicesList,
                                 Widget? child) {
-                              return  SizedBox(
+                              return SizedBox(
                                 height: choicesList.length > 2 ? 250 : 40,
                                 child: ListView.separated(
                                   shrinkWrap: true,
                                   controller: scrollController,
                                   itemBuilder: (context, int index) {
                                     return ListTile(
-                                      onTap: () {
+                                      onPressed: () {
                                         callbackElement['value'] =
                                             choicesList[index];
                                         onElementCallback(callbackElement);
@@ -242,24 +233,24 @@ class DropDownWidget extends StatelessWidget {
       // printSuccess("--------------------------------");
       // printSuccess(callbackElement);
       String? currentSelectedValue =
-      ['', null].contains(callbackElement['value'])
-          ? 'Select'
-          : callbackElement['value'];
+          ['', null].contains(callbackElement['value'])
+              ? 'Select'
+              : callbackElement['value'];
       List choices = ["Select"];
       List data = callbackElement['choices'];
       // printSuccess("==========================================================");
       // printSuccess(data.runtimeType);
-        for(int i = 0; i < data.length; i++) {
-          // printWarning(data[i].runtimeType);
-          if (data[i].runtimeType == String) {
-            choices.add(data[i]);
-            // printWarning("data as List<String>");
-            // printError(choices);
-          } else {
-            // printError(data);
-            choices.add(data[i]['value']);
-          }
+      for (int i = 0; i < data.length; i++) {
+        // printWarning(data[i].runtimeType);
+        if (data[i].runtimeType == String) {
+          choices.add(data[i]);
+          // printWarning("data as List<String>");
+          // printError(choices);
+        } else {
+          // printError(data);
+          choices.add(data[i]['value']);
         }
+      }
       // printSuccess(choices);
 
       return Column(
@@ -267,7 +258,6 @@ class DropDownWidget extends StatelessWidget {
         children: [
           Text(
             "${callbackElement['title']}",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(
             height: 10,
@@ -281,50 +271,43 @@ class DropDownWidget extends StatelessWidget {
                   width: double.infinity,
                   height: 40,
                   margin: const EdgeInsets.only(top: 10, bottom: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                  child:  DropdownButtonFormField(
-                    decoration: new InputDecoration(
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,),
-                      hint: SizedBox(
-                        width: 100,
-                        child: Text(callbackElement['title'] +
-                            ' ' +
-                            (callbackElement['description'] ?? ''),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      value: currentSelectedValue,
-                      items: choices.map<DropdownMenuItem>((choice) {
-                        return DropdownMenuItem(
-                          value: choice,
-                          child: Text(
-                            choice == 'Select'
-                                ? '\t - \t ${callbackElement['title']}'
-                                : '\t $choice',
-                            style: Theme.of(context).textTheme.caption,
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        currentSelectedValue = value;
-                        callbackElement['value'] = value;
-                        onElementCallback(callbackElement);
-                      },
-                      validator: (value) {
-                        if (valueFormResults[elementName]!['isRequired'] == null) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter ${valueFormResults[elementName]!['title']}';
-                          }
-                        }
-                      },
+                  child: ComboboxFormField<String>(
+                    value: currentSelectedValue,
+                    isExpanded: true,
+                  placeholder: SizedBox(
+                    width: 100,
+                    child: Text(
+                      callbackElement['title'] +
+                          ' ' +
+                          (callbackElement['description'] ?? ''),
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                    items: choices.map<ComboBoxItem<String>>((choice) {
+                      return ComboBoxItem(
+                        value: choice,
+                        child: Text(
+                          choice == 'Select'
+                              ? '\t - \t ${callbackElement['title']}'
+                              : '\t $choice',
+                          style: mat.Theme.of(context).textTheme.caption,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      currentSelectedValue = value;
+                      callbackElement['value'] = value;
+                      onElementCallback(callbackElement);
+                    },
+                    validator: (value) {
+                      if (valueFormResults[elementName]!['isRequired'] ==
+                          null) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter ${valueFormResults[elementName]!['title']}';
+                        }
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
@@ -381,12 +364,10 @@ class DropDownWidget extends StatelessWidget {
     if (userDataRes.statusCode == 200) {
       var data = json.decode(userDataRes.data!);
       var filteredList = data
-          .where((elem) =>
-              elem['value']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.toLowerCase())
-             )
+          .where((elem) => elem['value']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
           .toList();
       list.clear();
       list = filteredList.toSet().toList();
@@ -436,6 +417,5 @@ class DropDownWidget extends StatelessWidget {
     } else {
       return [];
     }
-
   }
 }

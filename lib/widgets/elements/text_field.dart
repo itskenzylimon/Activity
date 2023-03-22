@@ -36,8 +36,8 @@ class TextFieldWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(labelText),
-            const Divider(
-                direction: Axis.vertical
+            const SizedBox(
+                height: 10,
             ),
             TextFormBox(
               controller: valueFormResults[elementName]!['controller'],
