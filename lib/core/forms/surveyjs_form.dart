@@ -153,6 +153,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       setUpElement(element['name'], newElement);
 
       return Visibility(
+          visible: valueFormResults[element['name']]!['visible'],
           child: DatePickerWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
