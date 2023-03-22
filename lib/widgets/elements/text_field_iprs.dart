@@ -31,7 +31,7 @@ class TextFieldIPRSWidget extends StatelessWidget {
     String labelText = callbackElement['label'];
 
     return Container(
-      margin: const EdgeInsets.only(left:10,right:10,top: 30),
+      margin: const EdgeInsets.only(left:16,right:10,top: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,

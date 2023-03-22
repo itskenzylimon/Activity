@@ -47,8 +47,8 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: const EdgeInsets.only(top: 5,left:5,right:5, bottom: 10),
-                child: Text('${item['name']}'),
+                margin: const EdgeInsets.only(top: 20,left:5,right:5, bottom: 0),
+                child: Text('${item['name']}', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               SizedBox(
                 height: 250,

@@ -54,20 +54,31 @@ class DropDownIPRSWidget extends StatelessWidget {
 
     var vl ;
     return Container(
-      height: 48.0,
       margin: const EdgeInsets.only(bottom:8,top:10,right: 16,left: 16),
       alignment: Alignment.center,
-      child: ComboboxFormField(
-        isExpanded: true,
-        style: const TextStyle(color: Colors.black, fontSize: 14.0),
-        key: dropdownKey,
-        placeholder: const Text('Select a choice'),
-        value: vl,
-        items: choiceList,
-        onChanged: (value) {
-          callbackElement['value'] = value;
-          onElementCallback(callbackElement);
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "${callbackElement['label']}",
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          ComboboxFormField(
+
+            isExpanded: true,
+            style: const TextStyle(color: Colors.black, fontSize: 14.0),
+            key: dropdownKey,
+            placeholder: const Text('Select a choice'),
+            value: vl,
+            items: choiceList,
+            onChanged: (value) {
+              callbackElement['value'] = value;
+              onElementCallback(callbackElement);
+            },
+          ),
+        ],
       ),
 
     );
