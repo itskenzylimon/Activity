@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-
+import 'package:fluent_ui/fluent_ui.dart';
 import '../../core/forms/form_controller.dart';
 
 class AgeCalculatorWidget extends StatelessWidget {
@@ -44,15 +43,12 @@ class AgeCalculatorWidget extends StatelessWidget {
       const SizedBox(
         height: 10,
       ),
-      TextFormField(
+      TextFormBox(
         controller: agecalcEditingController,
         keyboardType: FormController().
         checkInputType(valueFormResults[elementName]!),
         readOnly: true,
-        decoration: InputDecoration(
-          labelText: labelText,
-          hintText: valueFormResults[elementName]!['placeholder'] ?? '',
-        ),
+        placeholder: valueFormResults[elementName]!['placeholder'] ?? '',
         validator: (value) {},
         onChanged: (value) {
 
