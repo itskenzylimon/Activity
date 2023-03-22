@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:activity/activity.dart';
 import 'package:activity/widgets/elements/text_field_iprs.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
@@ -31,7 +32,7 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
   var searchStatus = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext contextMode) {
 
     callbackElement = widget.valueFormResults[widget.elementName]!;
 
@@ -46,8 +47,8 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: const EdgeInsets.only(top: 5,left:5,right:5, bottom: 10),
-                child: Text('${item['name']}'),
+                margin: const EdgeInsets.only(top: 20,left:5,right:5, bottom: 0),
+                child: Text('${item['name']}', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               SizedBox(
                 height: 250,
@@ -135,7 +136,6 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: OutlinedButton(
                 onPressed: () async {
-
                   setState(() {
                     searchStatus = true;
                   });
@@ -168,29 +168,34 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                           "data": callbackElement['outputs'][0]['value']
                         });
 
-                        showSnackbar(context, InfoBar(
-                            title: const Text('Loading'),
-                            content: Text(
-                                "Processing Data"
-                            ),
-                            severity: InfoBarSeverity.info,
-                            isLong: true,
-                        ));
-
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //         duration: const Duration(milliseconds: 500),
-                        //         content: Text('Processing Data')));
                         var resData;
 
-                        if (data['first_name'].toLowerCase().contains(
-                            firstNameController.text.toLowerCase())) {
+                        if (data['first_name'].toLowerCase() == firstNameController.text.toLowerCase()) {
+
+                          displayInfoBar(contextMode, builder: (context, close) {
+                            return InfoBar(
+
+                              title: const Text('IPRS LOOKUP'),
+                              content: const Text(
+                                  'Retrieved data...'),
+                              action: IconButton(
+                                icon: const Icon(FluentIcons.clear),
+                                onPressed: close,
+                              ),
+                              severity: InfoBarSeverity.warning,
+                            );
+                          },
+                            alignment: Alignment.centerLeft);
+
+                          printWarning("?????? DATA IPRS");
+                          printWarning(data);
                           for (var i in callbackElement['outputs']) {
                             TextEditingController textEditingController =
                             TextEditingController();
 
                             if (widget.valueFormResults.containsKey(i['value']))
                             {
+
 
                               resData = _textSelect(i['text']);
 
@@ -237,18 +242,24 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                           }
                         }
                         else {
+
+                          displayInfoBar(contextMode, builder: (context, close) {
+                            return InfoBar(
+
+                              title: const Text('IPRS LOOKUP'),
+                              content: const Text(
+                                  'First Name does not match particulars'),
+                              action: IconButton(
+                                icon: const Icon(FluentIcons.clear),
+                                onPressed: close,
+                              ),
+                              severity: InfoBarSeverity.error,
+                            );
+                          },
+                              alignment: Alignment.centerLeft);
                           setState(() {
                             searchStatus = false;
                           });
-                          
-                          showSnackbar(context, const InfoBar(
-                            title: Text('Failed to validate'),
-                            content: Text(
-                              'First Name does not match particulars',
-                            ),
-                            severity: InfoBarSeverity.info,
-                            isLong: true,
-                          ));
 
                         }
 
@@ -283,6 +294,7 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
   Future<Map<String, dynamic>> httpLookUpUrl(Map choicesByUrl) async {
 
     Map<String, dynamic> choices = await formRequest(choicesByUrl);
+
     if (widget.valueFormResults.containsKey(choicesByUrl['data'])) {}
 
     return choices;
@@ -311,6 +323,8 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
         queryParameters: {"number": "${request['id']}"}));
     final Map<String, dynamic> convertedData =
     jsonDecode(activeResponse.data!);
+
+
     return convertedData;
   }
 
