@@ -71,6 +71,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
   int initialIndex = 0;
 
   List pages = [];
+  List pagesListData = [];
   List<Widget> pageList = [];
   List<Widget> tabList = [];
 
@@ -125,6 +126,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       /// use elementData in the rest of the function
       setUpElement('${element['name']}-${element['outputs'][0]['value']}', newElement);
       return Visibility(
+          visible: valueFormResults['${element['name']}-${element['outputs'][0]['value']}']!['visible'] ?? true,
           child: TextSearchUpdateFieldWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
@@ -656,7 +658,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     tabList.clear();
     pageList.clear();
 
+    var lst = {};
     for(var page in pages){
+      printWarning( '${page['name']} --- *** ---');
       setUpElement(page['name'], {
         'name': page['name'],
         'visibleIf': page['visibleIf'] ?? null,
@@ -672,10 +676,14 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
         pageList.add(Visibility(
             visible: valueFormResults[page['name']]!['visible'] ?? true,
-            replacement: const SizedBox(),
             child: Form(
                 key: listGlobalKey[index],
                 child: formBuilderController(page))));
+      lst = {
+        "name": valueFormResults[page['name']],
+        "visibility" : valueFormResults[page['name']]!['visible'] ?? true
+      };
+      pagesListData.add(lst);
 
 
 
@@ -768,17 +776,47 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                   child: Previous(
                     context: context,
                     onPrevious: () {
-                      if (initialIndex > 0) {
-                        setState(() {
-                          initialIndex = initialIndex - 1;
-                        });
+                      for(var i=0; i <= pagesListData.length; i++) {
+                        if (initialIndex > 0) {
+
+                          if(pagesListData[initialIndex-1]['visibility']) {
+
+                            GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                            if (formKey.currentState!.validate()){
+                              printWarning('"Index + 1"');
+                              printWarning(initialIndex);
+                              printWarning(initialIndex-1);
+                              printWarning(pagesListData[initialIndex-1]);
+                              setState(() {
+                                initialIndex = initialIndex - 1;
+                              });
+                            }
+                            break;
+
+                          } else {
+                            if (initialIndex > 0) {
+                              GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                              if (formKey.currentState!.validate()){
+                                printWarning('"Index - 2"');
+                                printWarning(initialIndex);
+                                printWarning(initialIndex-2);
+                                printWarning(pagesListData[initialIndex-2]);
+                                setState(() {
+                                  initialIndex = initialIndex - 2;
+                                });
+                              }
+                            }
+                            break;
+                          }
+                        }
                       }
+
                     },
                     formKey: GlobalKey(),
                   ),
                 ),
                 const Spacer(),
-                (initialIndex + 1) == pages.length
+                (initialIndex + 1) == pagesListData.length
                     ? SubmitButton(
                   context: context,
                   formKey: GlobalKey(),
@@ -790,14 +828,34 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                     : Next(
                   context: context,
                   onNext: () {
-                    if (initialIndex < pages.length - 1) {
-                      GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                      if (formKey.currentState!.validate()){
-                        setState(() {
-                          initialIndex = initialIndex + 1;
-                        });
+                    for(var i=0; i<=pagesListData.length; i++) {
+                      if (initialIndex < pagesListData.length - 1) {
+
+                      if(pagesListData[initialIndex+1]['visibility']) {
+
+                          GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                          if (formKey.currentState!.validate()){
+                            setState(() {
+                              initialIndex = initialIndex + 1;
+                            });
+                          }
+                          break;
+
+                      } else {
+                        if (initialIndex < pagesListData.length - 1) {
+                          GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                          if (formKey.currentState!.validate()){
+                            setState(() {
+                              initialIndex = initialIndex + 2;
+                            });
+                          }
+                        }
+                        break;
+                      }
                       }
                     }
+
+
                   },
                   formKey: GlobalKey(),
                 )
@@ -1159,6 +1217,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       setState(() {
         /// Add the value
         valueFormResults.putIfAbsent(name, () => newValue);
+
+        ///check if name represent a page name
+
         visibleIf();
         isRequiredIf();
         enableIf();
@@ -1541,13 +1602,15 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
   /// This function splits the visibleIf string into a list of conditions
   /// and updates its visibility
   visibleIf() {
+    printWarning('??????? BVISIBILITYYYYYYY');
     /// loop through the objects to get value element
     valueFormResults.forEach((name, element) {
-      // printWarning( '$name --- *** --- $element');
 
       /// check if the element has a name property
       if (name != null) {
+
         if (element['visibleIf'] != null) {
+
           /// Drama follows here if the element has a visibleIf
           /// property and no visible property is set
 
@@ -1562,10 +1625,10 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             List visibilityStates = [];
             /// loop through visibleIfConditions
             for (var condition in visibleIfConditions) {
-              print('???? Conditions');
-              print(condition);
 
-              // printWarning( '$name --- %%% --- $condition');
+
+
+
 
               /// Handle anyof conditionType
               /// it should overwrite visible state from above
@@ -1648,7 +1711,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             /// Handle the and / or conditions state
             if(element['visibleIf'].toString().contains(' and ')){
 
-              printWarning( '$name --- FINAL AND --- $visibilityStates');
+
+              // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
               /// update the visible valueFormResults
               valueFormResults.update(name, (value) {
@@ -1705,6 +1769,18 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
         }
       }
+
+
+          int index = pagesListData.indexWhere((element) => element['name']['name'] == name);
+          if(index != -1) {
+            pagesListData[index]['visibility'] = valueFormResults[name]!['visible'] ?? true;
+          }
+
+
+
+
+
+
     });
   }
 
