@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:activity/core/networks/active_request.dart';
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 
 class DropDownIPRSWidget extends StatelessWidget {
    ValueChanged<Map<String, dynamic>> onElementCallback;
@@ -20,7 +20,7 @@ class DropDownIPRSWidget extends StatelessWidget {
   // Perform some logic or user interaction that generates a callback value
     Map<String, dynamic> callbackElement = {};
     ActiveRequest activeRequest = ActiveRequest();
-    List<DropdownMenuItem> choices = [];
+    List<ComboBoxItem> choices = [];
 
     List<String> choiceList = [];
     List<String> _listNotifier = [];
@@ -39,46 +39,29 @@ class DropDownIPRSWidget extends StatelessWidget {
     Key dropdownKey = Key(callbackElement['name']);
 
 
-    final List<DropdownMenuItem> choiceList = [
-      DropdownMenuItem(
+    final List<ComboBoxItem> choiceList = [
+      ComboBoxItem(
         value: callbackElement['label'].toString(),
         child: const Text('Select choices'),
       ),
       for (var i = 0; i < callbackElement['options'].length; i++)
-        DropdownMenuItem(
+        ComboBoxItem(
           value: callbackElement['options'][i]['value'],
           child: Text(
               callbackElement['options'][i]['label']),
         )
     ];
 
-
-
     var vl ;
     return Container(
       height: 48.0,
-      margin: EdgeInsets.only(bottom:8,top:10,right: 16,left: 16),
+      margin: const EdgeInsets.only(bottom:8,top:10,right: 16,left: 16),
       alignment: Alignment.center,
-      child: DropdownButtonFormField(
-        style: TextStyle(color: Colors.black, fontSize: 14.0),
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 10.0,
-            vertical: 3.0,
-          ),
-          filled: true,
-          fillColor: Colors.grey.withOpacity(0.1),
-          enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: Colors.grey, width: 0.0),
-              borderRadius: BorderRadius.circular(8)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius:
-              BorderRadius.all(Radius.circular(8.0)),
-              borderSide: BorderSide(color: Colors.blue,)),
-        ),
+      child: ComboboxFormField(
+        isExpanded: true,
+        style: const TextStyle(color: Colors.black, fontSize: 14.0),
         key: dropdownKey,
-        hint: const Text('Select choices'),
+        placeholder: const Text('Select a choice'),
         value: vl,
         items: choiceList,
         onChanged: (value) {

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:activity/widgets/elements/text_field_iprs.dart';
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 
 import '../../core/forms/form_controller.dart';
 import '../../core/networks/active_request.dart';
@@ -35,28 +35,24 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
 
     callbackElement = widget.valueFormResults[widget.elementName]!;
 
-
-
     return SizedBox(
         height: 320,
-        child: ListView.builder(
-        physics: NeverScrollableScrollPhysics(),
+        child: searchStatus == false ? ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: callbackElement['lookup'].length,
         itemBuilder: (BuildContext context, int index) {
           final item = callbackElement['lookup'][index];
-          return searchStatus == false ?
-          Column(
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: EdgeInsets.only(top: 12,left:16,right:16),
-                child: Text('${item['name']}',
-                    style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600)),
+                margin: const EdgeInsets.only(top: 5,left:5,right:5, bottom: 10),
+                child: Text('${item['name']}'),
               ),
               SizedBox(
                 height: 250,
                 child: ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: item['parameters'].length,
                   itemBuilder: (BuildContext context, int index) {
                     final parameters = item['parameters'][index];
@@ -71,7 +67,8 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                       Map<String, dynamic> newValue = newElement;
 
                       /// add the element to the formValues map
-                      if(widget.valueFormResults.containsKey('${item['parameters'][index]['name']}-${callbackElement['outputs'][0]['value']}') == false){
+                      if(widget.valueFormResults.containsKey('${item['parameters'][index]['name']}-${callbackElement['outputs'][0]['value']}') == false)
+                      {
 
                         // setState(() {
                           /// Add the value
@@ -99,9 +96,7 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                       }
                     }
 
-
-
-
+                    
                     return Container(
                       child: parameters['type'] == 'dropdown'
                           ? DropDownIPRSWidget(
@@ -130,10 +125,14 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                         valueFormResults: widget.valueFormResults, customTheme: {},
                       )
                     );
+
+
                   },
                 ),
               ),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 16),
+              
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: OutlinedButton(
                 onPressed: () async {
 
@@ -168,10 +167,20 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                           "id": '${idEditingController.text}',
                           "data": callbackElement['outputs'][0]['value']
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                duration: const Duration(milliseconds: 500),
-                                content: Text('Processing Data')));
+
+                        showSnackbar(context, InfoBar(
+                            title: const Text('Loading'),
+                            content: Text(
+                                "Processing Data"
+                            ),
+                            severity: InfoBarSeverity.info,
+                            isLong: true,
+                        ));
+
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //     const SnackBar(
+                        //         duration: const Duration(milliseconds: 500),
+                        //         content: Text('Processing Data')));
                         var resData;
 
                         if (data['first_name'].toLowerCase().contains(
@@ -231,10 +240,16 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
                           setState(() {
                             searchStatus = false;
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'First Name does not match particulars')));
+                          
+                          showSnackbar(context, const InfoBar(
+                            title: Text('Failed to validate'),
+                            content: Text(
+                              'First Name does not match particulars',
+                            ),
+                            severity: InfoBarSeverity.info,
+                            isLong: true,
+                          ));
+
                         }
 
                       } else if (idType == 'AlienIdentification') {
@@ -252,13 +267,10 @@ class _TextSearchUpdateFieldWidgetState extends State<TextSearchUpdateFieldWidge
 
               )
             ],
-          ) :
-          Center(child: CircularProgressIndicator());
-        }));
+          );
+        }) : const Center(child: ProgressRing()));
 
   }
-
-
 
   String _textSelect(String str) {
     str = str.replaceAll('<<', '');
