@@ -1,3 +1,4 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 
 class DatePickerWidget extends StatelessWidget {
@@ -32,39 +33,33 @@ class DatePickerWidget extends StatelessWidget {
         ? callbackElement['title']
         : callbackElement['value'];
     // Return an empty Container widget (or any other widget)
-    return Ink(
-        child: Container(
-          margin: const EdgeInsets.only(top:8,bottom: 16,right:16,left:16),
-          child:   TextField(
-            onTap: () {
-              selectDate(context);
-            },
-            readOnly: true,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              hintStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-              ),
-              filled: true,
-              fillColor: Colors.grey.withOpacity(0.1),
-              enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(
-                      color: Colors.grey, width: 0.0),
-                  borderRadius: BorderRadius.circular(8)),
-              focusedBorder: const OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.all(Radius.circular(8.0)),
-                  borderSide: BorderSide(color: Colors.blue,)),
-              hintText: callbackElement['title'] ?? '',
-            ),
-            controller: textEditingController,
+    return Container(
+      margin: const EdgeInsets.only(left: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 10,
           ),
-        )
+          Text(
+            "${callbackElement['title']}",
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Ink(
+              child: TextFormBox(
+                onTap: () {
+                  selectDate(context);
+                },
+                readOnly: true,
+                placeholder: callbackElement['title'] ?? '',
+
+                controller: textEditingController,
+              )
+          ),
+        ],
+      ),
     );
   }
 
@@ -77,8 +72,8 @@ class DatePickerWidget extends StatelessWidget {
     );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
-      textEditingController.text = selectedDate.toString();
-      callbackElement['value'] = selectedDate.toString();
+      textEditingController.text = selectedDate.toString().substring(0,10);
+      callbackElement['value'] = selectedDate.toString().substring(0,10);
       onElementCallback(callbackElement);
     }
   }

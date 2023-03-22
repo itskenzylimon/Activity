@@ -262,56 +262,43 @@ class DropDownWidget extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                Container(
-                  width: double.infinity,
-                  height: 40,
-                  margin: const EdgeInsets.only(top: 10, bottom: 10),
-                  child: ComboboxFormField<String>(
-                    value: currentSelectedValue,
-                    isExpanded: true,
-                  placeholder: SizedBox(
-                    width: 100,
-                    child: Text(
-                      callbackElement['title'] +
-                          ' ' +
-                          (callbackElement['description'] ?? ''),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                    items: choices.map<ComboBoxItem<String>>((choice) {
-                      return ComboBoxItem(
-                        value: choice,
-                        child: Text(
-                          choice == 'Select'
-                              ? '\t - \t ${callbackElement['title']}'
-                              : '\t $choice',
-                          style: mat.Theme.of(context).textTheme.caption,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      currentSelectedValue = value;
-                      callbackElement['value'] = value;
-                      onElementCallback(callbackElement);
-                    },
-                    validator: (value) {
-                      if (valueFormResults[elementName]!['isRequired'] ==
-                          null) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter ${valueFormResults[elementName]!['title']}';
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ],
+          ComboboxFormField<String>(
+            value: currentSelectedValue,
+            isExpanded: true,
+            placeholder: SizedBox(
+              width: 100,
+              child: Text(
+                callbackElement['title'] +
+                    ' ' +
+                    (callbackElement['description'] ?? ''),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          )
+            items: choices.map<ComboBoxItem<String>>((choice) {
+              return ComboBoxItem(
+                value: choice,
+                child: Text(
+                  choice == 'Select'
+                      ? '\t - \t ${callbackElement['title']}'
+                      : '\t $choice',
+                  style: mat.Theme.of(context).textTheme.caption,
+                ),
+              );
+            }).toList(),
+            onChanged: (value) {
+              currentSelectedValue = value;
+              callbackElement['value'] = value;
+              onElementCallback(callbackElement);
+            },
+            validator: (value) {
+              if (valueFormResults[elementName]!['isRequired'] ==
+                  null) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter ${valueFormResults[elementName]!['title']}';
+                }
+              }
+            },
+          ),
         ],
       );
     }
