@@ -54,7 +54,7 @@ class DropDownWidget extends StatelessWidget {
             children: [
               Text(
                 "${callbackElement['title']}",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const Typography.raw().caption,
               ),
               const SizedBox(
                 height: 10,
@@ -134,7 +134,8 @@ class DropDownWidget extends StatelessWidget {
               )
             ],
           ));
-    } else if (callbackElement['renderAs'] == null &&
+    }
+    else if (callbackElement['renderAs'] == null &&
         callbackElement['choicesByUrl'] != null) {
       String? currentSelectedValue =
           ['', null].contains(callbackElement['value'])
@@ -151,85 +152,55 @@ class DropDownWidget extends StatelessWidget {
             children: [
               Text(
                 "${callbackElement['title']}",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const Typography.raw().caption,
               ),
               const SizedBox(
                 height: 10,
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10, bottom: 10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: Colors.grey)),
-                      ),
-                      child: TextBox(
-                        placeholder: 'Search ${callbackElement['title']}',
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
+              ValueListenableBuilder(
+                  valueListenable: _listNotifier,
+                  builder: (BuildContext context, choicesList,
+                      Widget? child) {
+                    return AutoSuggestBox<String>(
+                        items: choicesList.map((choice) {
+                          return AutoSuggestBoxItem<String>(
+                              value: choice,
+                              label: choice
+                          );
+                        }).toList(),
+                        onSelected: (item) {
+                          callbackElement['value'] = item.value;
+                          onElementCallback(callbackElement);
+                        },
+                        onChanged: (String value, TextChangedReason reason) {
+                          if (value.isNotEmpty && value.length >= 2) {
                             Timer? debounce;
                             if (debounce?.isActive ?? false) debounce?.cancel();
-                            debounce = Timer(const Duration(milliseconds: 1000),
-                                () async {
-                              var list = await getChoicesByUrl(
-                                value,
-                                callbackElement['choicesByUrl']['url'],
-                              );
-                              for (var l in list) {
-                                choicesList.add(
-                                  l['value'].toString(),
-                                );
-                                _listNotifier.value = choicesList;
-                              }
-                            });
+                            debounce = Timer(const Duration(milliseconds: 500),
+                                    () async {
+                                  var list = await getChoicesByUrl(
+                                    value,
+                                    callbackElement['choicesByUrl']['url'],
+                                  );
+                                  for (var l in list) {
+                                    choicesList.add(
+                                      l['value'].toString(),
+                                    );
+                                    _listNotifier.value = choicesList;
+                                  }
+                                });
                           } else {
                             choicesList = [
                               "Select ${callbackElement['title']}"
                             ];
                           }
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                        width: double.infinity,
-                        child: ValueListenableBuilder(
-                            valueListenable: _listNotifier,
-                            builder: (BuildContext context, choicesList,
-                                Widget? child) {
-                              return SizedBox(
-                                height: choicesList.length > 2 ? 250 : 40,
-                                child: ListView.separated(
-                                  shrinkWrap: true,
-                                  controller: scrollController,
-                                  itemBuilder: (context, int index) {
-                                    return ListTile(
-                                      onPressed: () {
-                                        callbackElement['value'] =
-                                            choicesList[index];
-                                        onElementCallback(callbackElement);
-                                      },
-                                      title: Text(choicesList[index]),
-                                    );
-                                  },
-                                  separatorBuilder: (context, int index) =>
-                                      SizedBox(height: 10),
-                                  itemCount: choicesList.length,
-                                ),
-                              );
-                            })),
-                  ],
-                ),
-              )
+                        }
+                    );
+                  }),
             ],
           ));
-    } else {
+    }
+    else {
       // printSuccess("--------------------------------");
       // printSuccess(callbackElement);
       String? currentSelectedValue =
@@ -258,6 +229,7 @@ class DropDownWidget extends StatelessWidget {
         children: [
           Text(
             "${callbackElement['title']}",
+            style: const Typography.raw().caption,
           ),
           const SizedBox(
             height: 10,
