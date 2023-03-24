@@ -666,6 +666,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     tabList.clear();
     pageList.clear();
+    pagesListData.clear();
 
     var lst = {};
     for(var page in pages){
@@ -856,7 +857,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                         ),
                       ),
                       const Spacer(),
-                      (initialIndex + 1) == pagesListData.length
+                      (initialIndex+2) > pagesListData.length
                           ? SubmitButton(
                         context: context,
                         formKey: GlobalKey(),
@@ -871,6 +872,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                           : Next(
                         context: context,
                         onNext: () {
+                          print("??????");
+                          print(initialIndex);
+                          print(pagesListData.length);
                           for(var i=0; i<=pagesListData.length; i++) {
                             if (initialIndex < pagesListData.length - 1) {
 
