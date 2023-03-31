@@ -35,7 +35,10 @@ class TextFieldWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(labelText),
+            Text(labelText, style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey)),
             const SizedBox(
                 height: 10,
             ),

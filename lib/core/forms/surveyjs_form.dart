@@ -81,6 +81,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
   late Timer debounce;
 
+  bool showDialogContainer = false;
+  bool showDialogConfirmation = false;
+  List<List> pageValues = [];
+  List<String> pageTitles = [];
+
   String? path;
 
   Map<String, Map<String, dynamic>> valueFormResults = {};
@@ -773,212 +778,145 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           ),
         );
       },
-      home: Container(
-        color: Colors.white,
-        child: Column(
-          children: [
-            // SizedBox(
-            //   width: double.infinity,
-            // height: 50,
-            //   child: ListView(
-            //     scrollDirection: Axis.horizontal,
-            //     children: tabList,
-            //   ),
-            // ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: tabList,
-              ),
-            ),
-            Expanded(
-              child: SizedBox(
-                child: pageList[initialIndex],
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                border: Border(
-                  top: BorderSide(
-                      width: 1.0, color: Colors.grey.withOpacity(0.3)),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    right: 16, top: 8, bottom: 8, left: 16),
-                child: Align(
-                  alignment: Alignment.bottomRight,
+      home: Stack(
+        children: [
+          Container(
+            color: Colors.white,
+            child: Column(
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Visibility(
-                        visible: initialIndex == 0 ? false : true,
-                        child: Previous(
-                          context: context,
-                          onPrevious: () {
-                            for(var i=0; i <= pagesListData.length; i++) {
-                              if (initialIndex > 0) {
-
-                                if(pagesListData[initialIndex-1]['visibility']) {
-
-                                  GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                  if (formKey.currentState!.validate()){
-                                    printWarning('"Index + 1"');
-                                    printWarning(initialIndex);
-                                    printWarning(initialIndex-1);
-                                    printWarning(pagesListData[initialIndex-1]);
-                                    setState(() {
-                                      initialIndex = initialIndex - 1;
-                                    });
-                                  }
-                                  break;
-
-                                } else {
-                                  if (initialIndex > 0) {
-                                    GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                    if (formKey.currentState!.validate()){
-                                      printWarning('"Index - 2"');
-                                      printWarning(initialIndex);
-                                      printWarning(initialIndex-2);
-                                      printWarning(pagesListData[initialIndex-2]);
-                                      setState(() {
-                                        initialIndex = initialIndex - 2;
-                                      });
-                                    }
-                                  }
-                                  break;
-                                }
-                              }
-                            }
-
-                          },
-                          formKey: GlobalKey(),
-                        ),
-                      ),
-                      const Spacer(),
-                      (initialIndex+2) > pagesListData.length
-                          ? SubmitButton(
-                        context: context,
-                        formKey: GlobalKey(),
-                        onFormSubmit: () {
-                          /// Validate the data saved in the form
-                          ///
-
-                          printNormal(dataKeyList.toString());
-                          showConfirmDialog(context);
-                        },
-                      )
-                          : Next(
-                        context: context,
-                        onNext: () {
-                          print("??????");
-                          print(initialIndex);
-                          print(pagesListData.length);
-                          for(var i=0; i<=pagesListData.length; i++) {
-                            if (initialIndex < pagesListData.length - 1) {
-
-                              if(pagesListData[initialIndex+1]['visibility']) {
-
-                                GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                if (formKey.currentState!.validate()){
-                                  setState(() {
-                                    initialIndex = initialIndex + 1;
-                                  });
-                                }
-                                break;
-
-                              } else {
-                                if (initialIndex < pagesListData.length - 1) {
-                                  GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                  if (formKey.currentState!.validate()){
-                                    setState(() {
-                                      initialIndex = initialIndex + 2;
-                                    });
-                                  }
-                                }
-                                break;
-                              }
-                            }
-                          }
-
-
-                        },
-                        formKey: GlobalKey(),
-                      )
-                    ],
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: tabList,
                   ),
                 ),
-              ),
+                Expanded(
+                  child: SizedBox(
+                    child: pageList[initialIndex],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    border: Border(
+                      top: BorderSide(
+                          width: 1.0, color: Colors.grey.withOpacity(0.3)),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        right: 16, top: 8, bottom: 8, left: 16),
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Visibility(
+                            visible: initialIndex == 0 ? false : true,
+                            child: Previous(
+                              context: context,
+                              onPrevious: () {
+                                for(var i=0; i <= pagesListData.length; i++) {
+                                  if (initialIndex > 0) {
+
+                                    if(pagesListData[initialIndex-1]['visibility']) {
+
+                                      GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                      if (formKey.currentState!.validate()){
+                                        printWarning('"Index + 1"');
+                                        printWarning(initialIndex);
+                                        printWarning(initialIndex-1);
+                                        printWarning(pagesListData[initialIndex-1]);
+                                        setState(() {
+                                          initialIndex = initialIndex - 1;
+                                        });
+                                      }
+                                      break;
+
+                                    } else {
+                                      if (initialIndex > 0) {
+                                        GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                        if (formKey.currentState!.validate()){
+                                          printWarning('"Index - 2"');
+                                          printWarning(initialIndex);
+                                          printWarning(initialIndex-2);
+                                          printWarning(pagesListData[initialIndex-2]);
+                                          setState(() {
+                                            initialIndex = initialIndex - 2;
+                                          });
+                                        }
+                                      }
+                                      break;
+                                    }
+                                  }
+                                }
+
+                              },
+                              formKey: GlobalKey(),
+                            ),
+                          ),
+                          const Spacer(),
+                          (initialIndex+2) > pagesListData.length
+                              ? SubmitButton(
+                            context: context,
+                            formKey: GlobalKey(),
+                            onFormSubmit: () {
+                              printError(dataKeyList.toString());
+                              showConfirmDialog();
+                            },
+                          )
+                              : Next(
+                            context: context,
+                            onNext: () {
+                              print("??????");
+                              print(initialIndex);
+                              print(pagesListData.length);
+                              for(var i=0; i<=pagesListData.length; i++) {
+                                if (initialIndex < pagesListData.length - 1) {
+
+                                  if(pagesListData[initialIndex+1]['visibility']) {
+
+                                    GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                    if (formKey.currentState!.validate()){
+                                      setState(() {
+                                        initialIndex = initialIndex + 1;
+                                      });
+                                    }
+                                    break;
+
+                                  } else {
+                                    if (initialIndex < pagesListData.length - 1) {
+                                      GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
+                                      if (formKey.currentState!.validate()){
+                                        setState(() {
+                                          initialIndex = initialIndex + 2;
+                                        });
+                                      }
+                                    }
+                                    break;
+                                  }
+                                }
+                              }
+
+
+                            },
+                            formKey: GlobalKey(),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      )
-    );
-  }
-
-  setVisibleKeys(String name, bool visible){
-    if(!dataKeys.contains(name) && visible == true){
-        dataKeys.add(name);
-    } else if (dataKeys.contains(name) && visible == false){
-      dataKeys.remove(name);
-    }
-  }
-
-  loopThroughElements(List elements, String name, bool visible){
-    setVisibleKeys(name, visible);
-    for(var element in elements){
-     if(element['elements'] != null){
-       loopThroughElements(element['elements'], element['name'], visible);
-     } else {
-       setVisibleKeys(element['name'], visible);
-     }
-    }
-  }
-
-  showConfirmDialog(context) {
-
-    Map<String ,List> formPagePreviewData = {};
-
-    for (int x = 0; x < pages.length; x++) {
-      valueFormResults.forEach((key, value) {
-        // printError('{{{{{{value}}}}}}');
-        // printError(value);
-        // printError('{{{{{{value}}}}}}');
-        /// Map check if formPageData has the key page
-        if(pages[x].toString().contains(key)) {
-          List currentValues = formPagePreviewData['${pages[x]['name']}'] ?? [];
-          if(currentValues.isEmpty) {
-
-            if(![null, '', ' '].contains(value['value'])){
-              formPagePreviewData['${pages[x]['title']}'] = [{
-                'value': value['value'],
-                'name': key
-              }];
-            }
-          } else {
-
-            if(![null, '', ' '].contains(value['value'])){
-              currentValues.add({
-                'value': value['value'],
-                'name': key
-              });
-            }
-          }
-        }
-      });
-    }
-
-    List<List> pageValues = formPagePreviewData.values.toList();
-    List<String> pageTitles = formPagePreviewData.keys.toList();
-
-    showGeneralDialog(
-      context: context,
-      pageBuilder: (context, animation, secondaryAnimation) =>
+          ),
+          showDialogContainer == true ?
           Container(
-            margin: const EdgeInsets.only(top: 100, bottom: 50, right: 20, left: 20),
+            margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
             child: Container(
-              margin: const EdgeInsets.only(top: 10),
+                margin: const EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: const Color(0xffE3E5EE)),
@@ -1007,11 +945,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                                   height: 15,
                                 ),
                                 const Divider(
-                                    direction: Axis.vertical,
-                                    size: 0,
-                                    style: DividerThemeData(
-                                        thickness: 1.0,
-                                    ),
+                                  direction: Axis.vertical,
+                                  size: 0,
+                                  style: DividerThemeData(
+                                    thickness: 1.0,
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 15,
@@ -1056,7 +994,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                                         ),
                                         const Padding(
                                           padding: EdgeInsets.only(
-                                              bottom: 13, top: 13,
+                                              bottom: 8, top: 8,
                                               left: 26, right: 26),
                                           child: Divider(
                                             direction: Axis.vertical,
@@ -1079,137 +1017,12 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                       child: Container(
                         margin: const EdgeInsets.all(10),
                         child: GestureDetector(
-                          onTap: () => showDialog<String>(
-                            context: context,
-                            builder: (BuildContext context) => mat.AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)
-                                ),
-                                content: Container(
-                                  height: 190,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            width: 56,
-                                            height: 56,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(28),
-                                              border: Border.all(color: const Color(0xffeaf3ff), width: 10, ),
-                                              color: const Color(0xffc6dfff),
-                                            ),
-                                            padding: const EdgeInsets.all(5),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children:[
-                                                Container(
-                                                  width: 24,
-                                                  height: 24,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                  ),
-                                                  child: Icon(
-                                                    FluentIcons.status_circle_outer, color: Colors.blue, size: 24,),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Icon(FluentIcons.close_pane))
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                        height: 16,
-                                      ),
-                                      const Text(
-                                        'Complete Application',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 4,
-                                      ),
-                                      const Text(
-                                        'Are you sure you want to complete this application?',
-                                        style: TextStyle(
-                                          color: Color(0xff475467),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 30,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 5,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Container(
-                                                height: 44,
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(color: const Color(0xffD0D5DD)),
-                                                    borderRadius: BorderRadius.circular(8)),
-                                                child: const Center(
-                                                  child: Text(
-                                                    'Cancel',
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12,),
-                                          Expanded(
-                                            flex: 5,
-                                            child: GestureDetector(
-                                              onTap: (){
-                                                Navigator.pop(context);
-                                                widget.onFormValueSubmit(valueFormResults);
-                                              },
-                                              child: Container(
-                                                height: 44,
-                                                decoration: BoxDecoration(
-                                                    color: const Color(0xff006FFF),
-                                                    borderRadius: BorderRadius.circular(8)),
-                                                child: const Center(
-                                                  child: Text(
-                                                    'Complete',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                )),
-                          ),
+                          onTap: (){
+                            setState(() {
+                              showDialogContainer = false;
+                              showDialogConfirmation = false;
+                            });
+                          },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -1218,7 +1031,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                                 height: 44,
                                 child: GestureDetector(
                                   onTap: () {
-                                    Navigator.pop(context);
+                                    setState(() {
+                                      showDialogContainer = false;
+                                    });
                                   },
                                   child: Container(
                                     height: 44,
@@ -1239,19 +1054,26 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                                 ),
                               ),
                               const SizedBox(width: 50,),
-                              Container(
-                                height: 44,
-                                width: 148,
-                                decoration: BoxDecoration(
-                                    color: const Color(0xff006FFF),
-                                    borderRadius: BorderRadius.circular(8)),
-                                child: const Center(
-                                  child: Text(
-                                    'Complete',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    showDialogConfirmation = true;
+                                  });
+                                },
+                                child: Container(
+                                  height: 44,
+                                  width: 148,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xff006FFF),
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: const Center(
+                                    child: Text(
+                                      'Complete',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1264,8 +1086,214 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                   ],
                 )
             ),
+          ) :
+          const SizedBox(),
+          showDialogConfirmation == true ?
+          Container(
+            height: MediaQuery.of(context).size.height,
+            color: Colors.black.withOpacity(0.5),
+            child: Center(
+              child: Container(
+                height: 250,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                margin: const EdgeInsets.only(left: 50, right: 50),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(color: const Color(0xffeaf3ff), width: 10, ),
+                            color: const Color(0xffc6dfff),
+                          ),
+                          padding: const EdgeInsets.all(5),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children:[
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  FluentIcons.status_circle_outer, color: Colors.blue, size: 24,),
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showDialogConfirmation = false;
+                              });
+                            },
+                            child: const Icon(FluentIcons.clear))
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const Text(
+                      'Complete Application',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    const Text(
+                      'Are you sure you want to complete this application?',
+                      style: TextStyle(
+                        color: Color(0xff475467),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showDialogConfirmation = false;
+                              });
+                            },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: const Color(0xffD0D5DD)),
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: const Center(
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12,),
+                        Expanded(
+                          flex: 5,
+                          child: GestureDetector(
+                            onTap: (){
+                              widget.onFormValueSubmit(valueFormResults);
+                              setState(() {
+                                showDialogConfirmation = false;
+                                showDialogContainer = false;
+                              });
+                            },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                  color: const Color(0xff006FFF),
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: const Center(
+                                child: Text(
+                                  'Complete',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
           )
+              : const SizedBox()
+        ],
+      )
     );
+  }
+
+  setVisibleKeys(String name, bool visible){
+    if(!dataKeys.contains(name) && visible == true){
+        dataKeys.add(name);
+    } else if (dataKeys.contains(name) && visible == false){
+      dataKeys.remove(name);
+    }
+  }
+
+  loopThroughElements(List elements, String name, bool visible){
+    setVisibleKeys(name, visible);
+    for(var element in elements){
+     if(element['elements'] != null){
+       loopThroughElements(element['elements'], element['name'], visible);
+     } else {
+       setVisibleKeys(element['name'], visible);
+     }
+    }
+  }
+
+  showConfirmDialog() {
+    Map<String ,List> formPagePreviewData = {};
+
+    for (int x = 0; x < pages.length; x++) {
+      valueFormResults.forEach((key, value) {
+        // printError('{{{{{{value}}}}}}');
+        // printError(value);
+        // printError('{{{{{{value}}}}}}');
+        /// Map check if formPageData has the key page
+        if(pages[x].toString().contains(key)) {
+          List currentValues = formPagePreviewData['${pages[x]['name']}'] ?? [];
+          if(currentValues.isEmpty) {
+
+            if(![null, '', ' '].contains(value['value'])){
+              formPagePreviewData['${pages[x]['title']}'] = [{
+                'value': value['value'],
+                'name': key
+              }];
+            }
+          } else {
+
+            if(![null, '', ' '].contains(value['value'])){
+              currentValues.add({
+                'value': value['value'],
+                'name': key
+              });
+            }
+          }
+        }
+      });
+    }
+
+    setState(() {
+      pageValues = formPagePreviewData.values.toList();
+      pageTitles = formPagePreviewData.keys.toList();
+      showDialogContainer = true;
+    });
   }
 
   /// All created elements should be added here
@@ -1856,7 +1884,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
   @override
   void dispose() {
-    // super.dispose();
+    super.dispose();
   }
 }
 

@@ -70,7 +70,8 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
       // printInfo(callbackElement['type']);
       return widget.valueFormResults[widget.elementName]!['visible']
           ? Container(
-              height: 450,
+              margin: const EdgeInsets.only(top: 30),
+              height: 400,
               child: imageInBase64 == ''
                   ? Stack(
                       children: [
@@ -111,7 +112,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
                       ],
                     )
                   : Container(
-                      height: 450,
+                      height: 400,
                       child: Image.memory(
                         base64.decode(imageInBase64),
                       ),
