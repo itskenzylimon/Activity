@@ -20,14 +20,17 @@ class DatePickerWidget extends StatelessWidget {
 
   final TextEditingController textEditingController = TextEditingController();
   DateTime selectedDate = DateTime.now();
-  DateTime maxDays = DateTime(1950);
+  DateTime maxDays =  DateTime(1950);
 
   @override
   Widget build(BuildContext context) {
 
     callbackElement = valueFormResults[elementName]!;
     if (callbackElement['maxDays'] != null) {
-      maxDays.add(Duration(days: callbackElement['maxDays']));
+      if(callbackElement['maxDays'].toString().contains('-')){
+        callbackElement['maxDays'] = int.parse(callbackElement['maxDays'].toString().replaceAll('-', ''));
+      }
+      maxDays = DateTime.now().subtract(Duration(days: callbackElement['maxDays']));
     }
     textEditingController.text = ['', null].contains(callbackElement['value'])
         ? callbackElement['title']
