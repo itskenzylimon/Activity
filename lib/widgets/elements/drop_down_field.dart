@@ -78,16 +78,21 @@ class DropDownWidget extends StatelessWidget {
                             controller: callbackElement['controller'],
                             placeholder: 'Search ${callbackElement['title']}',
                             onChanged: (value) {
+
+                              var list = [];
                               if (value.isNotEmpty) {
+
                                 if (_debounce?.isActive ?? false)
                                   _debounce?.cancel();
                                 _debounce =
                                     Timer(const Duration(milliseconds: 100),
                                         () async {
-                                  var list = await getListItems(
-                                    value,
-                                    callbackElement['choicesByUrl']['url'],
-                                  );
+                                      if(list.isEmpty) {
+                                        list = await getListItems(
+                                          value,
+                                          callbackElement['choicesByUrl']['url'],
+                                        );
+                                      }
                                   for (var l in list) {
                                     choicesList.add(
                                       l['value'].toString(),
@@ -98,7 +103,7 @@ class DropDownWidget extends StatelessWidget {
                               } else {
                                 choiceList.clear();
                                 choicesList = [
-                                  "Select ${callbackElement['title']}"
+                                  "Select ${['title']}"
                                 ];
                               }
                             })),
@@ -173,15 +178,18 @@ class DropDownWidget extends StatelessWidget {
                           onElementCallback(callbackElement);
                         },
                         onChanged: (String value, TextChangedReason reason) {
+                          var list =[];
                           if (value.isNotEmpty && value.length >= 2) {
                             Timer? debounce;
                             if (debounce?.isActive ?? false) debounce?.cancel();
                             debounce = Timer(const Duration(milliseconds: 500),
                                     () async {
-                                  var list = await getChoicesByUrl(
-                                    value,
-                                    callbackElement['choicesByUrl']['url'],
-                                  );
+                              if(list.isEmpty) {
+                                list = await getChoicesByUrl(
+                                  value,
+                                  callbackElement['choicesByUrl']['url'],
+                                );
+                              }
                                   for (var l in list) {
                                     choicesList.add(
                                       l['value'].toString(),
