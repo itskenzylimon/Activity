@@ -47,7 +47,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
 
   exportImage() async {
     final Uint8List? data =
-        await _controller.toPngBytes(height: 200, width: 200);
+        await _controller.toPngBytes(height: 400, width: 600);
     if (data == null) {
       return;
     } else {
