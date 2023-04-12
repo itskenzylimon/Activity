@@ -1,5 +1,17 @@
 import 'package:fluent_ui/fluent_ui.dart';
-
+extension on String {
+  toBoolean() {
+    print(this);
+    if (this.runtimeType == bool) {
+      return this;
+    } else if (this.toLowerCase() == "true") {
+      return true;
+    } else if (this.toLowerCase() == "false") {
+      return false;
+    }
+    throw UnsupportedError;
+  }
+}
 class CheckBoxWidget extends StatelessWidget {
   final ValueChanged<Map<String, dynamic>> onElementCallback;
   final String elementName;
@@ -14,6 +26,7 @@ class CheckBoxWidget extends StatelessWidget {
     required this.customTheme
   });
 
+
   // Perform some logic or user interaction that generates a callback value
   Map<String, dynamic> callbackElement = {};
 
@@ -26,7 +39,8 @@ class CheckBoxWidget extends StatelessWidget {
       choices.add(callbackElement['choices'][i]);
     }
     if (callbackElement['value'] != '') {
-      selectedCheck = callbackElement['value'] ?? false;
+      var val = callbackElement['value'].toString();
+      selectedCheck = val.toBoolean() ?? false;
 
     }
 

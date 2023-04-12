@@ -75,6 +75,7 @@
         <entry key="fluent_ui">
           <value>
             <list>
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/fluent_ui-4.4.2/lib" />
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/fluent_ui-4.4.1/lib" />
             </list>
           </value>
@@ -188,6 +189,13 @@
           <value>
             <list>
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/material_color_utilities-0.2.0/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="math_expressions">
+          <value>
+            <list>
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/math_expressions-2.3.1/lib" />
             </list>
           </value>
         </entry>
@@ -317,6 +325,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/ffi-2.0.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/file_picker-5.2.5/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/fluent_ui-4.4.1/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/fluent_ui-4.4.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_html-3.0.0-alpha.6/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_lints-2.0.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.7/lib" />
@@ -329,6 +338,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/lints-2.0.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/matcher-0.12.13/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/material_color_utilities-0.2.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/math_expressions-2.3.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.8.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/numerus-2.0.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path-1.8.2/lib" />
