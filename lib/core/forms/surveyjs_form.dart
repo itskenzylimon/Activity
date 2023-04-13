@@ -94,9 +94,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
   void initState() {
     super.initState();
 
-    pages =
-        widget.schema['pages'] ?? widget.schema['service']['schema']['pages'];
-    for(var page in pages){
+    pages = widget.schema['pages'] ?? widget.schema['service']['schema']['pages'];
+    for (var page in pages) {
       dataKeyList.add([]);
     }
     // metaData.putIfAbsent('customWidgets', () => customWidgets());
@@ -111,47 +110,51 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
       return Visibility(
           child: Padding(
-            padding: const EdgeInsets.only(left:16,right: 16,top: 16),
-            child: DropDownWidget(
-        onElementCallback: (Map<String, dynamic> value) {
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+        child: DropDownWidget(
+          onElementCallback: (Map<String, dynamic> value) {
             setState(() {
-              Map<String, Map<String, dynamic>> newValueFormResults =
-                  valueFormResults;
+              Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
               newValueFormResults[element['name']] = value;
               valueFormResults = newValueFormResults;
             });
-        },
-        elementName: element['name'],
-        valueFormResults: valueFormResults,
-        customTheme: metaData['theme'],
-      ),
-          ));
+          },
+          elementName: element['name'],
+          valueFormResults: valueFormResults,
+          customTheme: metaData['theme'],
+        ),
+      ));
     }
 
     Visibility httpLookUp(Map<String, dynamic> element) {
+      printInfo('element 2');
+      printInfo(element);
       /// call setUpElement
       Map<String, dynamic> newElement = {
         'value': '',
       }..addAll(element);
 
+      
+
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement('${element['name']}-${element['outputs'][0]['value']}', newElement);
       return Visibility(
-          visible: valueFormResults['${element['name']}-${element['outputs'][0]['value']}']!['visible'] ?? true,
+          visible: valueFormResults['${element['name']}-${element['outputs'][0]['value']}']![
+                  'visible'] ??
+              true,
           child: TextSearchUpdateFieldWidget(
-        onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
-        },
-        elementName: '${element['name']}-${element['outputs'][0]['value']}',
-        valueFormResults: valueFormResults,
-        customTheme: {},
-      ));
+            onElementCallback: (Map<String, dynamic> value) {
+              setState(() {
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                newValueFormResults[element['name']] = value;
+                valueFormResults = newValueFormResults;
+              });
+            },
+            elementName: '${element['name']}-${element['outputs'][0]['value']}',
+            valueFormResults: valueFormResults,
+            customTheme: {},
+          ));
     }
 
     Visibility datepicker(Map<String, dynamic> element) {
@@ -167,18 +170,17 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       return Visibility(
           visible: valueFormResults[element['name']]!['visible'],
           child: DatePickerWidget(
-        onElementCallback: (Map<String, dynamic> value) {
-          setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
-            newValueFormResults[element['name']] = value;
-            valueFormResults = newValueFormResults;
-          });
-        },
-        elementName: element['name'],
-        valueFormResults: valueFormResults,
-        customTheme: metaData['theme'],
-      ));
+            onElementCallback: (Map<String, dynamic> value) {
+              setState(() {
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
+                newValueFormResults[element['name']] = value;
+                valueFormResults = newValueFormResults;
+              });
+            },
+            elementName: element['name'],
+            valueFormResults: valueFormResults,
+            customTheme: metaData['theme'],
+          ));
     }
 
     Visibility radioGroup(Map<String, dynamic> element) {
@@ -197,8 +199,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           child: RadioGroupWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
             newValueFormResults[element['name']] = value;
             valueFormResults = newValueFormResults;
           });
@@ -230,27 +231,26 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       /// After setting up the element, add it to the elementData
       /// use elementData in the rest of the function
       setUpElement(element['name'], newElement);
-      
+
       // print("newElement-------------------------------->");
       // print(newElement);
 
       return Visibility(
           child: Padding(
-            padding: const EdgeInsets.only(left:16,right: 16),
-            child: CheckBoxWidget(
-        onElementCallback: (Map<String, dynamic> value) {
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: CheckBoxWidget(
+          onElementCallback: (Map<String, dynamic> value) {
             setState(() {
-              Map<String, Map<String, dynamic>> newValueFormResults =
-                  valueFormResults;
+              Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
               newValueFormResults[element['name']] = value;
               valueFormResults = newValueFormResults;
             });
-        },
-        elementName: element['name'],
-        valueFormResults: valueFormResults,
-        customTheme: metaData['theme'],
-      ),
-          ));
+          },
+          elementName: element['name'],
+          valueFormResults: valueFormResults,
+          customTheme: metaData['theme'],
+        ),
+      ));
     }
 
     Visibility signaturePad(Map<String, dynamic> element) {
@@ -267,8 +267,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           child: SignatureFieldWidget(
         onElementCallback: (Map<String, dynamic> value) {
           setState(() {
-            Map<String, Map<String, dynamic>> newValueFormResults =
-                valueFormResults;
+            Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
             newValueFormResults[element['name']] = value;
             valueFormResults = newValueFormResults;
           });
@@ -294,8 +293,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           child: AgeCalculatorWidget(
             onElementCallback: (Map<String, dynamic> value) {
               setState(() {
-                Map<String, Map<String, dynamic>> newValueFormResults =
-                    valueFormResults;
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
                 newValueFormResults[element['name']] = value;
                 valueFormResults = newValueFormResults;
               });
@@ -336,9 +334,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       return Visibility(
           visible: valueFormResults[element['name']]!['visible'],
           child: Container(
-            padding: const EdgeInsets.only(left:10,right: 10,bottom: 20),
+            padding: const EdgeInsets.only(left: 10, right: 10, bottom: 20),
             height: 70,
-            child:Html(data: element['html']),
+            child: Html(data: element['html']),
           ));
     }
 
@@ -361,8 +359,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           child: TextFieldWidget(
             onElementCallback: (Map<String, dynamic> value) {
               setState(() {
-                Map<String, Map<String, dynamic>> newValueFormResults =
-                    valueFormResults;
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
                 newValueFormResults[element['name']] = value;
                 valueFormResults = newValueFormResults;
               });
@@ -391,8 +388,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           child: TextFieldWidget(
             onElementCallback: (Map<String, dynamic> value) {
               setState(() {
-                Map<String, Map<String, dynamic>> newValueFormResults =
-                    valueFormResults;
+                Map<String, Map<String, dynamic>> newValueFormResults = valueFormResults;
                 newValueFormResults[element['name']] = value;
                 valueFormResults = newValueFormResults;
               });
@@ -453,9 +449,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       //       )
       //   );
       // } else {
-      return Visibility(
-          visible: valueFormResults[element['name']]!['visible'],
-          child: Container());
+      return Visibility(visible: valueFormResults[element['name']]!['visible'], child: Container());
       // }
     }
 
@@ -497,7 +491,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
         case 'container':
           return container(element);
 
-          case 'html':
+        case 'html':
           return html(element);
 
         default:
@@ -509,9 +503,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       List<List> result = [];
       List temp = [];
       // printError( element['elements']);
-      if( element['elements'] == null){
+      if (element['elements'] == null) {
         // printError( element['elements']);
-      }else{
+      } else {
         for (Map char in element['elements']) {
           if (char["startWithNewLine"] == null) {
             if (temp.isNotEmpty) {
@@ -527,32 +521,29 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
         }
       }
 
-
       // printSuccess('{{{{{{{{{panelresult}}}}}}}}}');
       // printSuccess(result);
       // printSuccess(result[0].length);
       // printSuccess(result.length);
       // printSuccess('{{{{{{{{{{{{panelresult}}}}}}}}}}}}');
 
-
       if (element['type'] == 'panel') {
-
         /// After setting up the element, add it to the elementData
         /// use elementData in the rest of the function
         setUpElement(element['name'], element);
 
         // visibleMap.add(element['name'], true);
 
-
         Column children = Column(
-          children: [for (List rowElements in result)
-            rowElements.length >= 2 ?
-            Row(
-              children: [
-                for (var element in rowElements)
-                  Expanded(child: checkElement(element))
-              ],
-            ) : checkElement(rowElements[0])
+          children: [
+            for (List rowElements in result)
+              rowElements.length >= 2
+                  ? Row(
+                      children: [
+                        for (var element in rowElements) Expanded(child: checkElement(element))
+                      ],
+                    )
+                  : checkElement(rowElements[0])
           ],
         );
 
@@ -583,14 +574,12 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                 )),
           ),
         );
-      }
-      else {
+      } else {
         return getElement(element);
       }
     }
 
     ListView buildForm() {
-
       // List<Widget> children = [];
       // List<Widget> rowChildren = [];
       // List fields = page['elements'];
@@ -638,15 +627,15 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       // printSuccess('{{{{{{{{{{{{result}}}}}}}}}}}}');
 
       ListView listView = ListView(
-        children: [for (List rowElements in result)
-
-          rowElements.length >= 2 ?
-          Row(
-            children: [
-              for (var element in rowElements)
-                Expanded(child: checkElement(element))
-            ],
-          ) : checkElement(rowElements[0])
+        children: [
+          for (List rowElements in result)
+            rowElements.length >= 2
+                ? Row(
+                    children: [
+                      for (var element in rowElements) Expanded(child: checkElement(element))
+                    ],
+                  )
+                : checkElement(rowElements[0])
         ],
       );
 
@@ -661,11 +650,10 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     });
 
     return Visibility(
-        visible: valueFormResults[page['name']]!['visible'] ?? true,
-        child: buildForm());
+        visible: valueFormResults[page['name']]!['visible'] ?? true, child: buildForm());
   }
 
-  setUpTabview(){
+  setUpTabview() {
     /// After setting up the element, add it to the elementData
     /// use elementData in the rest of the function
 
@@ -674,7 +662,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     pagesListData.clear();
 
     var lst = {};
-    for(var page in pages){
+    for (var page in pages) {
       // printWarning( '${page['name']} --- *** ---');
       setUpElement(page['name'], {
         'name': page['name'],
@@ -689,47 +677,41 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
       // page.removeWhere((item) => item['visibleIf'] == true);
 
-        pageList.add(Visibility(
-            visible: valueFormResults[page['name']]!['visible'] ?? true,
-            child: Form(
-                key: listGlobalKey[index],
-                child: formBuilderController(page))));
+      pageList.add(Visibility(
+          visible: valueFormResults[page['name']]!['visible'] ?? true,
+          child: Form(key: listGlobalKey[index], child: formBuilderController(page))));
       lst = {
         "name": valueFormResults[page['name']],
-        "visibility" : valueFormResults[page['name']]!['visible'] ?? true
+        "visibility": valueFormResults[page['name']]!['visible'] ?? true
       };
       pagesListData.add(lst);
-
-
-
 
       visibleIf();
 
       // printSuccess('{{{{valueFormResults[page[]]}}}}');
       // printSuccess(valueFormResults[page['name']]);
       // printSuccess('{{{valueFormResults[page[]]}}}');
-        tabList.add(Visibility(
-            visible: valueFormResults[page['name']]!['visible'] ?? false,
-            replacement: const SizedBox(),
-            child: Container(
-              margin: const EdgeInsets.all(5),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                border: initialIndex == index
-                    ? const Border(bottom: BorderSide(width: 1)) : null,
-                color: initialIndex == index
-                    ? Colors.grey.withOpacity(0.05)
-                    : Colors.grey.withOpacity(0.02),),
-              child: Text(page['title'], style: TextStyle(
-                fontSize: 11,
-                color: initialIndex == index
-                    ? Colors.blue
-                    : Colors.grey,),
-              ),
+      tabList.add(Visibility(
+        visible: valueFormResults[page['name']]!['visible'] ?? false,
+        replacement: const SizedBox(),
+        child: Container(
+          margin: const EdgeInsets.all(5),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            border: initialIndex == index ? const Border(bottom: BorderSide(width: 1)) : null,
+            color: initialIndex == index
+                ? Colors.grey.withOpacity(0.05)
+                : Colors.grey.withOpacity(0.02),
+          ),
+          child: Text(
+            page['title'],
+            style: TextStyle(
+              fontSize: 11,
+              color: initialIndex == index ? Colors.blue : Colors.grey,
             ),
-          ));
-
-
+          ),
+        ),
+      ));
     }
   }
 
@@ -737,7 +719,6 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
   @override
   Widget build(BuildContext context) {
-
     // printWarning('{{{tabList}}}');
     // printSuccess(tabList);
 
@@ -747,518 +728,514 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
     setUpTabview();
 
-    return  FluentApp(
-      themeMode: ThemeMode.light,
-      debugShowCheckedModeBanner: false,
-      color: Colors.teal.darkest,
-      darkTheme: FluentThemeData(
-        brightness: Brightness.dark,
-        accentColor: Colors.blue,
-        visualDensity: VisualDensity.standard,
-        focusTheme: FocusThemeData(
-          glowFactor: is10footScreen() ? 2.0 : 0.0,
-        ),
-      ),
-      theme: FluentThemeData(
-        accentColor: Colors.blue,
-        visualDensity: VisualDensity.standard,
-        focusTheme: FocusThemeData(
-          glowFactor: is10footScreen() ? 2.0 : 0.0,
-        ),
-      ),
-      locale: const Locale('en'),
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: NavigationPaneTheme(
-            data: const NavigationPaneThemeData(
-              backgroundColor: Colors.transparent,
-            ),
-            child: child!,
+    return FluentApp(
+        themeMode: ThemeMode.light,
+        debugShowCheckedModeBanner: false,
+        color: Colors.teal.darkest,
+        darkTheme: FluentThemeData(
+          brightness: Brightness.dark,
+          accentColor: Colors.blue,
+          visualDensity: VisualDensity.standard,
+          focusTheme: FocusThemeData(
+            glowFactor: is10footScreen() ? 2.0 : 0.0,
           ),
-        );
-      },
-      home: Stack(
-        children: [
-          Container(
-            color: Colors.white,
-            child: Column(
-              children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: tabList,
-                  ),
-                ),
-                Expanded(
-                  child: SizedBox(
-                    child: pageList[initialIndex],
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    border: Border(
-                      top: BorderSide(
-                          width: 1.0, color: Colors.grey.withOpacity(0.3)),
+        ),
+        theme: FluentThemeData(
+          accentColor: Colors.blue,
+          visualDensity: VisualDensity.standard,
+          focusTheme: FocusThemeData(
+            glowFactor: is10footScreen() ? 2.0 : 0.0,
+          ),
+        ),
+        locale: const Locale('en'),
+        builder: (context, child) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: NavigationPaneTheme(
+              data: const NavigationPaneThemeData(
+                backgroundColor: Colors.transparent,
+              ),
+              child: child!,
+            ),
+          );
+        },
+        home: Stack(
+          children: [
+            Container(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: tabList,
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        right: 16, top: 8, bottom: 8, left: 16),
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Visibility(
-                            visible: initialIndex == 0 ? false : true,
-                            child: Previous(
-                              context: context,
-                              onPrevious: () {
-                                for(var i=0; i <= pagesListData.length; i++) {
-                                  if (initialIndex > 0) {
-
-                                    if(pagesListData[initialIndex-1]['visibility']) {
-
-                                      GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                      if (formKey.currentState!.validate()){
-                                        printWarning('"Index + 1"');
-                                        printWarning(initialIndex);
-                                        printWarning(initialIndex-1);
-                                        printWarning(pagesListData[initialIndex-1]);
-                                        setState(() {
-                                          initialIndex = initialIndex - 1;
-                                        });
-                                      }
-                                      break;
-
-                                    } else {
-                                      if (initialIndex > 0) {
+                  Expanded(
+                    child: SizedBox(
+                      child: pageList[initialIndex],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      border: Border(
+                        top: BorderSide(width: 1.0, color: Colors.grey.withOpacity(0.3)),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 16, top: 8, bottom: 8, left: 16),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Visibility(
+                              visible: initialIndex == 0 ? false : true,
+                              child: Previous(
+                                context: context,
+                                onPrevious: () {
+                                  for (var i = 0; i <= pagesListData.length; i++) {
+                                    if (initialIndex > 0) {
+                                      if (pagesListData[initialIndex - 1]['visibility']) {
                                         GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                        if (formKey.currentState!.validate()){
-                                          printWarning('"Index - 2"');
-                                          printWarning(initialIndex);
-                                          printWarning(initialIndex-2);
-                                          printWarning(pagesListData[initialIndex-2]);
+                                        if (formKey.currentState!.validate()) {
                                           setState(() {
-                                            initialIndex = initialIndex - 2;
+                                            initialIndex = initialIndex - 1;
                                           });
                                         }
+                                        break;
+                                      } else {
+                                        if (initialIndex > 0) {
+                                          GlobalKey<FormState> formKey =
+                                              listGlobalKey[initialIndex];
+                                          if (formKey.currentState!.validate()) {
+                                            setState(() {
+                                              initialIndex = initialIndex - 2;
+                                            });
+                                          }
+                                        }
+                                        break;
                                       }
-                                      break;
                                     }
                                   }
-                                }
-
-                              },
-                              formKey: GlobalKey(),
+                                },
+                                formKey: GlobalKey(),
+                              ),
                             ),
-                          ),
-                          const Spacer(),
-                          (initialIndex+2) > pagesListData.length
-                              ? SubmitButton(
-                            context: context,
-                            formKey: GlobalKey(),
-                            onFormSubmit: () {
-                              printError(dataKeyList.toString());
-                              showConfirmDialog();
-                            },
-                          )
-                              : Next(
-                            context: context,
-                            onNext: () {
-                              print("??????");
-                              print(initialIndex);
-                              print(pagesListData.length);
-                              for(var i=0; i<=pagesListData.length; i++) {
-                                if (initialIndex < pagesListData.length - 1) {
-
-                                  if(pagesListData[initialIndex+1]['visibility']) {
-
-                                    GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                    if (formKey.currentState!.validate()){
-                                      setState(() {
-                                        initialIndex = initialIndex + 1;
-                                      });
-                                    }
-                                    break;
-
-                                  } else {
-                                    if (initialIndex < pagesListData.length - 1) {
-                                      GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                      if (formKey.currentState!.validate()){
-                                        setState(() {
-                                          initialIndex = initialIndex + 2;
-                                        });
+                            const Spacer(),
+                            (initialIndex + 2) > pagesListData.length
+                                ? SubmitButton(
+                                    context: context,
+                                    formKey: GlobalKey(),
+                                    onFormSubmit: () {
+                                      showConfirmDialog();
+                                    },
+                                  )
+                                : Next(
+                                    context: context,
+                                    onNext: () {
+                                      for (var i = 0; i <= pagesListData.length; i++) {
+                                        if (initialIndex < pagesListData.length - 1) {
+                                          if (pagesListData[initialIndex + 1]['visibility']) {
+                                            GlobalKey<FormState> formKey =
+                                                listGlobalKey[initialIndex];
+                                            if (formKey.currentState!.validate()) {
+                                              setState(() {
+                                                initialIndex = initialIndex + 1;
+                                              });
+                                            }
+                                            break;
+                                          } else {
+                                            if (initialIndex < pagesListData.length - 1) {
+                                              GlobalKey<FormState> formKey =
+                                                  listGlobalKey[initialIndex];
+                                              if (formKey.currentState!.validate()) {
+                                                setState(() {
+                                                  initialIndex = initialIndex + 2;
+                                                });
+                                              }
+                                            }
+                                            break;
+                                          }
+                                        }
                                       }
-                                    }
-                                    break;
-                                  }
-                                }
-                              }
-
-
-                            },
-                            formKey: GlobalKey(),
-                          )
-                        ],
+                                    },
+                                    formKey: GlobalKey(),
+                                  )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          showDialogContainer == true ?
-          Container(
-            margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
-            child: Container(
-                margin: const EdgeInsets.only(top: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xffE3E5EE)),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          for (int x = 0; x < pageTitles.length; x++)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 18, top: 15),
-                                  child: Text(pageTitles[x],
-                                    style: const TextStyle(
-                                      color: Color(0xff111827),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                const Divider(
-                                  direction: Axis.vertical,
-                                  size: 0,
-                                  style: DividerThemeData(
-                                    thickness: 1.0,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                for (int y = 0; y < pageValues[x].length; y++)
-                                  SizedBox(
-                                    child: Column(
+            showDialogContainer == true
+                ? Container(
+                    margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
+                    child: Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: const Color(0xffE3E5EE)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: ListView(
+                                children: [
+                                  for (int x = 0; x < pageTitles.length; x++)
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        SizedBox(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 26, right: 26),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 18, top: 15),
+                                          child: Text(
+                                            pageTitles[x],
+                                            style: const TextStyle(
+                                              color: Color(0xff111827),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        const Divider(
+                                          direction: Axis.vertical,
+                                          size: 0,
+                                          style: DividerThemeData(
+                                            thickness: 1.0,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        for (int y = 0; y < pageValues[x].length; y++)
+                                          SizedBox(
+                                            child: Column(
                                               children: [
-                                                Text(pageValues[x][y]['name'],
-                                                  style: const TextStyle(
-                                                    color: Color(0xff6B7280),
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
+                                                SizedBox(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(left: 26, right: 26),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          pageValues[x][y]['name'],
+                                                          style: const TextStyle(
+                                                            color: Color(0xff6B7280),
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                        pageValues[x][y]['value'].runtimeType ==
+                                                                    String &&
+                                                                pageValues[x][y]['value']
+                                                                        .toString()
+                                                                        .length >
+                                                                    100 &&
+                                                                FormController().base64RegExp(
+                                                                    pageValues[x][y]['value'])
+                                                            ? SizedBox(
+                                                                height: 250,
+                                                                width: 250,
+                                                                child: Image.memory(
+                                                                    const Base64Decoder().convert(
+                                                                        pageValues[x][y]['value'])))
+                                                            : Text(
+                                                                pageValues[x][y]['value']
+                                                                    .toString(),
+                                                                style: const TextStyle(
+                                                                  color: Color(0xff111827),
+                                                                  fontSize: 14,
+                                                                  fontWeight: FontWeight.w500,
+                                                                ),
+                                                              ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
-                                                pageValues[x][y]['value'].runtimeType == String &&
-                                                    pageValues[x][y]['value'].toString().length > 100 &&
-                                                    FormController().base64RegExp(pageValues[x][y]['value']) ?
-                                                SizedBox(
-                                                    height: 250,
-                                                    width: 250,
-                                                    child: Image.memory(
-                                                        const Base64Decoder().convert(pageValues[x][y]['value'])
-                                                    )) :
-                                                Text(pageValues[x][y]['value'].toString(),
-                                                  style: const TextStyle(
-                                                    color: Color(0xff111827),
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
+                                                const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 8, top: 8, left: 26, right: 26),
+                                                  child: Divider(
+                                                    direction: Axis.vertical,
+                                                    size: 0,
+                                                    style: DividerThemeData(
+                                                      thickness: 1.0,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.only(
-                                              bottom: 8, top: 8,
-                                              left: 26, right: 26),
-                                          child: Divider(
-                                            direction: Axis.vertical,
-                                            size: 0,
-                                            style: DividerThemeData(
-                                              thickness: 1.0,
-                                            ),
-                                          ),
-                                        ),
+                                          )
                                       ],
-                                    ),
-                                  )
-                              ],
-                            )
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        margin: const EdgeInsets.all(10),
-                        child: GestureDetector(
-                          onTap: (){
-                            setState(() {
-                              showDialogContainer = false;
-                              showDialogConfirmation = false;
-                            });
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                width: 148,
-                                height: 44,
+                                    )
+                                ],
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                margin: const EdgeInsets.all(10),
                                 child: GestureDetector(
                                   onTap: () {
                                     setState(() {
                                       showDialogContainer = false;
+                                      showDialogConfirmation = false;
                                     });
                                   },
-                                  child: Container(
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(color: const Color(0xffD0D5DD)),
-                                        borderRadius: BorderRadius.circular(8)),
-                                    child: const Center(
-                                      child: Text(
-                                        'Cancel',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      SizedBox(
+                                        width: 148,
+                                        height: 44,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              showDialogContainer = false;
+                                            });
+                                          },
+                                          child: Container(
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                                border: Border.all(color: const Color(0xffD0D5DD)),
+                                                borderRadius: BorderRadius.circular(8)),
+                                            child: const Center(
+                                              child: Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 50,
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            showDialogConfirmation = true;
+                                          });
+                                        },
+                                        child: Container(
+                                          height: 44,
+                                          width: 148,
+                                          decoration: BoxDecoration(
+                                              color: const Color(0xff006FFF),
+                                              borderRadius: BorderRadius.circular(8)),
+                                          child: const Center(
+                                            child: Text(
+                                              'Complete',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
+                  )
+                : const SizedBox(),
+            showDialogConfirmation == true
+                ? Container(
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.black.withOpacity(0.5),
+                    child: Center(
+                      child: Container(
+                        height: 250,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        margin: const EdgeInsets.only(left: 50, right: 50),
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(28),
+                                    border: Border.all(
+                                      color: const Color(0xffeaf3ff),
+                                      width: 10,
+                                    ),
+                                    color: const Color(0xffc6dfff),
+                                  ),
+                                  padding: const EdgeInsets.all(5),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          FluentIcons.status_circle_outer,
+                                          color: Colors.blue,
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        showDialogConfirmation = false;
+                                      });
+                                    },
+                                    child: const Icon(FluentIcons.clear))
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            const Text(
+                              'Complete Application',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            const Text(
+                              'Are you sure you want to complete this application?',
+                              style: TextStyle(
+                                color: Color(0xff475467),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 5,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        showDialogConfirmation = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(color: const Color(0xffD0D5DD)),
+                                          borderRadius: BorderRadius.circular(8)),
+                                      child: const Center(
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 50,),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    showDialogConfirmation = true;
-                                  });
-                                },
-                                child: Container(
-                                  height: 44,
-                                  width: 148,
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xff006FFF),
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: const Center(
-                                    child: Text(
-                                      'Complete',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                const SizedBox(
+                                  width: 12,
+                                ),
+                                Expanded(
+                                  flex: 5,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      widget.onFormValueSubmit(valueFormResults);
+                                      setState(() {
+                                        showDialogConfirmation = false;
+                                        showDialogContainer = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                          color: const Color(0xff006FFF),
+                                          borderRadius: BorderRadius.circular(8)),
+                                      child: const Center(
+                                        child: Text(
+                                          'Complete',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            )
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                )
-            ),
-          ) :
-          const SizedBox(),
-          showDialogConfirmation == true ?
-          Container(
-            height: MediaQuery.of(context).size.height,
-            color: Colors.black.withOpacity(0.5),
-            child: Center(
-              child: Container(
-                height: 250,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-                margin: const EdgeInsets.only(left: 50, right: 50),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28),
-                            border: Border.all(color: const Color(0xffeaf3ff), width: 10, ),
-                            color: const Color(0xffc6dfff),
-                          ),
-                          padding: const EdgeInsets.all(5),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children:[
-                              Container(
-                                width: 24,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  FluentIcons.status_circle_outer, color: Colors.blue, size: 24,),
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                showDialogConfirmation = false;
-                              });
-                            },
-                            child: const Icon(FluentIcons.clear))
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Text(
-                      'Complete Application',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    const Text(
-                      'Are you sure you want to complete this application?',
-                      style: TextStyle(
-                        color: Color(0xff475467),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                showDialogConfirmation = false;
-                              });
-                            },
-                            child: Container(
-                              height: 44,
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: const Color(0xffD0D5DD)),
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: const Center(
-                                child: Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12,),
-                        Expanded(
-                          flex: 5,
-                          child: GestureDetector(
-                            onTap: (){
-                              widget.onFormValueSubmit(valueFormResults);
-                              setState(() {
-                                showDialogConfirmation = false;
-                                showDialogContainer = false;
-                              });
-                            },
-                            child: Container(
-                              height: 44,
-                              decoration: BoxDecoration(
-                                  color: const Color(0xff006FFF),
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: const Center(
-                                child: Text(
-                                  'Complete',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ),
-          )
-              : const SizedBox()
-        ],
-      )
-    );
+                  )
+                : const SizedBox()
+          ],
+        ));
   }
 
-  setVisibleKeys(String name, bool visible){
-    if(!dataKeys.contains(name) && visible == true){
-        dataKeys.add(name);
-    } else if (dataKeys.contains(name) && visible == false){
+  setVisibleKeys(String name, bool visible) {
+    if (!dataKeys.contains(name) && visible == true) {
+      dataKeys.add(name);
+    } else if (dataKeys.contains(name) && visible == false) {
       dataKeys.remove(name);
     }
   }
 
-  loopThroughElements(List elements, String name, bool visible){
+  loopThroughElements(List elements, String name, bool visible) {
     setVisibleKeys(name, visible);
-    for(var element in elements){
-     if(element['elements'] != null){
-       loopThroughElements(element['elements'], element['name'], visible);
-     } else {
-       setVisibleKeys(element['name'], visible);
-     }
+    for (var element in elements) {
+      if (element['elements'] != null) {
+        loopThroughElements(element['elements'], element['name'], visible);
+      } else {
+        setVisibleKeys(element['name'], visible);
+      }
     }
   }
 
   showConfirmDialog() {
-    Map<String ,List> formPagePreviewData = {};
+    Map<String, List> formPagePreviewData = {};
 
     for (int x = 0; x < pages.length; x++) {
       valueFormResults.forEach((key, value) {
@@ -1266,23 +1243,17 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
         // printError(value);
         // printError('{{{{{{value}}}}}}');
         /// Map check if formPageData has the key page
-        if(pages[x].toString().contains(key)) {
+        if (pages[x].toString().contains(key)) {
           List currentValues = formPagePreviewData['${pages[x]['name']}'] ?? [];
-          if(currentValues.isEmpty) {
-
-            if(![null, '', ' '].contains(value['value'])){
-              formPagePreviewData['${pages[x]['title']}'] = [{
-                'value': value['value'],
-                'name': key
-              }];
+          if (currentValues.isEmpty) {
+            if (![null, '', ' '].contains(value['value'])) {
+              formPagePreviewData['${pages[x]['title']}'] = [
+                {'value': value['value'], 'name': key}
+              ];
             }
           } else {
-
-            if(![null, '', ' '].contains(value['value'])){
-              currentValues.add({
-                'value': value['value'],
-                'name': key
-              });
+            if (![null, '', ' '].contains(value['value'])) {
+              currentValues.add({'value': value['value'], 'name': key});
             }
           }
         }
@@ -1304,7 +1275,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     Map<String, dynamic> newValue = value;
 
     /// Do a update value check
-    if(widget.defaultValues.containsKey(value['name'])){
+    if (widget.defaultValues.containsKey(value['name'])) {
       newValue['value'] = widget.defaultValues[value['name']];
     }
 
@@ -1338,9 +1309,8 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
       value.toLowerCase();
       int start = value.indexOf("[") + 1;
       int end = value.indexOf("]");
-      return value.substring(start, end)
-          .split(",").toList();
-    } catch(e){
+      return value.substring(start, end).split(",").toList();
+    } catch (e) {
       // printError(' ******* $e ********');
       return [];
     }
@@ -1414,24 +1384,21 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
             /// Handle anyof conditionType
             /// it should overwrite enable state from above
             if (condition.toString().contains(' anyof ')) {
-
               // printWarning( '$name --- anyof --- $condition');
 
               /// Here we handle the many conditions in the enableIf that meet
               /// the anyof condition type
               if (valueFormResults[trimCurly(condition)] != null) {
                 /// get the values in the list
-                List<String> getListString =
-                    trimListString(condition.toString().toLowerCase());
+                List<String> getListString = trimListString(condition.toString().toLowerCase());
 
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
                 String trimValue = trimCurly(condition);
 
-                String trimCurlyValue = valueFormResults[trimValue]!['value']
-                    .toString()
-                    .toLowerCase();
+                String trimCurlyValue =
+                    valueFormResults[trimValue]!['value'].toString().toLowerCase();
 
                 /// data found, now check if trimCurly element
                 /// value is in getListString
@@ -1451,10 +1418,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               /// get the value of the element if element is not found
               /// set it to an empty string
 
-              var trimCurlyValue =
-                  valueFormResults[trimCurly(condition)] == null
-                      ? ''
-                      : valueFormResults[trimCurly(condition)]!['value'];
+              var trimCurlyValue = valueFormResults[trimCurly(condition)] == null
+                  ? ''
+                  : valueFormResults[trimCurly(condition)]!['value'];
 
               // printWarning( '$name --- $trimCurlyValue --- $condition');
 
@@ -1475,13 +1441,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
               /// get the value of the element if element is not found
               /// set it to an empty string
-              var trimCurlyValue =
-                  valueFormResults[trimCurly(condition)] == null
-                      ? ''
-                      : valueFormResults[trimCurly(condition)]!['value'];
+              var trimCurlyValue = valueFormResults[trimCurly(condition)] == null
+                  ? ''
+                  : valueFormResults[trimCurly(condition)]!['value'];
 
-              if (trimCurlyValue.toString() ==
-                  conditionValue(condition).toString()) {
+              if (trimCurlyValue.toString() == conditionValue(condition).toString()) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -1490,8 +1454,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           }
 
           /// Handle the and / or conditions state
-          if(element['enableIf'].toString().contains(' and ')){
-
+          if (element['enableIf'].toString().contains(' and ')) {
             // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
             /// update the enable valueFormResults
@@ -1499,10 +1462,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               value['enable'] = !visibilityStates.contains(false);
               return value;
             });
-
-          }
-          else if (element['enableIf'].toString().contains(' or ')){
-
+          } else if (element['enableIf'].toString().contains(' or ')) {
             // printWarning( '$name --- FINAL OR --- $visibilityStates');
 
             /// update the enable valueFormResults
@@ -1510,10 +1470,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               value['enable'] = visibilityStates.contains(true);
               return value;
             });
-
-          }
-          else {
-
+          } else {
             // printWarning( '$name --- FINAL --- $visibilityStates');
 
             /// update the enable valueFormResults
@@ -1555,8 +1512,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           /// create a list of conditions
           /// Handle or conditions
           /// Handle and conditions
-          List isRequiredIfConditions =
-              splitStringList(element['isRequiredIf']);
+          List isRequiredIfConditions = splitStringList(element['isRequiredIf']);
 
           // printWarning( '$name --- @@@ --- $isRequiredIfConditions');
 
@@ -1576,17 +1532,15 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               /// the anyof condition type
               if (valueFormResults[trimCurly(condition)] != null) {
                 /// get the values in the list
-                List<String> getListString =
-                    trimListString(condition.toString().toLowerCase());
+                List<String> getListString = trimListString(condition.toString().toLowerCase());
 
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
                 String trimValue = trimCurly(condition);
 
-                String trimCurlyValue = valueFormResults[trimValue]!['value']
-                    .toString()
-                    .toLowerCase();
+                String trimCurlyValue =
+                    valueFormResults[trimValue]!['value'].toString().toLowerCase();
 
                 /// data found, now check if trimCurly element
                 /// value is in getListString
@@ -1606,10 +1560,9 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               /// get the value of the element if element is not found
               /// set it to an empty string
 
-              var trimCurlyValue =
-                  valueFormResults[trimCurly(condition)] == null
-                      ? ''
-                      : valueFormResults[trimCurly(condition)]!['value'];
+              var trimCurlyValue = valueFormResults[trimCurly(condition)] == null
+                  ? ''
+                  : valueFormResults[trimCurly(condition)]!['value'];
 
               // printWarning( '$name --- $trimCurlyValue --- $condition');
 
@@ -1630,13 +1583,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
               /// get the value of the element if element is not found
               /// set it to an empty string
-              var trimCurlyValue =
-                  valueFormResults[trimCurly(condition)] == null
-                      ? ''
-                      : valueFormResults[trimCurly(condition)]!['value'];
+              var trimCurlyValue = valueFormResults[trimCurly(condition)] == null
+                  ? ''
+                  : valueFormResults[trimCurly(condition)]!['value'];
 
-              if (trimCurlyValue.toString() ==
-                  conditionValue(condition).toString()) {
+              if (trimCurlyValue.toString() == conditionValue(condition).toString()) {
                 visibilityStates.add(true);
               } else {
                 visibilityStates.add(false);
@@ -1645,8 +1596,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
           }
 
           /// Handle the and / or conditions state
-          if(element['isRequiredIf'].toString().contains(' and ')){
-
+          if (element['isRequiredIf'].toString().contains(' and ')) {
             // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
             /// update the isRequired valueFormResults
@@ -1654,10 +1604,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               value['isRequired'] = !visibilityStates.contains(false);
               return value;
             });
-
-          }
-          else if (element['isRequiredIf'].toString().contains(' or ')){
-
+          } else if (element['isRequiredIf'].toString().contains(' or ')) {
             // printWarning( '$name --- FINAL OR --- $visibilityStates');
 
             /// update the isRequired valueFormResults
@@ -1704,98 +1651,49 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
 
       /// check if the element has a name property
       if (name != null) {
-
         if (element['visibleIf'] != null) {
-
           /// Drama follows here if the element has a visibleIf
           /// property and no visible property is set
 
-            /// create a list of conditions
-            /// Handle or conditions
-            /// Handle and conditions
-            List visibleIfConditions = splitStringList(element['visibleIf']);
+          /// create a list of conditions
+          /// Handle or conditions
+          /// Handle and conditions
+          List visibleIfConditions = splitStringList(element['visibleIf']);
 
-            // printWarning( '$name --- @@@ --- $visibleIfConditions');
+          // printWarning( '$name --- @@@ --- $visibleIfConditions');
 
-            /// New Map for conditional bools
-            List visibilityStates = [];
-            /// loop through visibleIfConditions
-            for (var condition in visibleIfConditions) {
-              // print('???? Conditions');
-              // print(condition);
+          /// New Map for conditional bools
+          List visibilityStates = [];
 
-              // printWarning( '$name --- %%% --- $condition');
+          /// loop through visibleIfConditions
+          for (var condition in visibleIfConditions) {
+            // print('???? Conditions');
+            // print(condition);
 
-              /// Handle anyof conditionType
-              /// it should overwrite visible state from above
-              if (condition.toString().contains(' anyof ')) {
+            // printWarning( '$name --- %%% --- $condition');
 
-                // printWarning( '$name --- anyof --- $condition');
+            /// Handle anyof conditionType
+            /// it should overwrite visible state from above
+            if (condition.toString().contains(' anyof ')) {
+              // printWarning( '$name --- anyof --- $condition');
 
-                /// Here we handle the many conditions in the visibleIf that meet
-                /// the anyof condition type
-                if (valueFormResults[trimCurly(condition)] != null) {
-                  /// get the values in the list
-                  List<String> getListString = trimListString(condition.toString().toLowerCase());
-                  /// get the value of the element if element is not found
-                  /// set it to an empty string
-
-                  String trimValue = trimCurly(condition);
-
-                  String trimCurlyValue =
-                  valueFormResults[trimValue]!['value'].toString().toLowerCase();
-
-                  /// data found, now check if trimCurly element
-                  /// value is in getListString
-                  if(getListString.contains(trimCurlyValue)){
-
-                    visibilityStates.add(true);
-                  }
-                  else {
-                    visibilityStates.add(false);
-                  }
-                }
-              }
-
-              /// Handle notempty conditions
-              /// it should overwrite enabled state from above
-              if (condition.toString().contains('notempty')) {
-
-                // printWarning( '$name --- notempty --- $condition');
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the anyof condition type
+              if (valueFormResults[trimCurly(condition)] != null) {
+                /// get the values in the list
+                List<String> getListString = trimListString(condition.toString().toLowerCase());
 
                 /// get the value of the element if element is not found
                 /// set it to an empty string
 
-                var trimCurlyValue =
-                valueFormResults[trimCurly(condition)] == null ? '' :
-                valueFormResults[trimCurly(condition)]!['value'];
+                String trimValue = trimCurly(condition);
 
-                // printWarning( '$name --- $trimCurlyValue --- $condition');
+                String trimCurlyValue =
+                    valueFormResults[trimValue]!['value'].toString().toLowerCase();
 
-
-                /// Here we handle the many conditions in the visibleIf that meet
-                /// the notempty condition type
-                if(trimCurlyValue.toString().isNotEmpty){
-                  visibilityStates.add(true);
-                } else {
-                  visibilityStates.add(false);
-                }
-              }
-
-              /// Handle = conditions
-              /// it should overwrite enabled state from above
-              if (condition.toString().contains(' = ')) {
-
-                // printWarning( '$name --- = --- $condition');
-                // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
-
-                /// get the value of the element if element is not found
-                /// set it to an empty string
-                var trimCurlyValue =
-                valueFormResults[trimCurly(condition)] == null ? '' :
-                valueFormResults[trimCurly(condition)]!['value'];
-
-                if(trimCurlyValue.toString() == conditionValue(condition).toString()){
+                /// data found, now check if trimCurly element
+                /// value is in getListString
+                if (getListString.contains(trimCurlyValue)) {
                   visibilityStates.add(true);
                 } else {
                   visibilityStates.add(false);
@@ -1803,46 +1701,83 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
               }
             }
 
-            // "visibleIf": "{MotherMaritalStatus} anyof ['Divorced', 'Widowed', 'Married'] and {IsthechildAbandoned} anyof ['NO']"
-            /// Handle the and / or conditions state
-            if(element['visibleIf'].toString().contains(' and ')){
+            /// Handle notempty conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains('notempty')) {
+              // printWarning( '$name --- notempty --- $condition');
 
-              // printWarning( '$name --- FINAL AND --- $visibilityStates');
+              /// get the value of the element if element is not found
+              /// set it to an empty string
 
-              /// update the visible valueFormResults
-              valueFormResults.update(name, (value) {
-                loopThroughElements(element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
-                value['visible'] = !visibilityStates.contains(false);
-                return value;
-              });
+              var trimCurlyValue = valueFormResults[trimCurly(condition)] == null
+                  ? ''
+                  : valueFormResults[trimCurly(condition)]!['value'];
 
+              // printWarning( '$name --- $trimCurlyValue --- $condition');
+
+              /// Here we handle the many conditions in the visibleIf that meet
+              /// the notempty condition type
+              if (trimCurlyValue.toString().isNotEmpty) {
+                visibilityStates.add(true);
+              } else {
+                visibilityStates.add(false);
+              }
             }
-            else if (element['visibleIf'].toString().contains(' or ')){
 
-              // printWarning( '$name --- FINAL OR --- $visibilityStates');
+            /// Handle = conditions
+            /// it should overwrite enabled state from above
+            if (condition.toString().contains(' = ')) {
+              // printWarning( '$name --- = --- $condition');
+              // printWarning( '$name --- ${conditionValue(condition).toString()} --- $condition');
+
+              /// get the value of the element if element is not found
+              /// set it to an empty string
+              var trimCurlyValue = valueFormResults[trimCurly(condition)] == null
+                  ? ''
+                  : valueFormResults[trimCurly(condition)]!['value'];
+
+              if (trimCurlyValue.toString() == conditionValue(condition).toString()) {
+                visibilityStates.add(true);
+              } else {
+                visibilityStates.add(false);
+              }
+            }
+          }
+
+          // "visibleIf": "{MotherMaritalStatus} anyof ['Divorced', 'Widowed', 'Married'] and {IsthechildAbandoned} anyof ['NO']"
+          /// Handle the and / or conditions state
+          if (element['visibleIf'].toString().contains(' and ')) {
+            // printWarning( '$name --- FINAL AND --- $visibilityStates');
 
             /// update the visible valueFormResults
             valueFormResults.update(name, (value) {
-              loopThroughElements(element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
+              loopThroughElements(
+                  element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
+              value['visible'] = !visibilityStates.contains(false);
+              return value;
+            });
+          } else if (element['visibleIf'].toString().contains(' or ')) {
+            // printWarning( '$name --- FINAL OR --- $visibilityStates');
+
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              loopThroughElements(
+                  element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
               value['visible'] = visibilityStates.contains(true);
               return value;
             });
-
-          }
-          else {
-
+          } else {
             // printWarning( '$name --- FINAL --- $visibilityStates');
 
-              /// update the visible valueFormResults
-              valueFormResults.update(name, (value) {
-                loopThroughElements(element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
-                value['visible'] = !visibilityStates.contains(false);
-                return value;
-              });
-
+            /// update the visible valueFormResults
+            valueFormResults.update(name, (value) {
+              loopThroughElements(
+                  element['elements'] ?? [], element['name'], !visibilityStates.contains(false));
+              value['visible'] = !visibilityStates.contains(false);
+              return value;
+            });
           }
-        }
-        else {
+        } else {
           // printWarning( '$name --- NO VISIBILITY FIELDS --- ${element['name']}');
 
           /// Here we just let it go bro.
@@ -1867,19 +1802,11 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
         }
       }
 
-
-          int index = pagesListData.indexWhere((element) => element['name']['name'] == name);
-          if(index != -1) {
-            pagesListData[index]['visibility'] = valueFormResults[name]!['visible'] ?? true;
-          }
-
-
-
-
-
-
+      int index = pagesListData.indexWhere((element) => element['name']['name'] == name);
+      if (index != -1) {
+        pagesListData[index]['visibility'] = valueFormResults[name]!['visible'] ?? true;
+      }
     });
-
   }
 
   @override
@@ -1903,29 +1830,27 @@ class SubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: FilledButton(
-        onPressed: (){
-          onFormSubmit.call();
-        },
-        child: const Padding(
-        padding: EdgeInsets.only(
-    bottom: 3, top: 3,
-    right: 8.0, left: 8.0),
-    child:  Text('Submit')),
-      )
+        child: FilledButton(
+      onPressed: () {
+        onFormSubmit.call();
+      },
+      child: const Padding(
+          padding: EdgeInsets.only(bottom: 3, top: 3, right: 8.0, left: 8.0),
+          child: Text('Submit')),
+    )
 
-      // ElevatedButton(
-      //   style: ElevatedButton.styleFrom(
-      //       backgroundColor: const Color(0xff2F6CF6),
-      //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      //       textStyle:
-      //           const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      //   onPressed: () {
-      //       onFormSubmit.call();
-      //   },
-      //   child: const Text("Submit"),
-      // ),
-    );
+        // ElevatedButton(
+        //   style: ElevatedButton.styleFrom(
+        //       backgroundColor: const Color(0xff2F6CF6),
+        //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //       textStyle:
+        //           const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        //   onPressed: () {
+        //       onFormSubmit.call();
+        //   },
+        //   child: const Text("Submit"),
+        // ),
+        );
   }
 }
 
@@ -1944,27 +1869,24 @@ class Next extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: FilledButton(
-        onPressed: (){
-          onNext.call();
-        },
-        child: const Padding(
-        padding: EdgeInsets.only(
-    bottom: 3, top: 3,
-    right: 8.0, left: 8.0),
-    child: Text('Next')),
-      )
-      // ElevatedButton(
-      //   style: ElevatedButton.styleFrom(
-      //       backgroundColor: Color(0xff2F6CF6),
-      //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      //       textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      //   onPressed: () {
-      //     onNext.call();
-      //   },
-      //   child: const Text('Next'),
-      // ),
-    );
+        child: FilledButton(
+      onPressed: () {
+        onNext.call();
+      },
+      child: const Padding(
+          padding: EdgeInsets.only(bottom: 3, top: 3, right: 8.0, left: 8.0), child: Text('Next')),
+    )
+        // ElevatedButton(
+        //   style: ElevatedButton.styleFrom(
+        //       backgroundColor: Color(0xff2F6CF6),
+        //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //       textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        //   onPressed: () {
+        //     onNext.call();
+        //   },
+        //   child: const Text('Next'),
+        // ),
+        );
   }
 }
 
@@ -1983,28 +1905,26 @@ class Previous extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: FilledButton(
-        onPressed: (){
-          onPrevious.call();
-        },
-        child: const Padding(
-          padding: EdgeInsets.only(
-              bottom: 3, top: 3,
-              right: 8.0, left: 8.0),
-          child: Text('Previous'),
-        ),
-      )
-      // OutlinedButton(
-      //   style: OutlinedButton.styleFrom(
-      //       foregroundColor: Colors.black.withOpacity(0.6),
-      //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      //       textStyle:
-      //           const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      //   onPressed: () {
-      //     onPrevious.call();
-      //   },
-      //   child: const Text('Previous'),
-      // ),
-    );
+        child: FilledButton(
+      onPressed: () {
+        onPrevious.call();
+      },
+      child: const Padding(
+        padding: EdgeInsets.only(bottom: 3, top: 3, right: 8.0, left: 8.0),
+        child: Text('Previous'),
+      ),
+    )
+        // OutlinedButton(
+        //   style: OutlinedButton.styleFrom(
+        //       foregroundColor: Colors.black.withOpacity(0.6),
+        //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //       textStyle:
+        //           const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        //   onPressed: () {
+        //     onPrevious.call();
+        //   },
+        //   child: const Text('Previous'),
+        // ),
+        );
   }
 }

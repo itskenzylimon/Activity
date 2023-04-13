@@ -94,9 +94,7 @@ class MainController extends ActiveController {
 
     SchemaResponse schemaResponse = schemaValidator.validate(sampleJSON);
     if (schemaResponse.valid == false) {
-      printError(schemaResponse.toString());
     } else {
-      printSuccess(schemaResponse.toString());
     }
   }
 
@@ -359,23 +357,18 @@ class MainController extends ActiveController {
   startServer() async {
 
     var anyIPv4 = InternetAddress.anyIPv4;
-    printSuccess('{{{anyIPv4}}}');
-    printSuccess(anyIPv4.address);
-
     // var ipAddress = IpAddress(type: RequestType.json);
     // dynamic data = await ipAddress.getIpAddress();
     // printSuccess(data['ip']);
     // printSuccess('{{{anyIPv4}}}');
 
     HttpServer.bind('169.254.238.60', 1996).then((server) {
-      printInfo('Listening on localhost:${server.port}');
 
       /// Start a server
       server.listen((HttpRequest httpRequest) async {
         Map<ContentType, dynamic> response = await httpRequests(httpRequest);
         var data = response.values.first;
         var type = response.keys.first;
-        printNormal(data);
         httpRequest.response
           ..headers.contentType = type
           ..statusCode = 200
@@ -390,9 +383,6 @@ class MainController extends ActiveController {
   ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({});
 
   createMemory() async {
-    printSuccess(await memory.insertMemory('hellos', 'World'));
-    printSuccess(await memory.insertMemory('Jambos', 'Kenya'));
-    printSuccess('{{{text}}}');
     updateMemory();
   }
 
@@ -400,7 +390,7 @@ class MainController extends ActiveController {
     printSuccess(await memory.upsertMemory('hello', 'Asia'));
     printSuccess(await memory.upsertMemory('Jambo', DateTime.now().
     subtract(const Duration(days: 5)).toIso8601String()));
-    printSuccess('{{{text text}}}');
+  
     getMemory();
   }
 
@@ -410,7 +400,7 @@ class MainController extends ActiveController {
     printSuccess(await memory.readMemory('Jambos'));
     printSuccess(await memory.readMemory('hello'));
     printSuccess(await memory.readMemory('Jambo'));
-    printSuccess('{{{}}}');
+
   }
 
 }

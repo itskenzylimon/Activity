@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+
 extension on String {
   toBoolean() {
     print(this);
@@ -12,20 +13,19 @@ extension on String {
     throw UnsupportedError;
   }
 }
+
 class CheckBoxWidget extends StatelessWidget {
   final ValueChanged<Map<String, dynamic>> onElementCallback;
   final String elementName;
   final Map<String, Map<String, dynamic>> valueFormResults;
   final Map<String, dynamic> customTheme;
 
-  CheckBoxWidget({
-    super.key,
-    required this.onElementCallback,
-    required this.elementName,
-    required this.valueFormResults,
-    required this.customTheme
-  });
-
+  CheckBoxWidget(
+      {super.key,
+      required this.onElementCallback,
+      required this.elementName,
+      required this.valueFormResults,
+      required this.customTheme});
 
   // Perform some logic or user interaction that generates a callback value
   Map<String, dynamic> callbackElement = {};
@@ -36,23 +36,26 @@ class CheckBoxWidget extends StatelessWidget {
     var selectedCheck = false;
     callbackElement = valueFormResults[elementName]!;
     for (var i = 0; i < callbackElement['choices'].length; i++) {
-      choices.add(callbackElement['choices'][i]);
+      if (callbackElement['choices'][i].runtimeType == String) {
+        choices.add(callbackElement['choices'][i]);
+      } else {
+        choices.add(callbackElement['choices'][i]['value']);
+      }
     }
     if (callbackElement['value'] != '') {
       var val = callbackElement['value'].toString();
       selectedCheck = val.toBoolean() ?? false;
-
     }
 
     return Visibility(
-      visible:  true,
+      visible: true,
       child: Container(
         margin: const EdgeInsets.only(top: 10, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              callbackElement['title'],
+              callbackElement['title'] == null ? callbackElement['name'] : callbackElement['title'],
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -83,7 +86,6 @@ class CheckBoxWidget extends StatelessWidget {
                         maxLines: 2,
                       ),
                     ), //Text
-
                   ], //<Widget>[]
                 ); //Row
               }).toList(),
