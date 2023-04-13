@@ -261,7 +261,7 @@ class HttpActiveRequest {
   }
 
   _logApiRequests(ActiveResponse activeResponse) async {
-    printInfo(activeResponse.toString());
+    
   }
 
   _saveApiRequests(ActiveResponse activeResponse, String responseName) async {

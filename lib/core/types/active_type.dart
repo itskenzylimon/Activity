@@ -124,7 +124,7 @@ class ActiveType<T> implements ActiveTypeValue<T> {
   ///
   ///Returns the updated value
   T set(T value, {bool notifyChange = true, bool setAsOriginal = false}) {
-    print(value);
+
     final oldValue = _value;
     _value = value;
     if (notifyChange && oldValue != value) {
@@ -132,7 +132,7 @@ class ActiveType<T> implements ActiveTypeValue<T> {
       activeController.notifyActivities([
         ActiveStateChanged(value, oldValue, typeName: typeName)
       ]);
-      print(value);
+     
     }
 
     if (setAsOriginal) {
