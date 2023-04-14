@@ -7,7 +7,6 @@ export 'core/types/active_memory.dart';
 
 export 'core/src/controller.dart';
 export 'core/src/view.dart';
-
 //Helpers
 export 'core/helpers/strings.dart';
 export 'core/helpers/logger.dart';
