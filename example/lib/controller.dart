@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get_ip_address/get_ip_address.dart';
 import 'model.dart';
 
 class MainController extends ActiveController {
