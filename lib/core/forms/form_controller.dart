@@ -1,6 +1,8 @@
+import 'package:activity/core/types/active_type.dart';
 import 'package:flutter/widgets.dart';
+import '../src/controller.dart';
 
-class FormController{
+class FormController extends ActiveController{
 
 
   TextInputType checkInputType(Map element) {
@@ -54,4 +56,7 @@ class FormController{
     return regExp.hasMatch(base64);
   }
 
+  @override
+  // TODO: implement activities
+  Iterable<ActiveType> get activities => [];
 }

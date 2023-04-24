@@ -1,8 +1,9 @@
-
+import 'dart:io' as io if (dart.library.web) 'dart:html';
 import 'package:activity/core/networks/http/io.dart';
 
 export 'package:activity/core/networks/sockets/web.dart'
 if (dart.library.io) 'package:activity/core/networks/sockets/io.dart';
+
 
 // ignore: camel_case_types
 typedef getApi = void Function();
@@ -228,6 +229,47 @@ class ActiveRequest {
     bool saveResponse = false
   }) async{
     return await HttpActiveRequest().deleteApi(params, setUp, saveResponse: saveResponse);
+  }
+
+
+  /// [deleteApi] Get request.
+  ///
+  /// set [saveResponse] to 'true' if you would want to save the response
+  /// pass [savedResponseName] if you'd want to have a unique key assigned to
+  /// the saved [saveResponse] data. leaving this empty, Activity will set the
+  /// key name as the [endpoint].
+  ///
+  ///  ActiveResponse({
+  ///     required this.statusCode,
+  ///     required this.endpoint,
+  ///     this.data,
+  ///   });
+  ///
+  ///
+  ///     ActiveRequest activeRequest =  ActiveRequest();
+  ///
+  ///     activeRequest.setUp = RequestSetUp(
+  ///       idleTimeout: 10,
+  ///       connectionTimeout: 10,
+  ///       logResponse: true,
+  ///       withTrustedRoots: true
+  ///     );
+  ///
+  ///     ActiveResponse activeResponse = await activeRequest
+  ///     .deleteApi(Params(endpoint: 'https://catfact.ninja/fact'));
+  ///
+  /// You can easily get the [saveResponse] value using Memory
+  Future<ActiveResponse> uploadFileApi(
+      Params params,
+      io.File file,
+      String fileName,
+      RequestSetUp setUp, {
+        String savedResponseName = '',
+        bool saveResponse = false,
+      }) async{
+    return await HttpActiveRequest().uploadFileApi(
+        params, file, fileName, setUp, saveResponse: saveResponse
+    );
   }
 
 }

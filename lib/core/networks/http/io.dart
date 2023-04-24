@@ -260,6 +260,84 @@ class HttpActiveRequest {
     return activeResponse;
   }
 
+  Future<ActiveResponse> uploadFileApi(
+      Params params,
+      io.File file,
+      String fileName,
+      RequestSetUp setUp, {
+        String savedResponseName = '',
+        bool saveResponse = false,
+      }) async {
+    final endpoint = Uri.parse(params.endpoint);
+
+    Uri uri = Uri(
+      scheme: endpoint.scheme,
+      queryParameters: params.queryParameters,
+      path: endpoint.path,
+      host: endpoint.host,
+    );
+
+    final io.HttpClient apiRequest = _httpClientSetup(
+        setUp.idleTimeout!,
+        setUp.withTrustedRoots!,
+        setUp.connectionTimeout!,
+        setUp.privateKeyPath,
+        setUp.privateKeyPassword);
+
+    final io.HttpClientRequest request = await apiRequest.postUrl(uri);
+
+    final String boundary = '----${DateTime.now().millisecondsSinceEpoch}';
+    request.headers.contentType =
+        io.ContentType('multipart', 'form-data', parameters: {'boundary': boundary});
+
+    final io.IOSink sink = request;
+
+    sink.write('--$boundary\r\n');
+    sink.write('Content-Disposition: form-data; name="file"; filename="${file.path}"\r\n');
+    sink.write('Content-Type: ${io.ContentType.binary}\r\n');
+    sink.write('\r\n');
+
+    final Stream<List<int>> stream = file.openRead();
+    await for (List<int> chunk in stream) {
+      sink.add(chunk);
+    }
+
+    sink.write('\r\n--$boundary--\r\n');
+    await sink.flush();
+    await sink.close();
+    final io.HttpClientResponse response = await request.close();
+
+    if (response.statusCode != io.HttpStatus.ok) {
+      // The network may be only temporarily unavailable
+      ActiveResponse activeResponse = ActiveResponse(
+          statusCode: response.statusCode,
+          endpoint: params.endpoint,
+          errors: response.toString(),
+          data: await response.transform(utf8.decoder).join());
+      // await response.drain<List<int>>(<int>[]);
+      apiRequest.close(force: true);
+      return activeResponse;
+    }
+
+    ActiveResponse activeResponse = ActiveResponse(
+        statusCode: response.statusCode,
+        errors: null,
+        data: await response.transform(utf8.decoder).join(),
+        endpoint: params.endpoint);
+
+    if (setUp.logResponse == true) {
+      await _logApiRequests(activeResponse);
+    }
+
+    if (saveResponse == true) {
+      savedResponseName =
+      savedResponseName == '' ? uri.path : savedResponseName;
+      await _saveApiRequests(activeResponse, savedResponseName);
+    }
+
+    return activeResponse;
+  }
+
   _logApiRequests(ActiveResponse activeResponse) async {
     
   }
