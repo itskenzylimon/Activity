@@ -4,13 +4,18 @@ import 'dart:typed_data';
 
 import 'package:activity/core/helpers/logger.dart';
 
+/// Memory is a class that is used to store data in a file.
 class Memory {
+
+  /// [Memory] constructor.
+  /// filename is the name of the file you want to store the data in.
   Memory({String? filename}) :
         _filename = filename;
   final String? _filename;
 
   static final Memory memory = Memory();
 
+  /// Check if [Memory] is empty.
   Future<bool> get isDataEmpty async {
     Map<String, dynamic> data = await stageMemory();
     return data.isEmpty;
@@ -196,11 +201,13 @@ class Memory {
 
 }
 
-
+/// File Storage Class for storing data to a file, it uses a custom [encrypt]
+/// and [decrypt] when saving and reading data.
 class FileStorage {
   final File _file;
   FileStorage(String filename) : _file = File(filename);
 
+  /// Saves data to a file.
   Future<void> save(Map<String, dynamic> data) async {
     String stringEncrypted = encrypt(jsonEncode(data), 134523452346);
     var encodedData = utf8.encode(stringEncrypted);
@@ -208,6 +215,7 @@ class FileStorage {
     await _file.writeAsBytes(byteData);
   }
 
+  /// Reads data from a file.
   Future<Map<String, dynamic>> read() async {
     if (await _file.exists()) {
       var encodedData = await _file.readAsBytes();
@@ -221,10 +229,14 @@ class FileStorage {
 
   }
 
+  /// Deletes a file.
   Future<FileSystemEntity> delete() async {
     return _file.delete();
   }
 
+  /// Encrypts a string.
+  /// [plaintext] is the string to be encrypted.
+  /// [key] is the key to be used for encryption.
   String encrypt(String plaintext, int key) {
     StringBuffer ciphertext = StringBuffer();
     for (int i = 0; i < plaintext.length; i++) {
@@ -235,6 +247,9 @@ class FileStorage {
     return ciphertext.toString();
   }
 
+  /// Decrypts a string.
+  /// [ciphertext] is the string to be decrypted.
+  /// [key] is the key to be used for decryption.
   String decrypt(String ciphertext, int key) {
     StringBuffer plaintext = StringBuffer();
     for (int i = 0; i < ciphertext.length; i++) {

@@ -121,10 +121,12 @@ class _ActivityState<T extends ActiveController> extends State<Activity> {
 
   @override
   void initState() {
+    /// listen to the controller state changes
     widget.activeController.addOnStateChangedListener((events) {
       if (widget.developerMode && kDebugMode) {
-        // ignore: avoid_print
-        events.forEach(print);
+        for (var event in events) {
+          printInfo(event);
+        }
       }
       if (mounted) {
         setState(() {
