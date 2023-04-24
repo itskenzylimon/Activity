@@ -35,10 +35,15 @@ class TextFieldWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(labelText, style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey)),
+            Row(
+              children: [
+                Text(labelText, style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey)),
+                    valueFormResults[elementName]!['isRequired'] != true ?  Text('*',style: TextStyle(fontSize: 18,color: Colors.red),) :const SizedBox(),
+              ],
+            ),
             const SizedBox(
                 height: 10,
             ),

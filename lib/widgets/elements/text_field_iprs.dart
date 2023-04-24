@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Colors;
 
 import '../../core/forms/form_controller.dart';
 
@@ -36,10 +36,20 @@ class TextFieldIPRSWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(labelText),
+          Row(
+            children: [
+              Text(labelText),
+               const SizedBox(
+            width: 10,
+          ), 
+              valueFormResults[elementName]!['required'] != true ?  Text('*',style: TextStyle(fontSize: 18,color: Colors.red),) :const SizedBox(),
+            ],
+          ),
           const SizedBox(
             height: 10,
-          ),
+          ), 
+     
+         
           SizedBox(
             child: TextFormBox(
               controller: valueFormResults[elementName]!['controller'],
