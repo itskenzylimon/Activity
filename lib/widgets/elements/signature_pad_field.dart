@@ -47,7 +47,7 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
 
   exportImage() async {
     final Uint8List? data =
-        await _controller.toPngBytes(height: 400, width: 600);
+        await _controller.toPngBytes(height: 200, width: 300);
     if (data == null) {
       return;
     } else {
@@ -194,7 +194,10 @@ class _SignatureFieldWidgetState extends State<SignatureFieldWidget> {
   //upload file
   Future<String> getFile() async {
     FilePickerResult? result =
-        await FilePicker.platform.pickFiles(allowMultiple: false);
+        await FilePicker.platform.pickFiles(
+          allowCompression: true,
+          type: FileType.image,
+          allowMultiple: false);
     if (result == null) return "";
     path = result.files.single.path!;
     return getBase64FormateFile(path!);
