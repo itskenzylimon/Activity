@@ -271,5 +271,4 @@ class ActiveRequest {
         params, file, fileName, setUp, saveResponse: saveResponse
     );
   }
-
 }

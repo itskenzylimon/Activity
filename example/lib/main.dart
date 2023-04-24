@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:example/controller.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
@@ -9,34 +11,33 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ENVSetup envSetup = ENVSetup();
-  // var currentPath = Directory.current.path;
-  // print(currentPath);
-  // print(envSetup.readENVFile('.env'));
+  ENVSetup envSetup = ENVSetup();
+  Map<String, String> envMap = await envSetup.readENVFile('/Applications/MySpace/Coding/Repos/activity/example/.env');
+  printError(envMap['ID']);
 
-  try {
-
-    ActiveSocket activeSocket = WebSocket();
-    activeSocket.open('ws://127.0.0.1:2454');
-    activeSocket.send('data');
-
-    activeSocket.onSuccess(() {
-      print("onSuccess");
-    });
-    activeSocket.onFailure(() {
-      print("onFailure");
-    });
-    activeSocket.onMessage((data) {
-      print('onMessage @@@');
-      print(data);
-      if(data == 'Wewe ni'){
-        activeSocket.send('Fala....');
-      }
-      print('onMessage');
-    });
-    activeSocket.onClose(() {
-      print('onClose');
-    });
+  // try {
+  //
+  //   ActiveSocket activeSocket = WebSocket();
+  //   activeSocket.open('ws://127.0.0.1:2454');
+  //   activeSocket.send('data');
+  //
+  //   activeSocket.onSuccess(() {
+  //     print("onSuccess");
+  //   });
+  //   activeSocket.onFailure(() {
+  //     print("onFailure");
+  //   });
+  //   activeSocket.onMessage((data) {
+  //     print('onMessage @@@');
+  //     print(data);
+  //     if(data == 'Wewe ni'){
+  //       activeSocket.send('Fala....');
+  //     }
+  //     print('onMessage');
+  //   });
+  //   activeSocket.onClose(() {
+  //     print('onClose');
+  //   });
   //
   //   ActiveRequest activeRequest =  ActiveRequest();
   //   activeRequest.setUp = RequestSetUp(
@@ -52,9 +53,9 @@ void main() async {
   //   printError(activeResponse.data);
 
   //
-  } catch (error){
-    printError(error);
-  }
+  // } catch (error){
+  //   printError(error);
+  // }
 
   runApp(const MyApp());
 }

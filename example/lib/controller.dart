@@ -356,12 +356,10 @@ class MainController extends ActiveController {
   startServer() async {
 
     var anyIPv4 = InternetAddress.anyIPv4;
-    // var ipAddress = IpAddress(type: RequestType.json);
-    // dynamic data = await ipAddress.getIpAddress();
-    // printSuccess(data['ip']);
-    // printSuccess('{{{anyIPv4}}}');
+    printSuccess('{{{anyIPv4}}}');
+    printSuccess(anyIPv4);
 
-    HttpServer.bind('169.254.238.60', 1996).then((server) {
+    HttpServer.bind(anyIPv4, 1996).then((server) {
 
       /// Start a server
       server.listen((HttpRequest httpRequest) async {
@@ -392,7 +390,6 @@ class MainController extends ActiveController {
   
     getMemory();
   }
-
 
   getMemory() async {
     printSuccess(await memory.readMemory('hellos'));

@@ -517,19 +517,17 @@ activeMap.set({'key': 100},
   
 /// [value] will give you the current value  
 activeMap.value;
-``` 
-
-#### ActiveMemory
-* ActiveMemory : extends the dart bool data type, meaning you can enjoy the benefits  of the built in Memory functions.
-
-```dart 
-Docs coming soon
-``` 
+```
 
 #### ActiveModel
 * ActiveModel : This is a user specified Model class, you can save a Model and have it reactive across the app cycle while enjoying the benefits that come with Model class.
 
 ```dart 
+
+Its a work in progress, should work as ActiveType for now, but more
+features will be added soon. To make more data types reactive. and built
+in functions to sync data.
+
 Docs coming soon
 ``` 
 
@@ -537,14 +535,42 @@ Docs coming soon
 * ActiveString : extends the dart String data type, meaning you can enjoy the benefits  of the built in String functions.
 
 ```dart 
-Docs coming soon
+
+/// ActiveString extend the normal String Type with activity helper functions
+  ActiveString appTitle = ActiveString('First Title');
+
+/// [Contains] Whether the string value contains a match of [other].
+  appTitle.contains('First');
+  
+/// [isEmpty] Whether the string value is empty.
+  appTitle.isEmpty;
+
+/// [isNotEmpty] Whether the string value is not empty.
+  appTitle.isNotEmpty;
+  
+/// [length] The length of the string value.
+  appTitle.length;
+  
+/// To get the value of the string
+  appTitle.value;
+  
+/// To set the value of the string
+  appTitle.set('New Title');    
+
 ``` 
 
 #### ActiveType
 * ActiveType : This is a Type Any data data type, It supports any kind of data be it a Color, Widget, Map, Styles...
 
 ```dart 
-Docs coming soon
+/// ActiveType is a Type any with activity helper functions
+  ActiveType appBackgroundColor = ActiveType(Colors.white);
+  
+  /// ActiveType is a Type any with activity helper functions
+  ActiveType appBackgroundColor = ActiveType(Colors.white);
+  
+  ActiveType dateTime = ActiveType(DateTime.now());
+  
 ``` 
 
 
@@ -709,8 +735,40 @@ void main() {
 }  
 ```  
 
-## Activity Validation Setup:
+## Env Helper
 
+Env helper is a helper that allows you to access your environment variables easily.
+its ideal for storing sensitive information like API keys, database credentials, etc.
+
+Store the .env file in the root of your project and add it to your .gitignore file.
+data type is automatically detected and converted to the appropriate type.
+
+Expect a Future Map<String, dynamic> with the following format.
+
+```dart 
+import 'package:activity/activity.dart';
+
+ENVSetup envSetup = ENVSetup();
+
+/// if you change the path to the .env file, 
+/// you can pass it as a [filePath] parameter. Remember to use the
+/// absolute path to the file. .env file must be in the root of your project build file if
+/// not you can pass the path to the file as a parameter to the [readENVFile] function.
+
+print(envSetup.readENVFile('your_project/build_root_path/.env'));
+
+/// Example .env file
+ID=123
+KEY=QWE
+
+/// returns a Future<Map<String, String>> with the following format.
+{ID: 123, KEY: QWE}
+
+```  
+
+
+
+## Activity Validation Setup:
 
 **Activity** has a first-class support for object data validation, it works by defining a scheme with rules and assigning an object to [SchemaValidator.validate] for validation.
 

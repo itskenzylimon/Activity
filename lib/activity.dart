@@ -21,6 +21,7 @@ export 'core/memory/memory.dart';
 //Network
 export 'core/networks/active_socket.dart';
 export 'core/networks/active_request.dart';
+export 'core/networks/active_server.dart';
 
 //Localization
 export 'core/localization/localizations.dart';
