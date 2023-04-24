@@ -801,21 +801,21 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
                                     if (initialIndex > 0) {
                                       if (pagesListData[initialIndex - 1]['visibility']) {
                                         GlobalKey<FormState> formKey = listGlobalKey[initialIndex];
-                                        if (formKey.currentState!.validate()) {
+                                      
                                           setState(() {
                                             initialIndex = initialIndex - 1;
                                           });
-                                        }
+                                        
                                         break;
                                       } else {
                                         if (initialIndex > 0) {
                                           GlobalKey<FormState> formKey =
                                               listGlobalKey[initialIndex];
-                                          if (formKey.currentState!.validate()) {
+                                          
                                             setState(() {
                                               initialIndex = initialIndex - 2;
                                             });
-                                          }
+                                          
                                         }
                                         break;
                                       }

@@ -37,12 +37,9 @@ class DropDownWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     callbackElement = valueFormResults[elementName]!;
 
-    if (callbackElement['renderAs'] != null &&
-        callbackElement['renderAs'] == 'select2') {
+    if (callbackElement['renderAs'] != null && callbackElement['renderAs'] == 'select2') {
       String? currentSelectedValue =
-          ['', null].contains(callbackElement['value'])
-              ? 'Select'
-              : callbackElement['value'];
+          ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
       final ValueNotifier<List<String>> _listNotifier =
           ValueNotifier<List<String>>([currentSelectedValue!]);
       List<String> choicesList = [..._listNotifier.value];
@@ -71,28 +68,22 @@ class DropDownWidget extends StatelessWidget {
                   children: [
                     Container(
                         decoration: const BoxDecoration(
-                          border:
-                              Border(bottom: BorderSide(color: Colors.grey)),
+                          border: Border(bottom: BorderSide(color: Colors.grey)),
                         ),
                         child: TextBox(
                             controller: callbackElement['controller'],
                             placeholder: 'Search ${callbackElement['title']}',
                             onChanged: (value) {
-
                               var list = [];
                               if (value.isNotEmpty) {
-
-                                if (_debounce?.isActive ?? false)
-                                  _debounce?.cancel();
-                                _debounce =
-                                    Timer(const Duration(milliseconds: 100),
-                                        () async {
-                                      if(list.isEmpty) {
-                                        list = await getListItems(
-                                          value,
-                                          callbackElement['choicesByUrl']['url'],
-                                        );
-                                      }
+                                if (_debounce?.isActive ?? false) _debounce?.cancel();
+                                _debounce = Timer(const Duration(milliseconds: 100), () async {
+                                  if (list.isEmpty) {
+                                    list = await getListItems(
+                                      value,
+                                      callbackElement['choicesByUrl']['url'],
+                                    );
+                                  }
                                   for (var l in list) {
                                     choicesList.add(
                                       l['value'].toString(),
@@ -111,8 +102,7 @@ class DropDownWidget extends StatelessWidget {
                         width: double.infinity,
                         child: ValueListenableBuilder(
                             valueListenable: _listNotifier,
-                            builder: (BuildContext context, choicesList,
-                                Widget? child) {
+                            builder: (BuildContext context, choicesList, Widget? child) {
                               return SizedBox(
                                 height: choicesList.length > 2 ? 250 : 40,
                                 child: ListView.separated(
@@ -121,15 +111,13 @@ class DropDownWidget extends StatelessWidget {
                                   itemBuilder: (context, int index) {
                                     return ListTile(
                                       onPressed: () {
-                                        callbackElement['value'] =
-                                            choicesList[index];
+                                        callbackElement['value'] = choicesList[index];
                                         onElementCallback(callbackElement);
                                       },
                                       title: Text(choicesList[index]),
                                     );
                                   },
-                                  separatorBuilder: (context, int index) =>
-                                      SizedBox(height: 10),
+                                  separatorBuilder: (context, int index) => SizedBox(height: 10),
                                   itemCount: choicesList.length,
                                 ),
                               );
@@ -139,13 +127,9 @@ class DropDownWidget extends StatelessWidget {
               )
             ],
           ));
-    }
-    else if (callbackElement['renderAs'] == null &&
-        callbackElement['choicesByUrl'] != null) {
+    } else if (callbackElement['renderAs'] == null && callbackElement['choicesByUrl'] != null) {
       String? currentSelectedValue =
-          ['', null].contains(callbackElement['value'])
-              ? 'Select'
-              : callbackElement['value'];
+          ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
       final ValueNotifier<List<String>> _listNotifier =
           ValueNotifier<List<String>>([currentSelectedValue!]);
       List<String> choicesList = [..._listNotifier.value];
@@ -164,57 +148,46 @@ class DropDownWidget extends StatelessWidget {
               ),
               ValueListenableBuilder(
                   valueListenable: _listNotifier,
-                  builder: (BuildContext context, choicesList,
-                      Widget? child) {
+                  builder: (BuildContext context, choicesList, Widget? child) {
                     return AutoSuggestBox<String>(
                         items: choicesList.map((choice) {
-                          return AutoSuggestBoxItem<String>(
-                              value: choice,
-                              label: choice
-                          );
+                          return AutoSuggestBoxItem<String>(value: choice, label: choice);
                         }).toList(),
                         onSelected: (item) {
                           callbackElement['value'] = item.value;
                           onElementCallback(callbackElement);
                         },
                         onChanged: (String value, TextChangedReason reason) {
-                          var list =[];
+                          var list = [];
                           if (value.isNotEmpty && value.length >= 2) {
                             Timer? debounce;
                             if (debounce?.isActive ?? false) debounce?.cancel();
-                            debounce = Timer(const Duration(milliseconds: 500),
-                                    () async {
-                              if(list.isEmpty) {
+                            debounce = Timer(const Duration(milliseconds: 500), () async {
+                              if (list.isEmpty) {
                                 list = await getChoicesByUrl(
                                   value,
                                   callbackElement['choicesByUrl']['url'],
                                 );
                               }
-                                  for (var l in list) {
-                                    choicesList.add(
-                                      l['value'].toString(),
-                                    );
-                                    _listNotifier.value = choicesList;
-                                  }
-                                });
+                              for (var l in list) {
+                                choicesList.add(
+                                  l['value'].toString(),
+                                );
+                                _listNotifier.value = choicesList;
+                              }
+                            });
                           } else {
-                            choicesList = [
-                              "Select ${callbackElement['title']}"
-                            ];
+                            choicesList = ["Select ${callbackElement['title']}"];
                           }
-                        }
-                    );
+                        });
                   }),
             ],
           ));
-    }
-    else {
+    } else {
       // printSuccess("--------------------------------");
       // printSuccess(callbackElement);
       String? currentSelectedValue =
-          ['', null].contains(callbackElement['value'])
-              ? 'Select'
-              : callbackElement['value'];
+          ['', null].contains(callbackElement['value']) ? 'Select' : callbackElement['value'];
       List choices = ["Select"];
       List data = callbackElement['choices'];
       // printSuccess("==========================================================");
@@ -248,9 +221,7 @@ class DropDownWidget extends StatelessWidget {
             placeholder: SizedBox(
               width: 100,
               child: Text(
-                callbackElement['title'] +
-                    ' ' +
-                    (callbackElement['description'] ?? ''),
+                callbackElement['title'] + ' ' + (callbackElement['description'] ?? ''),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -258,21 +229,18 @@ class DropDownWidget extends StatelessWidget {
               return ComboBoxItem(
                 value: choice,
                 child: Text(
-                  choice == 'Select'
-                      ? '\t - \t ${callbackElement['title']}'
-                      : '\t $choice',
+                  choice == 'Select' ? '\t - \t ${callbackElement['title']}' : '\t $choice',
                   style: mat.Theme.of(context).textTheme.caption,
                 ),
               );
             }).toList(),
             onChanged: (value) {
-              currentSelectedValue = value;
-              callbackElement['value'] = value;
-              onElementCallback(callbackElement);
+                currentSelectedValue = value;
+                callbackElement['value'] = value;
+                onElementCallback(callbackElement);
             },
             validator: (value) {
-              if (valueFormResults[elementName]!['isRequired'] ==
-                  null) {
+              if (valueFormResults[elementName]!['isRequired'] == null) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter ${valueFormResults[elementName]!['title']}';
                 }
@@ -305,9 +273,8 @@ class DropDownWidget extends StatelessWidget {
     /// Handle httplookup
     /// Handle choicesByUrl
 
-    ActiveResponse activeResponse = await activeRequest.getApi(Params(
-        endpoint: request['url'],
-        queryParameters: {"number": "${request['id']}"}));
+    ActiveResponse activeResponse = await activeRequest
+        .getApi(Params(endpoint: request['url'], queryParameters: {"number": "${request['id']}"}));
     final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
     return convertedData;
   }
@@ -323,18 +290,14 @@ class DropDownWidget extends StatelessWidget {
       logResponse: true,
       withTrustedRoots: true,
     );
-    ActiveResponse userDataRes =
-        await activeRequest.getApi(Params(endpoint: url, queryParameters: {
+    ActiveResponse userDataRes = await activeRequest.getApi(Params(endpoint: url, queryParameters: {
       '': "",
     }));
 
     if (userDataRes.statusCode == 200) {
       var data = json.decode(userDataRes.data!);
       var filteredList = data
-          .where((elem) => elem['value']
-              .toString()
-              .toLowerCase()
-              .contains(query.toLowerCase()))
+          .where((elem) => elem['value'].toString().toLowerCase().contains(query.toLowerCase()))
           .toList();
       list.clear();
       list = filteredList.toSet().toList();
@@ -353,8 +316,7 @@ class DropDownWidget extends StatelessWidget {
       logResponse: true,
       withTrustedRoots: true,
     );
-    ActiveResponse userDataRes =
-        await activeRequest.getApi(Params(endpoint: url, queryParameters: {
+    ActiveResponse userDataRes = await activeRequest.getApi(Params(endpoint: url, queryParameters: {
       '': "",
     }));
 
@@ -373,10 +335,7 @@ class DropDownWidget extends StatelessWidget {
         }
       }
       var filteredList = listData
-          .where((elem) => elem['value']
-              .toString()
-              .toLowerCase()
-              .contains(query.toLowerCase()))
+          .where((elem) => elem['value'].toString().toLowerCase().contains(query.toLowerCase()))
           .toList();
       list.clear();
       list = filteredList.toSet().toList();
