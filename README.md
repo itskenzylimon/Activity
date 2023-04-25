@@ -322,10 +322,10 @@ Future<void> loadTasks() async {
      {taskName: 'Write Test Cases'},
      {taskScore: 5.5},
   ]);
-  ///```
+  
 ``` 
 
-* use resetAllActiveTypes to reset all active types to their default values
+* use `resetAllActiveTypes` to reset all active types to their default values
 ```dart
   /// [resetAllActiveTypes] will reset all [ActiveType] to their default values
   /// and trigger a single state change.
@@ -339,8 +339,80 @@ Future<void> loadTasks() async {
   resetAllActiveTypes();
   ///```
 ```
+* use `Fragment` to create a reactive widget that can be used in multiple places
+```dart
+  ///## Example Fragment
+  ///
+  ///```dart
+Fragment fragment = Fragment(
+   activeController: activeController,
+   viewContext: (BuildContext context) {
+      return Scaffold(
+         appBar: AppBar(
+            title: const Text('Activity Task App'),
+         ),
+         body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                  const Text(
+                     'You have pushed the button this many times:',
+                  ),
+                  GestureDetector(
+                     child: const Text(
+                        "close dialog",
+                     ),
+                     onTap: () {
+                        Navigator.pop(context);
+                     },
+                  ),
+               ],
+            ),
+         ),
+      );
+   },
+);
 
+/// Fragment can be used in multiple places like this
+```
 
+* use `ADialog` to create a reactive dialog that can be used in multiple places
+```dart
+  ///## Example Dialog
+  ///
+  ///```dart
+ADialog aDialog = ADialog(
+   backgroundColor: Colors.red,
+   margin: const EdgeInsets.all(100),
+   activeController: activeController,
+   viewContext: (BuildContext context) {
+      return Scaffold(
+         appBar: AppBar(
+            title: const Text('Activity Task App'),
+         ),
+         body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                  const Text(
+                     'You have pushed the button this many times:',
+                  ),
+                  GestureDetector(
+                     child: const Text(
+                        "close dialog",
+                     ),
+                     onTap: () {
+                        Navigator.pop(context);
+                     },
+                  ),
+               ],
+            ),
+         ),
+      );
+   },
+);
+/// 
+```
 
 ## Data Types
 
