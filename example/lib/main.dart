@@ -80,6 +80,39 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
+
+Widget activePage(TaskController taskController){
+
+  return ADialog(
+      activeController: taskController,
+      viewContext: (BuildContext context){
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Activity Task App'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'You have pushed the button this many times:',
+                ),
+                GestureDetector(
+                  child: const Text("close dialog",
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+  );
+}
+
 class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
