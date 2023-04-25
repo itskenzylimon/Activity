@@ -288,6 +288,7 @@ will automatically handle setting **actively** status from true to false once do
 > to false when done or if you have a loading indicator that depends on the status of the controller.
 
 ```dart
+
 /// loadTasks is your function that returns a Future<void>
 /// inside this function you can call your service to fetch data from the server or the database.
 /// We call activeAsync and pass a function with a isRunningKey key to make it easier to find the controller.
@@ -301,10 +302,12 @@ Future<void> loadTasks() async {
       isRunningKey: 'loadTasks'
     );
 }
+
 ```
 
 * use `activateTypes` to activate controller types at the same time
 ```dart 
+
   /// [activateTypes] allows multiple [ActiveType] to be updated at once and it
   /// will only trigger a single state change.
   ///
@@ -314,7 +317,6 @@ Future<void> loadTasks() async {
   ///
   ///## Example
   ///
-  ///```dart
   late final ActiveType<String> taskName;
   late final ActiveType<int> taskScore;
   
@@ -332,18 +334,17 @@ Future<void> loadTasks() async {
   ///
   ///## Example
   ///
-  ///```dart
   late final ActiveType<String> taskName;
   late final ActiveType<int> taskScore;
   
   resetAllActiveTypes();
-  ///```
+
 ```
 * use `Fragment` to create a reactive widget that can be used in multiple places
 ```dart
   ///## Example Fragment
   ///
-  ///```dart
+
 Fragment fragment = Fragment(
    activeController: activeController,
    viewContext: (BuildContext context) {
@@ -411,7 +412,7 @@ ADialog aDialog = ADialog(
       );
    },
 );
-/// 
+
 ```
 
 ## Data Types
@@ -900,6 +901,7 @@ data type is automatically detected and converted to the appropriate type.
 Expect a Future Map<String, dynamic> with the following format.
 
 ```dart 
+
 import 'package:activity/activity.dart';
 
 ENVSetup envSetup = ENVSetup();
