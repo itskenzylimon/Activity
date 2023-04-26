@@ -319,7 +319,7 @@ class HttpActiveRequest {
       /// [value] is the value of the field.
       /// [key] is the name of the field.
       /// whoever did the HttpBodyPart.fromString() why the inverse.....?????
-      final dataField  = HttpBodyPart.fromString(value, key);
+      final dataField  = HttpBodyPart.fromString(value.toString(), key);
       request.add(encodePart(boundary, dataField));
     });
 

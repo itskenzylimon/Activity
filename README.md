@@ -380,8 +380,7 @@ Fragment fragment = Fragment(
 * use `ADialog` to create a reactive dialog that can be used in multiple places
 ```dart
   ///## Example Dialog
-  ///
-  ///```dart
+
 ADialog aDialog = ADialog(
    backgroundColor: Colors.red,
    margin: const EdgeInsets.all(100),

@@ -51,7 +51,7 @@ class RequestSetUp {
 /// [queryParameters] is a map of the query parameters. It is optional
 /// [endpoint] is the endpoint of the request. It is required
 class Params {
-  Map<String, String>? queryParameters = {};
+  Map<String, dynamic>? queryParameters = {};
   String endpoint = '';
 
   Params({

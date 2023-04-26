@@ -213,7 +213,7 @@ class _SignaturePainter extends CustomPainter {
       : _penStyle = Paint(),
         super(repaint: _controller) {
     _penStyle
-      ..color = penColor != null ? penColor : _controller.penColor
+      ..color = penColor ?? _controller.penColor
       ..strokeWidth = _controller.penStrokeWidth
       ..strokeCap = _controller.strokeCap
       ..strokeJoin = _controller.strokeJoin;
