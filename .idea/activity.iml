@@ -18,6 +18,12 @@
       <excludeFolder url="file://$MODULE_DIR$/example/macos/Flutter/ephemeral/.symlinks/plugins/wakelock_macos/build" />
       <excludeFolder url="file://$MODULE_DIR$/example/macos/Flutter/ephemeral/.symlinks/plugins/wakelock_macos/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/example/macos/Flutter/ephemeral/.symlinks/plugins/wakelock_macos/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/example/ios/.symlinks/plugins/file_picker/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/example/ios/.symlinks/plugins/file_picker/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/example/ios/.symlinks/plugins/file_picker/build" />
+      <excludeFolder url="file://$MODULE_DIR$/example/ios/.symlinks/plugins/file_picker/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/example/ios/.symlinks/plugins/file_picker/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/example/ios/.symlinks/plugins/file_picker/example/.dart_tool" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 33, extension level 3 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

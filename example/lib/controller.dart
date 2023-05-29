@@ -144,7 +144,7 @@ class MainController extends ActiveController {
     ActiveDateTime activeDateTime = ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeDateTime.setOriginalValueToCurrent();
+    activeDateTime.setOriginalValueToCurrent('dateOfBirth');
     activeDateTime.reset(notifyChange: true);
 
     /// You can do updates to a field using [set] func, this will do the update
@@ -169,7 +169,7 @@ class MainController extends ActiveController {
     ActiveDouble activeDouble = ActiveDouble(1.5, typeName: 'rate'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeDouble.setOriginalValueToCurrent();
+    activeDouble.setOriginalValueToCurrent('rate');
     activeDouble.reset(notifyChange: true);
 
     /// checks if the value is negative and returns a bool type
@@ -211,7 +211,7 @@ class MainController extends ActiveController {
     ActiveInt activeInt = ActiveInt(100, typeName: 'score'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeInt.setOriginalValueToCurrent();
+    activeInt.setOriginalValueToCurrent('score');
     activeInt.reset(notifyChange: true);
 
     /// checks if the value is negative and returns a bool type
@@ -262,10 +262,10 @@ class MainController extends ActiveController {
     /// of the built in List functions
     /// [Activity] will allow you to update anywhere on the app code and rebuild UI
     /// for the affected widgets Only
-    ActiveList activeList = ActiveList([1, 2, 3], typeName: 'score'); // 1.5
+    ActiveList activeList = ActiveList([1, 2, 3], typeName: 'activeList'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeList.setOriginalValueToCurrent();
+    activeList.setOriginalValueToCurrent('activeList');
     activeList.reset(notifyChange: true);
 
     /// You can do updates to a field using [set] func, this will do the update
@@ -289,7 +289,7 @@ class MainController extends ActiveController {
     ActiveMap activeMap = ActiveMap({'key': 123}, typeName: 'score'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeMap.setOriginalValueToCurrent();
+    activeMap.setOriginalValueToCurrent('score');
     activeMap.reset(notifyChange: true);
 
     /// You can do updates to a field using [set] func, this will do the update

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:example/controller.dart';
@@ -39,18 +40,33 @@ void main() async {
   //     print('onClose');
   //   });
   //
-  //   ActiveRequest activeRequest =  ActiveRequest();
-  //   activeRequest.setUp = RequestSetUp(
-  //       idleTimeout: 10,
-  //       connectionTimeout: 10,
-  //       logResponse: true,
-  //       withTrustedRoots: true,
-  //   );
-  //
-  //   ActiveResponse activeResponse = await activeRequest
-  //       .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
-  //        final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
-  //   printError(activeResponse.data);
+
+try {
+
+  File file = await sendAssetFile('assets/index.html', 'index.html');
+
+    ActiveRequest activeRequest =  ActiveRequest();
+  printError('activeResponse.data');
+    ActiveResponse activeResponse = await activeRequest
+        .uploadFileApi(
+          Params(endpoint: 'https://www.filestackapi.com/api/store/S3?key=Azb7pTmKLQFGojQWsXwroz',
+          queryParameters: {}),
+          file,'ndex.html', RequestSetUp(
+        idleTimeout: 10,
+        connectionTimeout: 10,
+        logResponse: true,
+        withTrustedRoots: true,
+        httpHeaders: {        }
+    ));
+
+printError(activeResponse.statusCode);
+printError(activeResponse.data);
+         final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
+    printError(activeResponse.data);
+
+} catch (error){
+  printError(error);
+}
 
   //
   // } catch (error){
@@ -60,21 +76,71 @@ void main() async {
   runApp(const MyApp());
 }
 
+
+Future<File> sendAssetFile(String assetPath, String fileName) async {
+  // Load the asset file as a ByteData object.
+  final byteData = await rootBundle.load(assetPath);
+
+  // Create a new File object for the output file.
+  final outputFile = File(fileName);
+
+  // Write the ByteData object to the output file.
+  await outputFile.writeAsBytes(byteData.buffer.asUint8List());
+  return outputFile;
+}
+
+
+Widget fragmentView(){
+  return Fragment(
+   activeController: TaskController(),
+   viewContext: (BuildContext context) {
+   TaskController activeController = Activity.getActivity<TaskController>(context);
+  
+      return Scaffold(
+         appBar: AppBar(
+            title: Text('Activity Task App ${activeController.testData.value}'),
+         ),
+         body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                  const Text(
+                     'You have pushed the button this many times:',
+                  ),
+                  GestureDetector(
+                     child: const Text(
+                        "close dialog",
+                     ),
+                     onTap: () {
+                        Navigator.pop(context);
+                     },
+                  ),
+               ],
+            ),
+         ),
+      );
+   },
+);
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
+    // TaskController activeController = TaskController();
+    // activeController.testData.setToOriginal(' Test Data', activeController.testData.typeName ?? '');
+    // activeController.testData.set("Hello world");
+
     return MaterialApp(
       title: 'Activity Task App',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Activity(
-        MainController(),
+         TaskController(),
         developerMode: true,
         onActivityStateChanged: () =>
             DateTime.now().microsecondsSinceEpoch.toString(),
-        child: TaskView(
-          activeController: TaskController(),
-        ),
+        child: fragmentView(),
       ),
     );
   }
@@ -83,7 +149,6 @@ class MyApp extends StatelessWidget {
 
 
 Widget activePage(TaskController taskController){
-
   return ADialog(
       activeController: taskController,
       viewContext: (BuildContext context){

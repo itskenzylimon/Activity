@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 
 enum FocusColor { primary, secondary }
-
 enum FocusErrorColor { primary, secondary }
 
-Widget TextFieldWidget({
+Widget textFieldWidget({
   String? hint,
   Color? focusColor,
   FocusErrorColor? focusErrorColor,

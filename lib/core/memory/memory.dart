@@ -90,7 +90,7 @@ class Memory {
       T mem, {Duration? duration, bool persist = true}) async {
     Map<String, dynamic> data = await stageMemory();
     if(persist){
-        FileStorage fileStorage = FileStorage(_filename!);
+        FileStorage fileStorage = FileStorage(_filename ?? 'active_t');
         var entry = {
           'value': mem,
           'createdAt': DateTime.now().toIso8601String(),

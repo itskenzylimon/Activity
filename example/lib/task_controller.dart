@@ -15,6 +15,8 @@ class TaskController extends MainController {
   TextEditingController taskBody = TextEditingController();
   TextEditingController taskLevel = TextEditingController();
 
+  ActiveString testData = ActiveString(' Test Data', typeName: 'userNameError');
+  
 
   getMemoryData() async {
     // print(memory.isDataEmpty);
@@ -165,7 +167,7 @@ class TaskController extends MainController {
 
   @override
   List<ActiveType> get activities {
-    return [tasksLevel, tasks];
+    return [tasksLevel, tasks, testData];
   }
 
 }

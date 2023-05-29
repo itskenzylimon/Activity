@@ -346,8 +346,10 @@ Future<void> loadTasks() async {
   ///
 
 Fragment fragment = Fragment(
-   activeController: activeController,
+   activeController: TaskController(),
    viewContext: (BuildContext context) {
+      /// access the TaskController() using Activity.getActivity
+      TaskController activeController = Activity.getActivity<TaskController>(context);
       return Scaffold(
          appBar: AppBar(
             title: const Text('Activity Task App'),
@@ -419,6 +421,11 @@ ADialog aDialog = ADialog(
 **Activity** will allow you to update your declared variables anywhere on the app code and rebuild the UI  for the affected widgets Only.
 
 Active Data Types have a *typeName* and can be any key you assign the type to. It can really help when you want to update a value based on the assigned key *typeName*
+
+*setToOriginal* is function that extends any type of Active Type, it is meant to be used when you want to persist a value over
+the applications lyfecycle. you can still update the current value but the original value will persist through out and you can easily access the original values. Under the hood it relies on Memory to persist data.
+
+*setOriginalValueToCurrent* this function function update the original value set by *setToOriginal* to the current value, it will perform updates on the UI.
 
 #### ActiveBool
 * ActiveBool : extends the dart bool data type, meaning you can enjoy the benefits  of the built in bool functions.
@@ -731,9 +738,8 @@ memory.isDataEmpty
   
 memory.readMemories(); // Returns a a list of all memories stored  
 memory.readMemory('key'); // Returns the value of the key with its declared type  
-memory.createMemory('key', value); // Creates an entry with the assigned value and key  
-memory.upsertMemory('key', value); // Creates an entry and if the value exist it performs an upsert  
-memory.updateMemory('key', value); // Performs an update on the key value   
+memory.insertMemory('key', value, {Duration? duration, bool persist = true}); // Creates an entry with the assigned value and key  
+memory.upsertMemory('key', value, {Duration? duration}); // Creates an entry and if the value exist it performs an upsert  
 memory.deleteMemory('key'); // Remove an entry from ActiveMemory  
 memory.resetMemory(); // This resets all the entries on ActiveMemory  
 memory.hasMemory(); // Checks if a key exists in ActiveMemory  

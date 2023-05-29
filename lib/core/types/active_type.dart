@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:activity/core/helpers/logger.dart';
+import 'package:activity/core/memory/memory.dart';
 import 'package:activity/core/src/exceptions.dart';
 import 'package:activity/core/src/controller.dart';
 
@@ -39,6 +43,8 @@ abstract class ActiveTypeValue<T> {
 ///```
 class ActiveType<T> implements ActiveTypeValue<T> {
   String? typeName;
+
+  Memory memory = Memory(filename: '${Directory.current.path}/activity-data.act');
 
   late T _originalValue;
   T get originalValue => _originalValue;
@@ -116,8 +122,26 @@ class ActiveType<T> implements ActiveTypeValue<T> {
   ///user.reset(); //user value would be reset to the user returned from the userService
   ///
   ///```
-  void setOriginalValueToCurrent() {
-    _originalValue = _value;
+  void setOriginalValueToCurrent(String typeName) async {
+    var data = await memory.readMemory(typeName);
+    printError(data);
+    if (data != null) {
+       _originalValue = data;
+      set(data, setAsOriginal: true);
+    } else {
+      _originalValue = _value;
+    }
+  }
+  
+  void setToOriginal(dynamic value, String typeName) async {
+    memory.insertMemory(typeName, value);
+
+    var data = await memory.readMemory(typeName);
+    if (data != null) {
+      _originalValue = data;
+    } else {
+      _originalValue = _value;
+    }
   }
 
   ///Updates the property value. Notifies any listeners to the change
@@ -128,7 +152,6 @@ class ActiveType<T> implements ActiveTypeValue<T> {
     final oldValue = _value;
     _value = value;
     if (notifyChange && oldValue != value) {
-      print(value);
       activeController.notifyActivities([
         ActiveStateChanged(value, oldValue, typeName: typeName)
       ]);
