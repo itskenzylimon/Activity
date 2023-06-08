@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-
+import 'package:flutter/services.dart';
 import 'package:activity/core/helpers/logger.dart';
+
+import '../helpers/isplatforms.dart';
 
 /// Memory is a class that is used to store data in a file.
 class Memory {
@@ -29,6 +30,7 @@ class Memory {
   Future<Map<String, dynamic>> stageMemory() async {
     if (_filename != null) {
       FileStorage fileStorage = FileStorage(_filename!);
+
       return await fileStorage.read();
     }
     return {};
@@ -207,8 +209,14 @@ class FileStorage {
   final File _file;
   FileStorage(String filename) : _file = File(filename);
 
+  bool isAndroid = isAndroidPlatform();
+  static const MethodChannel memoryChannel = MethodChannel('activity_mobile_platform_channel');
+
   /// Saves data to a file.
   Future<void> save(Map<String, dynamic> data) async {
+    if(isAndroid == true){
+      return await saveMobile(data);
+    }
     String stringEncrypted = encrypt(jsonEncode(data), 134523452346);
     var encodedData = utf8.encode(stringEncrypted);
     var byteData = Uint8List.fromList(encodedData);
@@ -217,6 +225,9 @@ class FileStorage {
 
   /// Reads data from a file.
   Future<Map<String, dynamic>> read() async {
+    if(isAndroid == true){
+      return await readMobile();
+    }
     if (await _file.exists()) {
       var encodedData = await _file.readAsBytes();
       var decodedData = utf8.decode(encodedData);
@@ -227,6 +238,23 @@ class FileStorage {
       return {};
     }
 
+  }
+
+  /// Saves data to mobile file.
+  Future<void> saveMobile(Map<String, dynamic> data) async {
+    String stringEncrypted = encrypt(jsonEncode(data), 134523452346);
+    var encodedData = utf8.encode(stringEncrypted);
+    var byteData = Uint8List.fromList(encodedData);
+    await memoryChannel.invokeMethod('create', byteData);
+  }
+
+  /// Reads data from mobile file.
+  Future<Map<String, dynamic>> readMobile() async {
+    var encodedData = await memoryChannel.invokeMethod('read', {'memoryPath': File});
+    var decodedData = utf8.decode(encodedData);
+    String stringDecrypt = decrypt(decodedData, 134523452346);
+
+    return jsonDecode(stringDecrypt) as Map<String, dynamic>;
   }
 
   /// Deletes a file.

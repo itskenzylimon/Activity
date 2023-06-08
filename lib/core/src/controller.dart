@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:activity/core/types/active_type.dart';
-import 'package:flutter/foundation.dart';
 
 import 'errors.dart';
 
@@ -75,7 +74,6 @@ abstract class ActiveController {
     if (_stateController.isClosed) {
       return;
     }
-    print(events);
     _stateController.add(events);
   }
 
@@ -149,7 +147,7 @@ abstract class ActiveController {
         _removeIsRunningKey(isRunningKey);
       }
       _actively = _isRunningKeys.isNotEmpty || isRunning;
-      notifyActivities([ActiveStateChanged(isRunning, !isRunning)]);
+      notifyActivities([ActiveStateChanged(isRunning, !isRunning, typeName: 'State Updated')]);
     }
   }
 

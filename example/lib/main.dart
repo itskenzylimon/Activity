@@ -12,9 +12,12 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ENVSetup envSetup = ENVSetup();
-  Map<String, String> envMap = await envSetup.readENVFile('/Applications/MySpace/Coding/Repos/activity/example/.env');
-  printError(envMap['ID']);
+  // ENVSetup envSetup = ENVSetup();
+  // Map<String, String> envMap = await envSetup.readENVFile(
+  //   ".env"
+  //     //'/Applications/MySpace/Coding/Repos/activity/example/.env'
+  // );
+  // printError(envMap['ID']);
 
   // try {
   //
@@ -41,7 +44,7 @@ void main() async {
   //   });
   //
 
-try {
+/*try {
 
   File file = await sendAssetFile('assets/index.html', 'index.html');
 
@@ -66,7 +69,7 @@ printError(activeResponse.data);
 
 } catch (error){
   printError(error);
-}
+}*/
 
   //
   // } catch (error){
@@ -90,38 +93,38 @@ Future<File> sendAssetFile(String assetPath, String fileName) async {
 }
 
 
-Widget fragmentView(){
-  return Fragment(
-   activeController: TaskController(),
-   viewContext: (BuildContext context) {
-   TaskController activeController = Activity.getActivity<TaskController>(context);
-  
-      return Scaffold(
-         appBar: AppBar(
-            title: Text('Activity Task App ${activeController.testData.value}'),
-         ),
-         body: Center(
-            child: Column(
-               mainAxisAlignment: MainAxisAlignment.center,
-               children: <Widget>[
-                  const Text(
-                     'You have pushed the button this many times:',
-                  ),
-                  GestureDetector(
-                     child: const Text(
-                        "close dialog",
-                     ),
-                     onTap: () {
-                        Navigator.pop(context);
-                     },
-                  ),
-               ],
-            ),
-         ),
-      );
-   },
-);
-}
+// Widget fragmentView(){
+//   return Fragment(
+//    activeController: TaskController(),
+//    viewContext: (BuildContext context) {
+//    TaskController activeController = Activity.getActivity<TaskController>(context);
+//
+//       return Scaffold(
+//          appBar: AppBar(
+//             title: Text('Activity Task App ${activeController.testData.value}'),
+//          ),
+//          body: Center(
+//             child: Column(
+//                mainAxisAlignment: MainAxisAlignment.center,
+//                children: <Widget>[
+//                   const Text(
+//                      'You have pushed the button this many times:',
+//                   ),
+//                   GestureDetector(
+//                      child: const Text(
+//                         "close dialog",
+//                      ),
+//                      onTap: () {
+//                         Navigator.pop(context);
+//                      },
+//                   ),
+//                ],
+//             ),
+//          ),
+//       );
+//    },
+// );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -140,7 +143,7 @@ class MyApp extends StatelessWidget {
         developerMode: true,
         onActivityStateChanged: () =>
             DateTime.now().microsecondsSinceEpoch.toString(),
-        child: fragmentView(),
+        child: TaskView(activeController: TaskController()),
       ),
     );
   }
@@ -194,6 +197,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    activeController.createMemory();
 
     // activeController.memory.resetMemory();
     // activeController.createMemory();
