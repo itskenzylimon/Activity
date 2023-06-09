@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -12,9 +13,9 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  ENVSetup envSetup = ENVSetup();
+  /*ENVSetup envSetup = ENVSetup();
   Map<String, String> envMap = await envSetup.readENVFile('/Applications/MySpace/Coding/Repos/activity/example/.env');
-  printError(envMap['ID']);
+  printError(envMap['ID']);*/
 
   // try {
   //
@@ -41,7 +42,7 @@ void main() async {
   //   });
   //
 
-try {
+/*try {
 
   File file = await sendAssetFile('assets/index.html', 'index.html');
 
@@ -66,7 +67,7 @@ printError(activeResponse.data);
 
 } catch (error){
   printError(error);
-}
+}*/
 
   //
   // } catch (error){
@@ -76,8 +77,7 @@ printError(activeResponse.data);
   runApp(const MyApp());
 }
 
-
-Future<File> sendAssetFile(String assetPath, String fileName) async {
+/*Future<File> sendAssetFile(String assetPath, String fileName) async {
   // Load the asset file as a ByteData object.
   final byteData = await rootBundle.load(assetPath);
 
@@ -87,15 +87,14 @@ Future<File> sendAssetFile(String assetPath, String fileName) async {
   // Write the ByteData object to the output file.
   await outputFile.writeAsBytes(byteData.buffer.asUint8List());
   return outputFile;
-}
+}*/
 
-
-Widget fragmentView(){
+/*Widget fragmentView(){
   return Fragment(
    activeController: TaskController(),
    viewContext: (BuildContext context) {
    TaskController activeController = Activity.getActivity<TaskController>(context);
-  
+
       return Scaffold(
          appBar: AppBar(
             title: Text('Activity Task App ${activeController.testData.value}'),
@@ -121,10 +120,32 @@ Widget fragmentView(){
       );
    },
 );
+}*/
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _MyAppState extends State<MyApp> {
+  var taskController = TaskController();
+
+  void afterFirstLayout(BuildContext context) {
+    taskController.createMemory();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    printError("text");
+    WidgetsBinding.instance.endOfFrame.then(
+      (_) {
+        if (mounted) afterFirstLayout(context);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,50 +156,49 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Activity Task App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: Activity(
-         TaskController(),
-        developerMode: true,
-        onActivityStateChanged: () =>
-            DateTime.now().microsecondsSinceEpoch.toString(),
-        child: fragmentView(),
-      ),
+      home: Activity(taskController,
+          developerMode: true,
+          onActivityStateChanged: () =>
+              DateTime.now().microsecondsSinceEpoch.toString(),
+          child: activePage(taskController)
+          //fragmentView(),
+          ),
     );
   }
 }
 
-
-
-Widget activePage(TaskController taskController){
+Widget activePage(TaskController taskController) {
   return ADialog(
-      activeController: taskController,
-      viewContext: (BuildContext context){
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Activity Task App'),
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'You have pushed the button this many times:',
+    activeController: taskController,
+    viewContext: (BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Activity Task App'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'You have pushed the button this many times:',
+              ),
+              GestureDetector(
+                child: const Text(
+                  "close dialog",
                 ),
-                GestureDetector(
-                  child: const Text("close dialog",
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      );
+    },
   );
 }
 
-class TaskView extends ActiveView<TaskController> {
+/*class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
   @override
@@ -358,9 +378,9 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                                 TextButton(
                                                   onPressed: ()
                                                   {
-                                                    /**
+                                                    */ /**
                                                      * Clear fields and refresh Page
-                                                     */
+                                                     */ /*
                                                     activeController.userName.clear();
                                                     activeController.userEmail.clear();
                                                     activeController.taskName.clear();
@@ -542,4 +562,4 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
           ),
         ));
   }
-}
+}*/
