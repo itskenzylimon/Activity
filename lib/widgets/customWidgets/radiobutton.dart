@@ -1,17 +1,35 @@
 import 'package:flutter/material.dart';
 
+
+///[RadioButtonTextPosition] the position of text of the radio button.
 enum RadioButtonTextPosition {
   right,
   left,
 }
 class RadioButton<T> extends StatelessWidget {
+
+  ///[description] this is the text describing the radio button.
   final String description;
+
+  ///[value] value of radio button.
   final T value;
+
+  ///[groupValue] group value of the radio button.
   final T groupValue;
+
+  ///[onChanged]called when the user initiates a change to the dropdown
   final void Function(T?)? onChanged;
+
+  ///[textPosition] position of text either right or left
   final RadioButtonTextPosition textPosition;
+
+  ///[activeColor] color of the dropdown when its active
   final Color? activeColor;
+
+  ///[fillColor] color of the drop
   final Color? fillColor;
+
+  ///[textStyle] style of the dropdown's texts
   final TextStyle? textStyle;
 
   const RadioButton({
