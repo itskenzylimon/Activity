@@ -734,7 +734,7 @@ void main() async {
   runApp(const MyApp());
 } 
 
-///to retrieve instnace of Memory in another dart file do:
+///to retrieve an instance of Memory in another dart file do:
 ///no need to pass filename:"memory.txt" since the filename created when initMemory() was called will not be overwritten
 Memory memory = Memory.instance();
 
