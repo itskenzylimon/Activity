@@ -5,7 +5,6 @@ import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter

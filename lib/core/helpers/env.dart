@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 
+import 'package:activity/core/helpers/logger.dart';
+
 /// ENVSetup is a class that can be used to read the .env file
 class ENVSetup {
 
@@ -10,6 +12,7 @@ class ENVSetup {
   Future<Map<String, String>> readENVFile(String filePath) async {
     var file = File(filePath);
     if (!await file.exists()) {
+      printError("filePath==${filePath}");
       throw Exception('File not found');
     }
 

@@ -13,9 +13,13 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /*ENVSetup envSetup = ENVSetup();
-  Map<String, String> envMap = await envSetup.readENVFile('/Applications/MySpace/Coding/Repos/activity/example/.env');
-  printError(envMap['ID']);*/
+
+  // ENVSetup envSetup = ENVSetup();
+  // Map<String, String> envMap = await envSetup.readENVFile(
+  //   ".env"
+  //     //'/Applications/MySpace/Coding/Repos/activity/example/.env'
+  // );
+  // printError(envMap['ID']);
 
   // try {
   //
@@ -216,6 +220,7 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    activeController.createMemory();
 
     // activeController.memory.resetMemory();
     // activeController.createMemory();
