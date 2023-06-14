@@ -8,31 +8,43 @@ import 'package:flutter/services.dart';
 
 import 'memory_functions.dart';
 
-
 /// Memory is a class that is used to store data in a file.
 class Memory {
-  ///Initialize a MethodChannel to call platform specific code
-  static const MethodChannel _methodChannel =
-      MethodChannel('activity_mobile_platform_channel');
-
-  /// [Memory] constructor.
-  /// filename is the name of the file you want to store the data in.
-  Memory({String? filename}) : _filename = filename;
   String? _filename;
   String? _filePath;
+  ///to instantiate call await Memory.instance(filename:"filename.extension").initMemory(); in main() main.dart
+  ///in other parts of the app, get instaance by calling Memory memory = Memory.instance();
+  /// [instance] is a [Memory] factory method. This will instantiate a singleton of the [Memory] class appwide
+  /// [filename] is the name of the file you want to store the data in. this can have an extension e.g appdata.txt
+  ///You cannot override [filename] once it is set
 
-  static final Memory memory = Memory();
-
-  initMemory() async {
-    bool isCreated = false;
-    final appDir = await getApplicationDocumentsDirectory();
-    printError("initMemory appDir==");
-    printError(appDir);
-    if(appDir==null||appDir.path==null||appDir.path.isEmpty){
-      return;
+  static Memory? _instance;
+  static Memory instance({String? filename}) {
+    _instance ??= Memory(filename: filename );
+    return _instance!;
+  }
+  /// [Memory] constructor.
+  /// filename is the name of the file you want to store the data in.
+  Memory({String? filename}) {
+    ///You cannot override [filename] once it is set
+    _filename = _filename ?? filename;
+    if(_filename==null){
+      throw PlatformException(code: "404",message: "[filename] is null");
     }
-    _filePath= appDir.path+"/"+((_filename ?? "memory.txt"));
-    //_filePath = join(appDir.path, _filename ?? "memory.txt");
+  }
+
+
+   Future<bool> initMemory() async{
+    Directory? appDir;
+    try {
+       appDir = await getApplicationDocumentsDirectory();
+    }catch(xx){
+      throw PlatformException(code: "415",message: "Platform not supported: "+xx.toString());
+    }
+    if (appDir == null || appDir.path == null || appDir.path.isEmpty) {
+      throw PlatformException(code: "415",message: "Platform not supported");
+    }
+    _filePath = appDir.path + "/" + ((_filename ?? "memory.txt"));
     File file = File(_filePath!);
     if (await file.exists()) {
       return true;
@@ -40,26 +52,41 @@ class Memory {
       try {
         FileStorage fileStorage = FileStorage(_filePath!);
         bool isSaved = fileStorage.save({});
-        printError("isSaved ==${isSaved.toString()}");
-        //file.writeAsBytesSync(utf8.encode(""));
+
         return isSaved;
       } catch (error) {
-        printError("writeAsBytesSync error==");
-        printError(error.toString());
-        return false;
+        throw PlatformException(code: "415",message: "Platform not supported: "+error.toString());
       }
     }
-    /* try {
-      printError("is creating==");
-      isCreated = await _methodChannel.invokeMethod('create', {
-        "memoryPath": _filename,
-      });
-      printError("isCreated==" + isCreated.toString());
-    } catch (error) {
-      printError("error==");
-      printError(error.toString());
-    }*/
   }
+
+  // initMemory() async {
+  //   bool isCreated = false;
+  //   final appDir = await getApplicationDocumentsDirectory();
+  //   printError("initMemory appDir==");
+  //   printError(appDir);
+  //   if(appDir==null||appDir.path==null||appDir.path.isEmpty){
+  //     return;
+  //   }
+  //   _filePath= appDir.path+"/"+((_filename ?? "memory.txt"));
+  //   //_filePath = join(appDir.path, _filename ?? "memory.txt");
+  //   File file = File(_filePath!);
+  //   if (await file.exists()) {
+  //     return true;
+  //   } else {
+  //     try {
+  //       FileStorage fileStorage = FileStorage(_filePath!);
+  //       bool isSaved = fileStorage.save({});
+  //       printError("isSaved ==${isSaved.toString()}");
+  //       //file.writeAsBytesSync(utf8.encode(""));
+  //       return isSaved;
+  //     } catch (error) {
+  //       printError("writeAsBytesSync error==");
+  //       printError(error.toString());
+  //       return false;
+  //     }
+  //   }
+  // }
 
   /// Check if [Memory] is empty.
   Future<bool> get isDataEmpty async {
@@ -76,8 +103,9 @@ class Memory {
     if (_filePath != null) {
       FileStorage fileStorage = FileStorage(_filePath!);
       return await fileStorage.read();
+    }else{
+      throw PlatformException(code: "404",message: "initMemory method not called");
     }
-    return {};
   }
 
   /// Get all data from [Memory].
@@ -103,14 +131,8 @@ class Memory {
     Map<String, dynamic> data = await stageMemory();
     if (value) {
       if (data.containsKey(key)) {
-        if (kDebugMode) {
-          print("readMemory contains key ${key}");
-        }
         return data[key]['value'];
       } else {
-        if (kDebugMode) {
-          print("readMemory !contains key ${key}");
-        }
         return null;
       }
     } else {
@@ -195,9 +217,6 @@ class Memory {
   /// If the [key] is found it returns [true].
   Future<T> _updateMemory<T>(String key, T mem, {bool persist = true}) async {
     Map<String, dynamic> data = await stageMemory();
-
-    printError(data);
-
     /// Set the value of the key to mem
     /// Set the createdAt time
     Map entry = {};
@@ -231,6 +250,9 @@ class Memory {
   ///
   /// Clears every entry
   Future<void> resetMemory() async {
+    if(_filePath==Null){
+      throw PlatformException(code: "404",message: "initMemory method not called");
+    }
     FileStorage fileStorage = FileStorage(_filePath!);
     bool isSaved = fileStorage.save({});
   }
@@ -259,25 +281,13 @@ class FileStorage {
   /// Saves data to a file.
   /// {}
   bool save(Map<String, dynamic> data) {
-    if (kDebugMode) {
-      print("data ==");
-      print(data);
-    }
     String stringEncrypted = encrypt(jsonEncode(data), 134523452346);
-    if (kDebugMode) {
-      print("stringEncrypted ==");
-      print(stringEncrypted);
-    }
     var encodedData = utf8.encode(stringEncrypted);
     var byteData = Uint8List.fromList(encodedData);
     try {
       _file.writeAsBytesSync(byteData);
       return true;
     } catch (error) {
-      if (kDebugMode) {
-        print("writeAsBytesSync error==");
-        print(error.toString());
-      }
       return false;
     }
   }
@@ -288,19 +298,9 @@ class FileStorage {
       var encodedData = _file.readAsBytesSync();
       var decodedData = utf8.decode(encodedData);
       String stringDecrypt = decrypt(decodedData, 134523452346);
-      if (kDebugMode) {
-        print("stringDecrypt==$stringDecrypt");
-      }
-      if (kDebugMode) {
-        print("stringDecrypt==$stringDecrypt");
-      }
-
       return jsonDecode(stringDecrypt) as Map<String, dynamic>;
     } else {
       bool isSaved = save({});
-      if (kDebugMode) {
-        print("isSaved==$isSaved");
-      }
       return {};
     }
   }

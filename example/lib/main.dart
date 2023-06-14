@@ -74,6 +74,8 @@ printError(activeResponse.data);
   //   printError(error);
   // }
 
+  ///Instantiate memory here
+  await Memory.instance(filename:"ttt.act").initMemory();
   runApp(const MyApp());
 }
 

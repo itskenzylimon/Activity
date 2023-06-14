@@ -9,9 +9,10 @@ class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
 
   /// Initialise area
-  Memory memory = Memory(
+  /*Memory memory = Memory(
       //filename: '${Directory.current.path}activity-data.act'
-  );
+  );*/
+  Memory memory = Memory.instance();
 
   /// Assign Active values
   /// You can ideally check
@@ -382,11 +383,8 @@ class MainController extends ActiveController {
   ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({});
 
    void createMemory() async {
-   await memory.initMemory();
    printSuccess(await memory.upsertMemory('hello', 'Asia'));
-   printSuccess(await memory.readMemory('hello'));
    printInfo(await memory.readMemory('hello',value: false));
-   //printSuccess(await memory.readMemory('hello'));
   }
 
   /*updateMemory() async {

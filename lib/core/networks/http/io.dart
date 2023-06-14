@@ -364,7 +364,8 @@ class HttpActiveRequest {
   /// Save the [ActiveResponse] to the [Memory] class.
   _saveApiRequests(ActiveResponse activeResponse, String responseName) async {
     /// Get the instance of the [Memory] class.
-    Memory memory = Memory.memory;
+    //Memory memory = Memory.memory;
+    Memory memory = Memory.instance();
     /// Save the [ActiveResponse] to the [Memory] class.
     memory.upsertMemory(responseName, activeResponse);
   }

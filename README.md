@@ -727,7 +727,16 @@ Active memory is meant to make data management of [activeTypes] fast and easy. Y
 ```dart  
 
 /// initialise Memory instance
-Memory memory = Memory.memory;  
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Memory.instance(filename:"memory.txt").initMemory();
+  runApp(const MyApp());
+} 
+
+///to retrieve instnace of Memory in another dart file do:
+///no need to pass filename:"memory.txt" since the filename created when initMemory() was called will not be overwritten
+Memory memory = Memory.instance();
 
 /// you can easily check if any data is saved on memory
 memory.isDataEmpty  
@@ -735,9 +744,12 @@ memory.isDataEmpty
 ```  
 
 ```dart  
-  
+Memory memory = Memory.instance();
 memory.readMemories(); // Returns a a list of all memories stored  
 memory.readMemory('key'); // Returns the value of the key with its declared type  
+memory.readMemory('key',{bool value = false}); // Returns a key value map of the retrieved memory entry with it's createdAt and updatedAt dateTimes e.g:-
+//{value: Asia, createdAt: 2023-06-14T14:00:37.920852, updatedAt: 2023-06-14T14:07:14.506855}
+
 memory.insertMemory('key', value, {Duration? duration, bool persist = true}); // Creates an entry with the assigned value and key  
 memory.upsertMemory('key', value, {Duration? duration}); // Creates an entry and if the value exist it performs an upsert  
 memory.deleteMemory('key'); // Remove an entry from ActiveMemory  
