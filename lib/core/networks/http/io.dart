@@ -84,9 +84,11 @@ class HttpActiveRequest {
 
   Future<ActiveResponse> postApi(
       Params params,
-      RequestSetUp setUp, {
+      RequestSetUp setUp,
+      {
         String savedResponseName = '',
         bool saveResponse = false,
+        dynamic? body,
       }) async {
     final endpoint = Uri.parse(params.endpoint);
 
@@ -108,7 +110,10 @@ class HttpActiveRequest {
     setUp.httpHeaders?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
-
+    ///Write the body
+    if(body!=null) {
+      request.write(body);
+    }
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
       // The network may be only temporarily unavailable

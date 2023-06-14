@@ -177,9 +177,15 @@ class ActiveRequest {
   postApi(Params params, {
     bool saveResponse = false,
     String savedResponseName = '',
+    dynamic? body,
   }) async{
-    return await HttpActiveRequest().postApi(params, setUp, saveResponse: saveResponse,
-      savedResponseName: savedResponseName);
+    return await HttpActiveRequest().postApi(
+        params,
+        setUp,
+        saveResponse: saveResponse,
+        savedResponseName: savedResponseName,
+        body:body,
+    );
   }
 
   /// [putApi] Get request.
