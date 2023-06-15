@@ -856,7 +856,7 @@ ActiveResponse activeResponse = await activeRequest
 /// 2. String endpoint = ''; ( Required )
 
 ///For postApi
-ActiveResponse activeResponse = await activeRequest  
+ActiveResponse activePostResponse = await activeRequest  
   .postApi(Params(endpoint: 'https://catfact.ninja/fact',
                   body: jsonEncode({}),
                   ));
