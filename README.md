@@ -855,6 +855,17 @@ ActiveResponse activeResponse = await activeRequest
 /// 1. Map<String, String>? queryParameters = {}; ( Optional ) 
 /// 2. String endpoint = ''; ( Required )
 
+///For postApi
+ActiveResponse activeResponse = await activeRequest  
+  .postApi(Params(endpoint: 'https://catfact.ninja/fact',
+                  body: jsonEncode({}),
+                  ));
+  
+/// Here we are passing 
+/// 1. Map<String, String>? queryParameters = {}; ( Optional ) 
+/// 2. String endpoint = ''; ( Required )
+/// 3. dynamic? body = dynamic? ( Optional ). If it is a json send a json string.
+
 /// you can do the complete [getApi], [postApi], [putApi] and
 /// [deleteApi] and still get a successful [activeResponse].
 

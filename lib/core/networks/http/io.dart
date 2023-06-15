@@ -88,7 +88,6 @@ class HttpActiveRequest {
       {
         String savedResponseName = '',
         bool saveResponse = false,
-        dynamic? body,
       }) async {
     final endpoint = Uri.parse(params.endpoint);
 
@@ -111,8 +110,8 @@ class HttpActiveRequest {
       request.headers.add(name, value);
     });
     ///Write the body
-    if(body!=null) {
-      request.write(body);
+    if(params.body!=null) {
+      request.write(params.body);
     }
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
