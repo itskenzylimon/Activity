@@ -84,7 +84,8 @@ class HttpActiveRequest {
 
   Future<ActiveResponse> postApi(
       Params params,
-      RequestSetUp setUp, {
+      RequestSetUp setUp,
+      {
         String savedResponseName = '',
         bool saveResponse = false,
       }) async {
@@ -108,7 +109,10 @@ class HttpActiveRequest {
     setUp.httpHeaders?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
-
+    ///Write the body
+    if(params.body!=null) {
+      request.write(params.body);
+    }
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
       // The network may be only temporarily unavailable
@@ -364,7 +368,8 @@ class HttpActiveRequest {
   /// Save the [ActiveResponse] to the [Memory] class.
   _saveApiRequests(ActiveResponse activeResponse, String responseName) async {
     /// Get the instance of the [Memory] class.
-    Memory memory = Memory.memory;
+    //Memory memory = Memory.memory;
+    Memory memory = Memory.instance();
     /// Save the [ActiveResponse] to the [Memory] class.
     memory.upsertMemory(responseName, activeResponse);
   }

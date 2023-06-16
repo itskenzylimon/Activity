@@ -53,10 +53,12 @@ class RequestSetUp {
 class Params {
   Map<String, dynamic>? queryParameters = {};
   String endpoint = '';
+  dynamic? body;
 
   Params({
     this.queryParameters,
     required this.endpoint,
+    this.body,
   });
 
   @override
@@ -178,8 +180,12 @@ class ActiveRequest {
     bool saveResponse = false,
     String savedResponseName = '',
   }) async{
-    return await HttpActiveRequest().postApi(params, setUp, saveResponse: saveResponse,
-      savedResponseName: savedResponseName);
+    return await HttpActiveRequest().postApi(
+        params,
+        setUp,
+        saveResponse: saveResponse,
+        savedResponseName: savedResponseName,
+    );
   }
 
   /// [putApi] Get request.

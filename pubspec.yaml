@@ -1,6 +1,5 @@
 name: activity
 description: A simple multiplatform State Manager that allows the full power of MVC with ZERO Packages.
-
 version: 1.5.3+5
 homepage: https://github.com/itskenzylimon/Activity/blob/main/README.md
 repository: https://github.com/itskenzylimon/Activity
@@ -9,7 +8,6 @@ environment:
   sdk: '>=2.18.2 <3.0.0'
 
 dependencies:
-  path: ^1.8.2
   flutter:
     sdk: flutter
 
@@ -20,5 +18,12 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
+  plugin:
+    platforms:
+      android:
+        package: io.flutter.plugins.pathprovider
+        pluginClass: PathProviderPlugin
+      ios:
+        pluginClass: PathProviderPlugin
 
   uses-material-design: true

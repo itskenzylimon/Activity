@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,6 +12,7 @@ import 'model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
 
   // ENVSetup envSetup = ENVSetup();
   // Map<String, String> envMap = await envSetup.readENVFile(
@@ -76,11 +78,12 @@ printError(activeResponse.data);
   //   printError(error);
   // }
 
+  ///Instantiate memory here
+  await Memory.instance(filename:"ttt.act").initMemory();
   runApp(const MyApp());
 }
 
-
-Future<File> sendAssetFile(String assetPath, String fileName) async {
+/*Future<File> sendAssetFile(String assetPath, String fileName) async {
   // Load the asset file as a ByteData object.
   final byteData = await rootBundle.load(assetPath);
 
@@ -90,44 +93,65 @@ Future<File> sendAssetFile(String assetPath, String fileName) async {
   // Write the ByteData object to the output file.
   await outputFile.writeAsBytes(byteData.buffer.asUint8List());
   return outputFile;
+}*/
+
+/*Widget fragmentView(){
+  return Fragment(
+   activeController: TaskController(),
+   viewContext: (BuildContext context) {
+   TaskController activeController = Activity.getActivity<TaskController>(context);
+
+      return Scaffold(
+         appBar: AppBar(
+            title: Text('Activity Task App ${activeController.testData.value}'),
+         ),
+         body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                  const Text(
+                     'You have pushed the button this many times:',
+                  ),
+                  GestureDetector(
+                     child: const Text(
+                        "close dialog",
+                     ),
+                     onTap: () {
+                        Navigator.pop(context);
+                     },
+                  ),
+               ],
+            ),
+         ),
+      );
+   },
+);
+}*/
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
 }
 
+class _MyAppState extends State<MyApp> {
+  var taskController = TaskController();
 
-// Widget fragmentView(){
-//   return Fragment(
-//    activeController: TaskController(),
-//    viewContext: (BuildContext context) {
-//    TaskController activeController = Activity.getActivity<TaskController>(context);
-//
-//       return Scaffold(
-//          appBar: AppBar(
-//             title: Text('Activity Task App ${activeController.testData.value}'),
-//          ),
-//          body: Center(
-//             child: Column(
-//                mainAxisAlignment: MainAxisAlignment.center,
-//                children: <Widget>[
-//                   const Text(
-//                      'You have pushed the button this many times:',
-//                   ),
-//                   GestureDetector(
-//                      child: const Text(
-//                         "close dialog",
-//                      ),
-//                      onTap: () {
-//                         Navigator.pop(context);
-//                      },
-//                   ),
-//                ],
-//             ),
-//          ),
-//       );
-//    },
-// );
-// }
+  void afterFirstLayout(BuildContext context) {
+    taskController.createMemory();
+  }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  @override
+  void initState() {
+    super.initState();
+    printError("text");
+    WidgetsBinding.instance.endOfFrame.then(
+      (_) {
+        if (mounted) afterFirstLayout(context);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,50 +162,49 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Activity Task App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: Activity(
-         TaskController(),
-        developerMode: true,
-        onActivityStateChanged: () =>
-            DateTime.now().microsecondsSinceEpoch.toString(),
-        child: TaskView(activeController: TaskController()),
-      ),
+      home: Activity(taskController,
+          developerMode: true,
+          onActivityStateChanged: () =>
+              DateTime.now().microsecondsSinceEpoch.toString(),
+          child: activePage(taskController)
+          //fragmentView(),
+          ),
     );
   }
 }
 
-
-
-Widget activePage(TaskController taskController){
+Widget activePage(TaskController taskController) {
   return ADialog(
-      activeController: taskController,
-      viewContext: (BuildContext context){
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Activity Task App'),
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'You have pushed the button this many times:',
+    activeController: taskController,
+    viewContext: (BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Activity Task App'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'You have pushed the button this many times:',
+              ),
+              GestureDetector(
+                child: const Text(
+                  "close dialog",
                 ),
-                GestureDetector(
-                  child: const Text("close dialog",
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      );
+    },
   );
 }
 
-class TaskView extends ActiveView<TaskController> {
+/*class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
   @override
@@ -362,9 +385,9 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                                 TextButton(
                                                   onPressed: ()
                                                   {
-                                                    /**
+                                                    */ /**
                                                      * Clear fields and refresh Page
-                                                     */
+                                                     */ /*
                                                     activeController.userName.clear();
                                                     activeController.userEmail.clear();
                                                     activeController.taskName.clear();
@@ -546,4 +569,4 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
           ),
         ));
   }
-}
+}*/

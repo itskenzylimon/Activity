@@ -5,7 +5,6 @@ import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -18,8 +17,8 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            CHANNEL
+                flutterEngine.dartExecutor.binaryMessenger,
+                CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "create" -> {
@@ -27,10 +26,15 @@ class MainActivity : FlutterActivity() {
                     val value = call.argument<String>("value") ?: ""
 
                     val memory = Memory(memoryPath)
-                    memory.create(value)
-                    // Call the appropriate create function in your MapDataCRUD class passing the key and value
-                    // For example: mapDataCRUD.create(key, value)
-                    result.success(null) // You can return a result if necessary
+
+                    val isCreated = memory.create(value)
+                    if(isCreated){
+                        result.success(isCreated)
+                    }else {
+                        // Call the appropriate create function in your MapDataCRUD class passing the key and value
+                        // For example: mapDataCRUD.create(key, value)
+                        result.error("503","Error initializing memory",null) // You can return a result if necessary
+                    }
                 }
 
                 "read" -> {
@@ -58,16 +62,16 @@ class MainActivity : FlutterActivity() {
         }
 
         private fun loadDataFromFile() {
-            Log.i("MainActivity:","at loadDataFromFile")
+            Log.i("MainActivity:", "at loadDataFromFile")
             val file = File(filePath)
-            Log.i("MainActivity:","at file")
+            Log.i("MainActivity:", "at file")
             if (file.exists()) {
-                Log.i("MainActivity:","at file.exists()")
+                Log.i("MainActivity:", "at file.exists()")
                 FileReader(file).use { reader ->
                     dataType = reader.readText()
                 }
-            }else{
-                Log.i("MainActivity:","at else")
+            } else {
+                Log.i("MainActivity:", "at else")
                 try {
                     val file = File(filePath)
                     var out = file.outputStream()
@@ -77,24 +81,45 @@ class MainActivity : FlutterActivity() {
                     FileReader(file).use { reader ->
                         dataType = reader.readText()
                     }
-                }catch (exx:Exception){
-                    Log.i("MainActivity:","exception occurred")
-                    Log.i("MainActivity:",exx.message.toString())
+                } catch (exx: Exception) {
+                    Log.i("MainActivity:", "exception occurred")
+                    Log.i("MainActivity:", exx.message.toString())
                     exx.printStackTrace()
                 }
 
             }
         }
 
-        private fun saveDataToFile() {
-            FileWriter(filePath).use { writer ->
-                writer.write(dataType)
+        private fun saveDataToFile(): Boolean {
+            return try {
+                FileWriter(filePath).use { writer ->
+                    writer.write(dataType)
+                }
+                true
+            }catch (exception:Exception){
+                Log.i("MainActivity:", "exception occurred")
+                Log.i("MainActivity:", exception.message.toString())
+                false
             }
         }
 
-        fun create(value: String) {
-            dataType = value
-            saveDataToFile()
+        fun create(value: String): Boolean {
+            val file = File(filePath)
+            if(file.exists()){
+                Log.e("MainActivity:","at create file exists")
+                return true;
+            }
+            Log.e("MainActivity:","at create")
+            var isCreated: Boolean = false;
+            try {
+                dataType = value
+                return   saveDataToFile();
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                Log.e("MainActivity:","create error =="+ex.message)
+            }
+            Log.e("MainActivity:","at create END")
+            return isCreated;
         }
 
         fun read(): String? {

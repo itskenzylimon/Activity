@@ -17,6 +17,7 @@ export 'core/forms/surveyjs_form.dart';
 
 //Memory
 export 'core/memory/memory.dart';
+export 'core/memory/enums.dart';
 
 //Network
 export 'core/networks/active_socket.dart';
