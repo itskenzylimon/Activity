@@ -1,6 +1,12 @@
+
+/// Schema Response is a simple class that helps to check if the data
+/// is valid or not. It also returns the schema used for validation
 class SchemaResponse {
+  /// true if the data is valid, false otherwise
   bool valid;
+  /// the schema used for validation
   Map<String, dynamic> schema;
+  /// errors if the data is invalid
   Map<String, dynamic> errors;
 
   SchemaResponse({
@@ -16,6 +22,9 @@ class SchemaResponse {
   }
 }
 
+/// Schema Validator is a simple class that helps you validate your data
+/// against a schema. It is useful for validating data before sending to
+/// a server or saving to a database.
 class SchemaValidator {
 
   final Map<String, dynamic> _schema;

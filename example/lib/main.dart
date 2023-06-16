@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:example/controller.dart';
@@ -12,14 +13,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ENVSetup envSetup = ENVSetup();
-  // var currentPath = Directory.current.path;
-  // print(currentPath);
-  // print(envSetup.readENVFile('.env'));
+  // Map<String, String> envMap = await envSetup.readENVFile(
+  //   ".env"
+  //     //'/Applications/MySpace/Coding/Repos/activity/example/.env'
+  // );
+  // printError(envMap['ID']);
 
   // try {
   //
   //   ActiveSocket activeSocket = WebSocket();
-  //   activeSocket.open('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
+  //   activeSocket.open('ws://127.0.0.1:2454');
+  //   activeSocket.send('data');
+  //
   //   activeSocket.onSuccess(() {
   //     print("onSuccess");
   //   });
@@ -38,18 +43,33 @@ void main() async {
   //     print('onClose');
   //   });
   //
-  //   ActiveRequest activeRequest =  ActiveRequest();
-  //   activeRequest.setUp = RequestSetUp(
-  //       idleTimeout: 10,
-  //       connectionTimeout: 10,
-  //       logResponse: true,
-  //       withTrustedRoots: true,
-  //   );
-  //
-  //   ActiveResponse activeResponse = await activeRequest
-  //       .getApi(Params(endpoint: 'https://catfact.ninja/fact'));
-  //        final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
-  //   printError(activeResponse.data);
+
+/*try {
+
+  File file = await sendAssetFile('assets/index.html', 'index.html');
+
+    ActiveRequest activeRequest =  ActiveRequest();
+  printError('activeResponse.data');
+    ActiveResponse activeResponse = await activeRequest
+        .uploadFileApi(
+          Params(endpoint: 'https://www.filestackapi.com/api/store/S3?key=Azb7pTmKLQFGojQWsXwroz',
+          queryParameters: {}),
+          file,'ndex.html', RequestSetUp(
+        idleTimeout: 10,
+        connectionTimeout: 10,
+        logResponse: true,
+        withTrustedRoots: true,
+        httpHeaders: {        }
+    ));
+
+printError(activeResponse.statusCode);
+printError(activeResponse.data);
+         final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
+    printError(activeResponse.data);
+
+} catch (error){
+  printError(error);
+}*/
 
   //
   // } catch (error){
@@ -57,27 +77,108 @@ void main() async {
   // }
 
   runApp(const MyApp());
-
 }
+
+
+Future<File> sendAssetFile(String assetPath, String fileName) async {
+  // Load the asset file as a ByteData object.
+  final byteData = await rootBundle.load(assetPath);
+
+  // Create a new File object for the output file.
+  final outputFile = File(fileName);
+
+  // Write the ByteData object to the output file.
+  await outputFile.writeAsBytes(byteData.buffer.asUint8List());
+  return outputFile;
+}
+
+
+// Widget fragmentView(){
+//   return Fragment(
+//    activeController: TaskController(),
+//    viewContext: (BuildContext context) {
+//    TaskController activeController = Activity.getActivity<TaskController>(context);
+//
+//       return Scaffold(
+//          appBar: AppBar(
+//             title: Text('Activity Task App ${activeController.testData.value}'),
+//          ),
+//          body: Center(
+//             child: Column(
+//                mainAxisAlignment: MainAxisAlignment.center,
+//                children: <Widget>[
+//                   const Text(
+//                      'You have pushed the button this many times:',
+//                   ),
+//                   GestureDetector(
+//                      child: const Text(
+//                         "close dialog",
+//                      ),
+//                      onTap: () {
+//                         Navigator.pop(context);
+//                      },
+//                   ),
+//                ],
+//             ),
+//          ),
+//       );
+//    },
+// );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
+    // TaskController activeController = TaskController();
+    // activeController.testData.setToOriginal(' Test Data', activeController.testData.typeName ?? '');
+    // activeController.testData.set("Hello world");
+
     return MaterialApp(
       title: 'Activity Task App',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Activity(
-        MainController(),
-        // developerMode: true,
-        onActivityStateChanged: ()=>
+         TaskController(),
+        developerMode: true,
+        onActivityStateChanged: () =>
             DateTime.now().microsecondsSinceEpoch.toString(),
-        child: TaskView(
-          activeController: TaskController(),
-        ),
+        child: TaskView(activeController: TaskController()),
       ),
     );
   }
+}
+
+
+
+Widget activePage(TaskController taskController){
+  return ADialog(
+      activeController: taskController,
+      viewContext: (BuildContext context){
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Activity Task App'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'You have pushed the button this many times:',
+                ),
+                GestureDetector(
+                  child: const Text("close dialog",
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+  );
 }
 
 class TaskView extends ActiveView<TaskController> {
@@ -90,15 +191,20 @@ class TaskView extends ActiveView<TaskController> {
 
 class _TaskViewState extends ActiveState<TaskView, TaskController> {
   _TaskViewState(super.activeController);
+  // SchemaData schema = SchemaData();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // activeController.memory.stageMemory();
-    // activeController.syncMemory();
-    activeController.initCalculations();
-    activeController.validateJSON();
+    activeController.createMemory();
+
+    // activeController.memory.resetMemory();
+    // activeController.createMemory();
+    // activeController.getMemory();
+
+    // activeController.initCalculations();
+    // activeController.validateJSON();
     activeController.startServer();
   }
 
@@ -109,14 +215,17 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   //   super.didChangeDependencies();
   // }
 
+  Map<String, Map<String, dynamic>> formResults = {};
+
   @override
   Widget build(BuildContext context) {
-
+    debugPrint(activeController.schema.toString());
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
       theme: ThemeData(
-        primarySwatch: activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
+        primarySwatch:
+            activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: Scaffold(
@@ -126,10 +235,17 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         // ),
         body: SafeArea(
             child:
-            // SurveyJSForm(schema: activeController.schema, context: context, formAppBar: AppBar(
-            //   title: Text(activeController.appTitle.value),
-            // )).createSurveyJSView()
-            // activeController.activeForm.create(context)
+
+            // SurveyJSForm(
+            //       schema: activeController.schema,
+            //       context: context,
+            //       formResults: formResults,
+            //     onFormValueSubmit: (Map results) {
+            //       /// At this point, the form has been submitted and the
+            //       /// results are available in the formResults variable
+            //       /// handle the results here
+            //     })
+
             Column(
               children: [
                 TextButton(
@@ -430,5 +546,4 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
           ),
         ));
   }
-
 }

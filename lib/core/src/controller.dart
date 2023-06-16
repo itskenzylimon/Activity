@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:activity/core/types/active_type.dart';
-import 'package:flutter/foundation.dart';
 
 import 'errors.dart';
 
@@ -148,7 +147,7 @@ abstract class ActiveController {
         _removeIsRunningKey(isRunningKey);
       }
       _actively = _isRunningKeys.isNotEmpty || isRunning;
-      notifyActivities([ActiveStateChanged(isRunning, !isRunning)]);
+      notifyActivities([ActiveStateChanged(isRunning, !isRunning, typeName: 'State Updated')]);
     }
   }
 
@@ -256,7 +255,6 @@ abstract class ActiveController {
   /// Use this when you want to clear current state & event listeners
   /// that are connected and are active.
 
-  @mustCallSuper
   void resetActivities() {
     for (var sub in _subscriptions) {
       sub.cancel();

@@ -9,8 +9,7 @@ class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
 
   /// Initialise area
-  // Memory memory = Memory(filename: '${Directory.current.path}/data3.json');
-  Memory memory = Memory.memory;
+  Memory memory = Memory(filename: '${Directory.current.path}activity-data.act');
 
   /// Assign Active values
   /// You can ideally check
@@ -36,6 +35,7 @@ class MainController extends ActiveController {
         user: User(name: 'Kenzy Limon', email: 'itskenzylimon@gmail.com')))
   ]);
 
+  Map schema = {};
   @override
   List<ActiveType> get activities {
     return [appTitle, appBarSize, dataLoaded];
@@ -93,9 +93,7 @@ class MainController extends ActiveController {
 
     SchemaResponse schemaResponse = schemaValidator.validate(sampleJSON);
     if (schemaResponse.valid == false) {
-      printError(schemaResponse.toString());
     } else {
-      printSuccess(schemaResponse.toString());
     }
   }
 
@@ -143,11 +141,10 @@ class MainController extends ActiveController {
     /// of the built in DateTime functions
     /// [Activity] will allow you to update anywhere on the app code and rebuild UI
     /// for the affected widgets Only
-    ActiveDateTime activeDateTime =
-        ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
+    ActiveDateTime activeDateTime = ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeDateTime.setOriginalValueToCurrent();
+    activeDateTime.setOriginalValueToCurrent('dateOfBirth');
     activeDateTime.reset(notifyChange: true);
 
     /// You can do updates to a field using [set] func, this will do the update
@@ -172,7 +169,7 @@ class MainController extends ActiveController {
     ActiveDouble activeDouble = ActiveDouble(1.5, typeName: 'rate'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeDouble.setOriginalValueToCurrent();
+    activeDouble.setOriginalValueToCurrent('rate');
     activeDouble.reset(notifyChange: true);
 
     /// checks if the value is negative and returns a bool type
@@ -214,7 +211,7 @@ class MainController extends ActiveController {
     ActiveInt activeInt = ActiveInt(100, typeName: 'score'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeInt.setOriginalValueToCurrent();
+    activeInt.setOriginalValueToCurrent('score');
     activeInt.reset(notifyChange: true);
 
     /// checks if the value is negative and returns a bool type
@@ -265,10 +262,10 @@ class MainController extends ActiveController {
     /// of the built in List functions
     /// [Activity] will allow you to update anywhere on the app code and rebuild UI
     /// for the affected widgets Only
-    ActiveList activeList = ActiveList([1, 2, 3], typeName: 'score'); // 1.5
+    ActiveList activeList = ActiveList([1, 2, 3], typeName: 'activeList'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeList.setOriginalValueToCurrent();
+    activeList.setOriginalValueToCurrent('activeList');
     activeList.reset(notifyChange: true);
 
     /// You can do updates to a field using [set] func, this will do the update
@@ -292,7 +289,7 @@ class MainController extends ActiveController {
     ActiveMap activeMap = ActiveMap({'key': 123}, typeName: 'score'); // 1.5
 
     /// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-    activeMap.setOriginalValueToCurrent();
+    activeMap.setOriginalValueToCurrent('score');
     activeMap.reset(notifyChange: true);
 
     /// You can do updates to a field using [set] func, this will do the update
@@ -304,10 +301,6 @@ class MainController extends ActiveController {
 
     /// [value] will give you the current value
     activeMap.value;
-  }
-
-  syncMemory() async {
-    // await memory.syncMemory();
   }
 
   /// How to start a local server on your io device with routing
@@ -327,61 +320,52 @@ class MainController extends ActiveController {
 
   Map<ContentType, dynamic> aboutPage(HttpRequest request) {
     return {
-      ContentType.json: {
-        'url': request.uri.path,
-        'key': 'Hello, World!... This is about us!'
-      }
+      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is about us!'}
     };
   }
 
   Map<ContentType, dynamic> contactUsPage(HttpRequest request) {
     return {
-      ContentType.json: {
-        'url': request.uri.path,
-        'key': 'Hello, World!... This is contact us!'
-      }
+      ContentType.json: {'url': request.uri.path, 'key': 'Hello, World!... This is contact us!'}
     };
   }
 
   Map<ContentType, dynamic> notFoundPage(HttpRequest request) {
-    var json = jsonEncode(
-        {'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
+    var json = jsonEncode({'url': request.uri.path, 'key': 'Hello, World!... Not found!'});
 
     return {ContentType.json: json};
   }
 
   /// Map request to response
-  Future<Map<ContentType, dynamic>> httpRequests(
-      HttpRequest httpRequest) async {
+  Future<Map<ContentType, dynamic>> httpRequests(HttpRequest httpRequest) async {
     switch (httpRequest.uri.path) {
       case '/':
         return homePage(httpRequest);
-        break;
 
       case '/contactus':
         return aboutPage(httpRequest);
-        break;
 
       case '/about':
         return contactUsPage(httpRequest);
-        break;
 
       default:
         return notFoundPage(httpRequest);
-        break;
     }
   }
 
-  startServer() {
-    HttpServer.bind(InternetAddress.anyIPv4, 3000).then((server) {
-      printInfo('Listening on localhost:${server.port}');
+  startServer() async {
+
+    var anyIPv4 = InternetAddress.anyIPv4;
+    printSuccess('{{{anyIPv4}}}');
+    printSuccess(anyIPv4);
+
+    HttpServer.bind(anyIPv4, 1996).then((server) {
 
       /// Start a server
       server.listen((HttpRequest httpRequest) async {
         Map<ContentType, dynamic> response = await httpRequests(httpRequest);
         var data = response.values.first;
         var type = response.keys.first;
-        printNormal(data);
         httpRequest.response
           ..headers.contentType = type
           ..statusCode = 200
@@ -391,4 +375,30 @@ class MainController extends ActiveController {
     });
   }
 
+  //create an object of ActiveMap<String, Map<String, dynamic>> to store the form results
+
+  ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({});
+
+  createMemory() async {
+    updateMemory();
+  }
+
+  updateMemory() async {
+    printSuccess(await memory.upsertMemory('hello', 'Asia'));
+    printSuccess(await memory.upsertMemory('Jambo', DateTime.now().
+    subtract(const Duration(days: 5)).toIso8601String()));
+  
+    getMemory();
+  }
+
+  getMemory() async {
+    printSuccess(await memory.readMemory('hellos'));
+    printSuccess(await memory.readMemory('Jambos'));
+    printSuccess(await memory.readMemory('hello'));
+    printSuccess(await memory.readMemory('Jambo'));
+
+  }
+
 }
+
+

@@ -9,6 +9,7 @@ environment:
   sdk: '>=2.18.2 <3.0.0'
 
 dependencies:
+  path: ^1.8.2
   flutter:
     sdk: flutter
 

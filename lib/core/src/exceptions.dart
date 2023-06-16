@@ -44,6 +44,6 @@ class ActiveTypeNotAssignedException extends ActiveException {
   @override
   String toString() =>
       '[ActiveTypeNotAssignedException] : Value for ${typeName ?? type} changed '
-          'and failed to update the UI. Check if you assigned the value'
-          '.\nStack Trace: $stackTrace';
+          'and failed to update the UI. \nStack Trace: $stackTrace, '
+          'add ${typeName ?? type} to list List<ActiveType> get activities';
 }

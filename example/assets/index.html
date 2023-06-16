@@ -5,7 +5,7 @@
         /* Make the iframe responsive */
         .responsive-iframe {
             position: relative;
-            padding-bottom: 56.25%;
+            padding-bottom: 100%;
             height: 0;
             overflow: hidden;
         }
@@ -19,9 +19,58 @@
     </style>
 </head>
 <body>
+
+
+
 <!-- The iframe with a responsive design -->
-<div class="responsive-iframe">
-    <iframe src="https://google.com" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+<!--<div class="responsive-iframe">-->
+<!--    <iframe id="my-iframe" src="https://facebook.com" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
+<!--</div>-->
+
+<!-- JavaScript code to handle CORS errors -->
+<!--<script>-->
+<!--    var iframe = document.getElementById('my-iframe');-->
+<!--    var blockedURLs = ['example.com', 'google.com'];-->
+
+<!--    function checkURL() {-->
+<!--        var currentHostname = iframe.contentWindow.location.hostname;-->
+
+<!--        console.log('Checking if ' + currentHostname + ' is blocked');-->
+
+<!--        if (iframe.contentWindow.location.href !== window.currentURL) {-->
+<!--            console.log('URL changed to: ' + iframe.contentWindow.location.href);-->
+<!--            window.currentURL = iframe.contentWindow.location.href;-->
+
+<!--            checkBlockedURLs();-->
+<!--        }-->
+<!--    }-->
+
+<!--    function checkBlockedURLs() {-->
+<!--        var currentHostname = iframe.contentWindow.location.hostname;-->
+
+<!--        console.log('Checking if ' + currentHostname + ' is blocked');-->
+
+<!--        if (currentHostname.includes('/retailers')) {-->
+<!--            // If the URL matches, make a POST request with the provided data-->
+<!--            fetch('localhost:3000/get-code', {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json'-->
+<!--                },-->
+<!--                body: JSON.stringify({-->
+<!--                    url: iframe.contentWindow.location.href-->
+<!--                })-->
+<!--            }).then(function(response) {-->
+<!--                console.log('POST request was successful');-->
+<!--            }).catch(function(error) {-->
+<!--                console.error('POST request failed:', error);-->
+<!--            });-->
+<!--        }-->
+<!--    }-->
+
+<!--    window.currentURL = iframe.contentWindow.location.href;-->
+<!--    setInterval(checkURL, 1000); // check every second-->
+<!--</script>-->
+
 </body>
 </html>

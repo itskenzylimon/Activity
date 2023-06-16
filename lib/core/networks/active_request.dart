@@ -1,12 +1,23 @@
-
+import 'dart:io' as io if (dart.library.web) 'dart:html';
 import 'package:activity/core/networks/http/io.dart';
 
 export 'package:activity/core/networks/sockets/web.dart'
 if (dart.library.io) 'package:activity/core/networks/sockets/io.dart';
 
+
 // ignore: camel_case_types
 typedef getApi = void Function();
 
+/// RequestSetUp is a class that contains the configuration of the request
+/// idleTimeout is the time in seconds to wait for the request to complete
+/// connectionTimeout is the time in seconds to wait for the connection to complete
+/// logResponse is a boolean to print the response in the console
+/// withTrustedRoots is a boolean to use the trusted roots
+/// httpHeaders is a map of the headers to send in the request
+/// privateKeyPath is the path of the private key
+/// schemePath is the scheme of the request
+/// baseURL is the base url of the request
+/// privateKeyPassword is the password of the private key
 class RequestSetUp {
   int? idleTimeout = 1;
   int? connectionTimeout = 1;
@@ -36,8 +47,11 @@ class RequestSetUp {
   }
 }
 
+/// Params is a class that contains the data of the request
+/// [queryParameters] is a map of the query parameters. It is optional
+/// [endpoint] is the endpoint of the request. It is required
 class Params {
-  Map<String, String>? queryParameters = {};
+  Map<String, dynamic>? queryParameters = {};
   String endpoint = '';
 
   Params({
@@ -51,6 +65,11 @@ class Params {
   }
 }
 
+/// ActiveResponse is a class that contains the response of the request
+/// [statusCode] is the status code of the response
+/// [endpoint] is the endpoint of the request
+/// [errors] is the error of the response
+/// [data] is the data of the response
 class ActiveResponse {
   int statusCode;
   String endpoint = '';
@@ -70,6 +89,13 @@ class ActiveResponse {
   }
 }
 
+/// ActiveRequest is a class that contains the request function.
+/// [setUp] is the configuration of the request
+/// [getApi] is the function that makes a get request
+/// [postApi] is the function that makes a post request
+/// [putApi] is the function that makes a put request
+/// [deleteApi] is the function that makes a delete request
+/// [uploadFileApi] is the function that makes a upload file request
 class ActiveRequest {
   RequestSetUp setUp = RequestSetUp();
 
@@ -230,4 +256,44 @@ class ActiveRequest {
     return await HttpActiveRequest().deleteApi(params, setUp, saveResponse: saveResponse);
   }
 
+
+  /// [deleteApi] Get request.
+  ///
+  /// set [saveResponse] to 'true' if you would want to save the response
+  /// pass [savedResponseName] if you'd want to have a unique key assigned to
+  /// the saved [saveResponse] data. leaving this empty, Activity will set the
+  /// key name as the [endpoint].
+  ///
+  ///  ActiveResponse({
+  ///     required this.statusCode,
+  ///     required this.endpoint,
+  ///     this.data,
+  ///   });
+  ///
+  ///
+  ///     ActiveRequest activeRequest =  ActiveRequest();
+  ///
+  ///     activeRequest.setUp = RequestSetUp(
+  ///       idleTimeout: 10,
+  ///       connectionTimeout: 10,
+  ///       logResponse: true,
+  ///       withTrustedRoots: true
+  ///     );
+  ///
+  ///     ActiveResponse activeResponse = await activeRequest
+  ///     .deleteApi(Params(endpoint: 'https://catfact.ninja/fact'));
+  ///
+  /// You can easily get the [saveResponse] value using Memory
+  Future<ActiveResponse> uploadFileApi(
+      Params params,
+      io.File file,
+      String fileName,
+      RequestSetUp setUp, {
+        String savedResponseName = '',
+        bool saveResponse = false,
+      }) async{
+    return await HttpActiveRequest().uploadFileApi(
+        params, file, fileName, setUp, saveResponse: saveResponse
+    );
+  }
 }

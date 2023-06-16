@@ -275,11 +275,157 @@ Apart from State Management, Activity can benefit a developer in many ways inclu
 * Lastly but not the least, Activity allows developers to practice better  
   MVC architecture.
 
+
+### How to use Activity effectively
+* Create a Controller class that extends `ActiveController`
+* Create a View class that extends `ActiveView` / `ActiveState`
+***
+* to get the controller instance, use `Activity.getActivity<Controller>(context)`
+* use `ifRunning` to check if the controller is running
+* use `activeAsync` to run a function **asynchronously** in the background. after the function is done, it
+will automatically handle setting **actively** status from true to false once done.
+> This can be helpful when you want to run **asynchronously** function in the background, and you don't want to manually set the **status** 
+> to false when done or if you have a loading indicator that depends on the status of the controller.
+
+```dart
+
+/// loadTasks is your function that returns a Future<void>
+/// inside this function you can call your service to fetch data from the server or the database.
+/// We call activeAsync and pass a function with a isRunningKey key to make it easier to find the controller.
+/// The function will run in the background and once done, it will automatically set the status to false and return
+/// dynamic value from the function.
+Future<void> loadTasks() async {
+    final tasks = await activeAsync<Tasks>(
+      () async => await taskService.getAllActiveTasks(),
+      /// [isRunningKey] is a String value rep Activity running status, this value
+      /// could be used to find the active [ActiveController].
+      isRunningKey: 'loadTasks'
+    );
+}
+
+```
+
+* use `activateTypes` to activate controller types at the same time
+```dart 
+
+  /// [activateTypes] allows multiple [ActiveType] to be updated at once and it
+  /// will only trigger a single state change.
+  ///
+  /// [activeTypeList] is a [List<Map<ActiveType, dynamic>>], where keys are the
+  /// properties you want to set, and the values are the new changes. Each map
+  /// in the list must contain exactly one key/value pair.
+  ///
+  ///## Example
+  ///
+  late final ActiveType<String> taskName;
+  late final ActiveType<int> taskScore;
+  
+  activateTypes([
+     {taskName: 'Write Test Cases'},
+     {taskScore: 5.5},
+  ]);
+  
+``` 
+
+* use `resetAllActiveTypes` to reset all active types to their default values
+```dart
+  /// [resetAllActiveTypes] will reset all [ActiveType] to their default values
+  /// and trigger a single state change.
+  ///
+  ///## Example
+  ///
+  late final ActiveType<String> taskName;
+  late final ActiveType<int> taskScore;
+  
+  resetAllActiveTypes();
+
+```
+* use `Fragment` to create a reactive widget that can be used in multiple places
+```dart
+  ///## Example Fragment
+  ///
+
+Fragment fragment = Fragment(
+   activeController: TaskController(),
+   viewContext: (BuildContext context) {
+      /// access the TaskController() using Activity.getActivity
+      TaskController activeController = Activity.getActivity<TaskController>(context);
+      return Scaffold(
+         appBar: AppBar(
+            title: const Text('Activity Task App'),
+         ),
+         body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                  const Text(
+                     'You have pushed the button this many times:',
+                  ),
+                  GestureDetector(
+                     child: const Text(
+                        "close dialog",
+                     ),
+                     onTap: () {
+                        Navigator.pop(context);
+                     },
+                  ),
+               ],
+            ),
+         ),
+      );
+   },
+);
+
+/// Fragment can be used in multiple places like this
+```
+
+* use `ADialog` to create a reactive dialog that can be used in multiple places
+```dart
+  ///## Example Dialog
+
+ADialog aDialog = ADialog(
+   backgroundColor: Colors.red,
+   margin: const EdgeInsets.all(100),
+   activeController: activeController,
+   viewContext: (BuildContext context) {
+      return Scaffold(
+         appBar: AppBar(
+            title: const Text('Activity Task App'),
+         ),
+         body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                  const Text(
+                     'You have pushed the button this many times:',
+                  ),
+                  GestureDetector(
+                     child: const Text(
+                        "close dialog",
+                     ),
+                     onTap: () {
+                        Navigator.pop(context);
+                     },
+                  ),
+               ],
+            ),
+         ),
+      );
+   },
+);
+
+```
+
 ## Data Types
 
 **Activity** will allow you to update your declared variables anywhere on the app code and rebuild the UI  for the affected widgets Only.
 
 Active Data Types have a *typeName* and can be any key you assign the type to. It can really help when you want to update a value based on the assigned key *typeName*
+
+*setToOriginal* is function that extends any type of Active Type, it is meant to be used when you want to persist a value over
+the applications lyfecycle. you can still update the current value but the original value will persist through out and you can easily access the original values. Under the hood it relies on Memory to persist data.
+
+*setOriginalValueToCurrent* this function function update the original value set by *setToOriginal* to the current value, it will perform updates on the UI.
 
 #### ActiveBool
 * ActiveBool : extends the dart bool data type, meaning you can enjoy the benefits  of the built in bool functions.
@@ -517,19 +663,17 @@ activeMap.set({'key': 100},
   
 /// [value] will give you the current value  
 activeMap.value;
-``` 
-
-#### ActiveMemory
-* ActiveMemory : extends the dart bool data type, meaning you can enjoy the benefits  of the built in Memory functions.
-
-```dart 
-Docs coming soon
-``` 
+```
 
 #### ActiveModel
 * ActiveModel : This is a user specified Model class, you can save a Model and have it reactive across the app cycle while enjoying the benefits that come with Model class.
 
 ```dart 
+
+Its a work in progress, should work as ActiveType for now, but more
+features will be added soon. To make more data types reactive. and built
+in functions to sync data.
+
 Docs coming soon
 ``` 
 
@@ -537,14 +681,42 @@ Docs coming soon
 * ActiveString : extends the dart String data type, meaning you can enjoy the benefits  of the built in String functions.
 
 ```dart 
-Docs coming soon
+
+/// ActiveString extend the normal String Type with activity helper functions
+  ActiveString appTitle = ActiveString('First Title');
+
+/// [Contains] Whether the string value contains a match of [other].
+  appTitle.contains('First');
+  
+/// [isEmpty] Whether the string value is empty.
+  appTitle.isEmpty;
+
+/// [isNotEmpty] Whether the string value is not empty.
+  appTitle.isNotEmpty;
+  
+/// [length] The length of the string value.
+  appTitle.length;
+  
+/// To get the value of the string
+  appTitle.value;
+  
+/// To set the value of the string
+  appTitle.set('New Title');    
+
 ``` 
 
 #### ActiveType
 * ActiveType : This is a Type Any data data type, It supports any kind of data be it a Color, Widget, Map, Styles...
 
 ```dart 
-Docs coming soon
+/// ActiveType is a Type any with activity helper functions
+  ActiveType appBackgroundColor = ActiveType(Colors.white);
+  
+  /// ActiveType is a Type any with activity helper functions
+  ActiveType appBackgroundColor = ActiveType(Colors.white);
+  
+  ActiveType dateTime = ActiveType(DateTime.now());
+  
 ``` 
 
 
@@ -566,9 +738,8 @@ memory.isDataEmpty
   
 memory.readMemories(); // Returns a a list of all memories stored  
 memory.readMemory('key'); // Returns the value of the key with its declared type  
-memory.createMemory('key', value); // Creates an entry with the assigned value and key  
-memory.upsertMemory('key', value); // Creates an entry and if the value exist it performs an upsert  
-memory.updateMemory('key', value); // Performs an update on the key value   
+memory.insertMemory('key', value, {Duration? duration, bool persist = true}); // Creates an entry with the assigned value and key  
+memory.upsertMemory('key', value, {Duration? duration}); // Creates an entry and if the value exist it performs an upsert  
 memory.deleteMemory('key'); // Remove an entry from ActiveMemory  
 memory.resetMemory(); // This resets all the entries on ActiveMemory  
 memory.hasMemory(); // Checks if a key exists in ActiveMemory  
@@ -688,29 +859,77 @@ import 'package:super_string/super_string.dart';
   
 void main() {  
     
+    /// isUpperCase checks if a string is in uppercase
   _value = 'ACTIVITY'.isUpperCase; /// => true  
+  /// isLowerCase checks if a string is in lowercase
   _value = 'activity'.isLowerCase; /// => true  
+  /// toCamelCase converts a string to camelCase
   _value = 'I_love activity'.toCamelCase(); /// => 'iLoveActivity'  
+  /// containsAll checks if a string contains all the words in a list
   _value = 'I love activity'.containsAll(['activity','love']); /// => true  
+  /// containsAny checks if a string contains any of the words in a list
   _value = 'I love activity'.containsAny(['hello','activity']); /// => true  
+  /// title converts a string to title case
   _value = 'I loVE ACTIVITY'.title(); /// => I Love Activity  
+  /// capitalize converts a string to capitalize case
   _value = 'activity'.capitalize(); /// => Activity  
     
+    /// isAlNum checks if a string is alphanumeric
   _value = '123Activity'.isAlNum; /// => true  
+  /// isAlpha checks if a string is alphabetic
   _value = 'Activity'.isAlpha; /// => true  
+  /// isInteger checks if a string is an integer
   _value = '111'.isInteger; /// => true  
   
+  /// count counts the number of times a word appears in a string
   _value = 'activity'.count('i'); /// => 2  
+  /// iterable converts a string to a list of characters
   _value = 'Activity'.iterable; /// => ['A','c','t','i','v', 'i', 't', 'y']  
+  /// first returns the first character of a string
   _value = 'Activity'.first; /// => A  
+  /// last returns the last character of a string
   _value = 'Activity'.last; /// => y  
+  /// charAt returns the character at a given index
   _value = 'Activity'.charAt(0); /// => A  
   
 }  
 ```  
 
-## Activity Validation Setup:
+## Env Helper
 
+Env helper is a helper that allows you to access your environment variables easily.
+its ideal for storing sensitive information like API keys, database credentials, etc.
+
+Store the .env file in the root of your project and add it to your .gitignore file.
+data type is automatically detected and converted to the appropriate type.
+
+Expect a Future Map<String, dynamic> with the following format.
+
+```dart 
+
+import 'package:activity/activity.dart';
+
+ENVSetup envSetup = ENVSetup();
+
+/// if you change the path to the .env file, 
+/// you can pass it as a [filePath] parameter. Remember to use the
+/// absolute path to the file. .env file must be in the root of your project build file if
+/// not you can pass the path to the file as a parameter to the [readENVFile] function.
+
+print(envSetup.readENVFile('your_project/build_root_path/.env'));
+
+/// Example .env file
+ID=123
+KEY=QWE
+
+/// returns a Future<Map<String, String>> with the following format.
+{ID: 123, KEY: QWE}
+
+```  
+
+
+
+## Activity Validation Setup:
 
 **Activity** has a first-class support for object data validation, it works by defining a scheme with rules and assigning an object to [SchemaValidator.validate] for validation.
 
@@ -719,12 +938,23 @@ void main() {
 **SchemaValidator** supports a number of data types like String, Numbers, bool, Date, Email and Phone validations, and apart from those, it also supports Max and Min checks with optional and mandatory fields.
 
 ```dart
+
+/// a sample json object to be validated, you can use any object.
+var sampleJSON = {
+   "email": "johndoegmail.com",
+   "phone": "2541234567",
+   "birthdate": "2020-01-01",
+   "address": "Area 254",
+   "name": "Test"
+};
+
 /// This is the schema definition.  
 /// Activity allows String, Numbers, bool, Date, Email and Phone validations  
 /// apart from those activity also supports max and Min with optional and  
 /// mandatory fields.  
 var registerSchema = {
   
+  /// you can use the required to make a field mandatory.
   "name": {  
   "type": String,  
   "required": true,  
@@ -732,24 +962,28 @@ var registerSchema = {
   "max": 20  
   },
     
+   /// you can also use the email to validate the email address.
   "email": {  
   "type": String,  
   "required": true,  
   "email": true,  
  },  
 
+   /// you can also use the phone to validate the phone number.
 "phone": {  
   "type": String,  
   "required": true,  
   "phone": true,  
  },  
 
+   /// you can also use the date to validate the date format.
 "birthdate": {  
   "type": String,  
   "required": true,  
   "date": true,  
  },  
 
+   /// you can also use the min and max to validate the length of a string.
 "address": {  
   "type": String,  
   "required": true,  
@@ -757,6 +991,27 @@ var registerSchema = {
   "max": 100
 }  
 };
+
+/// to validate the object against the schema, just pass the schema and the object to be validated.
+/// returns a SchemaResponse object with the following format.
+/// SchemaResponse({required this.valid, required this.schema, required this.errors});
+
+/// Example validation function. that validates the sampleJSON against the registerSchema above.
+validateJSON() async {
+   SchemaValidator schemaValidator = SchemaValidator(registerSchema);
+   // schemaValidator.customErrors = customErrorMessage;
+
+   /// returns a SchemaResponse object with the following format.
+   /// SchemaResponse({required this.valid, required this.schema, required this.errors});
+   SchemaResponse schemaResponse = schemaValidator.validate(sampleJSON);
+   if (schemaResponse.valid == false) {
+     /// do something with the errors.
+   } else {
+     /// do something with the schema. at this point the schema is valid.
+   }
+}
+
+
 ```
 
 **SchemaValidator** returns a **SchemaResponse** response Model that contains the need fields for your next steps, be it, database insert or parsing to the server.
@@ -796,6 +1051,8 @@ validateJSON(){
   printSuccess(schemaResponse.toString());  
  }}
  ```
+
+Using a **SchemaValidator** is very easy and straight forward, you can use it to validate your **JSON** objects before sending them to the server, or before inserting them to the database.
 
 #### Example Process Flow.
 
@@ -839,9 +1096,10 @@ If submitting a pull request, please ensure the following standards are met:
 
 This package has **NO** dependencies.
 
-Developed by:
+© 2023
+Developed by: [Kenzy Limon](https://kenzylimon.com)
 
-© 2022 [Kenzy Limon](https://kenzylimon.com)
+Top Contributors: [Contributors](), [Contributors](), [Contributors](), [Contributors](), [Contributors]()
 
 ### Articles and videos
 
