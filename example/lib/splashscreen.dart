@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:example/main.dart';
+import 'package:example/task_view.dart';
 import 'package:flutter/material.dart';
 import 'package:example/task_controller.dart';
 import 'package:activity/activity.dart';
