@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:activity/activity.dart';
 import 'package:activity/core/types/active_type.dart';
 
 import 'errors.dart';
@@ -23,9 +24,11 @@ abstract class ActiveController {
   final List<StreamSubscription> _subscriptions = [];
 
   bool _actively = false;
+
   bool get actively => _actively;
 
   final List<dynamic> _isRunningKeys = [];
+
   List<dynamic> get activeTasks => _isRunningKeys;
 
   ActiveController() {
@@ -133,21 +136,19 @@ abstract class ActiveController {
   /// in [ActiveController].
   ///
   /// [isRunning] is a bool value rep Activity running status
-  /// [isRunningKey] is a String value rep Activity running status, this value
+  /// [isRunningKey] is a String value rep Activity running key, this value
   /// could be used to find the active [ActiveController].
   ///
   /// [activeAsync] functions automatically updates [actively] value.
 
   void setRunningStatus(
       {required bool isRunning, required String isRunningKey}) {
-    if (_actively != isRunning) {
-      if (isRunning) {
-        _addIsRunningKey(isRunningKey);
-      } else {
-        _removeIsRunningKey(isRunningKey);
-      }
+    if (isRunning) {
+      _addIsRunningKey(isRunningKey);
       _actively = _isRunningKeys.isNotEmpty || isRunning;
       notifyActivities([ActiveStateChanged(isRunning, !isRunning, typeName: 'State Updated')]);
+    } else {
+      _removeIsRunningKey(isRunningKey);
     }
   }
 
@@ -222,8 +223,12 @@ abstract class ActiveController {
   ///
   /// Pass the [isRunningKey] if you intend to specify the [ActiveController].
 
-  bool isTaskRunning(dynamic isRunningKey) =>
-      _isRunningKeys.contains(isRunningKey);
+  bool isTaskRunning({String? isRunningKey}) {
+    if(isRunningKey == null){
+      return _isRunningKeys.isNotEmpty;
+    }
+   return _isRunningKeys.contains(isRunningKey);
+  }
 
   /// Use this when you intend to attach [isRunningKey] to a running [ActiveController].
 
@@ -306,11 +311,37 @@ class ActiveStateChanged<T> {
   /// [clearActiveList]
   /// Method that describes [ActiveStateChanged] of type [ActiveList] when you
   /// want to clear every value in a list
-
-  static ActiveStateChanged<Iterable<V>> clearActiveList<V>(Iterable<V> iterable,
+  static ActiveStateChanged<Iterable<V>> clearActiveList<V>(
+          Iterable<V> iterable,
           {String? typeName}) =>
       ActiveStateChanged(<V>[], iterable,
           typeName: typeName, info: 'List cleared');
+
+  ///A factory method which creates a single [ActiveStateChanged] object with a description
+  ///describing the value inserted into to the list at the specified index
+  static ActiveStateChanged insertIntoList<V>(int index, V value,
+          {String? typeName}) =>
+      ActiveStateChanged(
+        value,
+        null,
+        typeName: typeName,
+        info: 'Inserted $value into List as index $index',
+      );
+
+  ///A factory method which creates a single [ActiveStateChanged] object with a description
+  ///describing all the values that were inserted into the list at the specified index
+  static ActiveStateChanged insertAllIntoList<V>(int index, Iterable<V> values,
+          {String? typeName}) =>
+      ActiveStateChanged(values, null,
+          typeName: typeName,
+          info: 'Inserted All $values into List as index $index');
+
+  ///A factory method which creates a single [ActiveStateChanged] object with a description
+  ///describing what value was removed from the list
+  static ActiveStateChanged removedFromList<V>(V removedValue,
+          {String? typeName}) =>
+      ActiveStateChanged(null, removedValue,
+          typeName: typeName, info: 'Removed From List: $removedValue');
 
   /// [addActiveMap]
   /// Method that describes [ActiveStateChanged] of type [ActiveMap] when you
@@ -369,5 +400,36 @@ class ActiveStateChanged<T> {
   @override
   String toString() {
     return 'Old value : $oldValue, New value : $newValue, Type name : $typeName, Type info : $info';
+  }
+}
+
+extension ActiveStateChangedExtensions<T> on List<ActiveStateChanged<T>> {
+  ///Whether the typeName on any event matches the [typeName] argument
+  bool containsPropertyName(String typeName) {
+    return map((x) => x.typeName).contains(typeName);
+  }
+
+  ///Gets the first event where the [ActiveStateChanged.typeName] matches the
+  ///[typeName] argument
+  ///
+  ///Returns null if no event is found
+  ActiveStateChanged<T>? firstForPropertyName(String typeName) {
+    final events = where((e) => e.typeName == typeName);
+
+    return events.isNotEmpty ? events.first : null;
+  }
+
+  ///Gets the [ActiveStateChanged.newValue] for the first event where the
+  ///[ActiveStateChanged.typeName]
+  ///matches the [typeName] argument
+  T? newValueFor(String typeName) {
+    return firstForPropertyName(typeName)?.newValue;
+  }
+
+  ///Gets the [ActiveStateChanged.oldValue] for the first event where the
+  ///[ActiveStateChanged.typeName]
+  ///matches the [typeName] argument
+  T? oldValueFor(String typeName) {
+    return firstForPropertyName(typeName)?.oldValue;
   }
 }

@@ -392,6 +392,67 @@ class ActiveList<T> extends ActiveType<List<T>> {
     }
   }
 
+  /// Inserts [element] at position [index] in this list.
+  ///
+  /// This increases the length of the list by one and shifts all objects
+  /// at or after the index towards the end of the list.
+  ///
+  /// The list must be growable.
+  /// The [index] value must be non-negative and no greater than [length].
+  ///
+  /// ```dart
+  /// final numbers = ActiveList<int>([1, 2, 3, 4]);
+  /// const index = 2;
+  /// numbers.insert(index, 10);
+  /// print(numbers); // [1, 2, 10, 3, 4]
+  /// ```
+  void insert(int index, T element, {bool notifyChanges = true}) {
+    _value.insert(index, element);
+
+    if (notifyChanges) {
+      activeController
+          .notifyActivities([ActiveStateChanged.insertIntoList(index, value)]);
+    }
+  }
+
+  /// Inserts all objects of [values] at position [index] in this list.
+  /// This increases the length of the list by the length of [values]
+  /// and shifts all later objects towards the end of the list.
+  /// The list must be growable.
+  /// The [index] must be a valid index in the list or [length].
+  /// ```dart
+  /// final numbers = ActiveList<int>([1, 2, 3, 4]);
+  /// const index = 2;
+  /// numbers.insertAll(index, [10, 11, 12]);
+  /// print(numbers); // [1, 2, 10, 11, 12, 3, 4]
+  /// ```
+  void insertAll(int index, Iterable<T> values, {bool notifyChanges = true}) {
+    _value.insertAll(index, values);
+
+    if (notifyChanges) {
+      activeController
+          .notifyActivities([ActiveStateChanged.insertAllIntoList(index, values)]);
+    }
+  }
+
+  /// Inserts [values] at the end of this list
+  /// This increases the length of the list by the length of [values]
+  ///
+  /// The list must be growable.
+  /// ```dart
+  /// final numbers = ActiveList<int>([1, 2, 3, 4]);
+  /// numbers.insertAllAtEnd([10, 11, 12]);
+  /// print(numbers); // [1, 2, 3, 4, 10, 11, 12]
+  /// ```
+  void insertAllAtEnd(Iterable<T> values, {bool notifyChanges = true}) {
+    _value.insertAll(_value.length, values);
+
+    if (notifyChanges) {
+      activeController.notifyActivities(
+          [ActiveStateChanged.insertAllIntoList(_value.length, values)]);
+    }
+  }
+
   /// The object at the given [index] in the list.
   ///
   /// The [index] must be a valid index of this list,
