@@ -17,6 +17,7 @@ export 'core/forms/surveyjs_form.dart';
 
 //Memory
 export 'core/memory/memory.dart';
+export 'core/memory/memory_functions.dart';
 export 'core/memory/enums.dart';
 
 //Network
@@ -30,3 +31,5 @@ export 'core/localization/localizations.dart';
 //Widgets
 export 'widgets/alerts/dialog.dart';
 export 'widgets/customWidgets/fragment.dart';
+
+export '';
