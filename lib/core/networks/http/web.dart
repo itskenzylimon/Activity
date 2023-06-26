@@ -138,7 +138,7 @@ class HttpActiveRequest {
   }
 
   _saveApiRequests(String responseName, ActiveResponse activeResponse) async {
-    Memory memory = Memory.memory;
+    Memory memory = Memory.instance();
     memory.upsertMemory(responseName, activeResponse);
   }
 

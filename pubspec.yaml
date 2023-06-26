@@ -10,6 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  ffi: ">=1.1.2 <3.0.0"
+  #linux
+  xdg_directories: ">=0.2.0 <2.0.0"
+  #windows
+  win32: ">=2.1.0 <6.0.0"
 
 dev_dependencies:
   flutter_test:
@@ -25,5 +30,9 @@ flutter:
         pluginClass: PathProviderPlugin
       ios:
         pluginClass: PathProviderPlugin
+      linux:
+        dartPluginClass: PathProviderLinux
+      windows:
+        dartPluginClass: PathProviderWindows
 
   uses-material-design: true
