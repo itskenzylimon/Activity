@@ -30,7 +30,6 @@ export 'core/localization/localizations.dart';
 //Widgets
 export 'widgets/alerts/dialog.dart';
 export 'widgets/customWidgets/fragment.dart';
-
 //navigation
 export 'core/navigation/active_navigation.dart';
 ///PathProvider
