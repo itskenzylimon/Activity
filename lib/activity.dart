@@ -30,3 +30,9 @@ export 'core/localization/localizations.dart';
 //Widgets
 export 'widgets/alerts/dialog.dart';
 export 'widgets/customWidgets/fragment.dart';
+///PathProvider
+export 'core/memory/path/path.dart';
+///Windows memory
+export 'core/memory/windows/src/folders_stub.dart' if (dart.library.ffi) 'core/memory/windows/src/folders.dart';
+export 'core/memory/windows/src/path_provider_windows_stub.dart'
+if (dart.library.ffi) 'core/memory/windows/src/path_provider_windows_real.dart';

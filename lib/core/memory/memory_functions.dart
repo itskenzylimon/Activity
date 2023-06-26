@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'ios/path_provider_foundation.dart';
 import 'android/path_provider_android.dart';
+import 'linux/path_provider_linux.dart';
 import 'path_provider_platform_interface.dart';
 import 'enums.dart';
+import 'windows/path_provider_windows.dart';
 
 /// An exception thrown when a directory that should always be available on
 /// the current platform cannot be obtained.
@@ -25,10 +27,23 @@ class MissingPlatformDirectoryException implements Exception {
   }
 }
 
-PathProviderPlatform get _platform =>
-    ((Platform.isAndroid? PathProviderAndroid():
-    ((Platform.isIOS? PathProviderFoundation() :
-    PathProviderPlatform.instance))));
+PathProviderPlatform get _platform {
+  if(Platform.isAndroid) {
+    return PathProviderAndroid();
+  }
+  if(Platform.isIOS) {
+    return PathProviderFoundation();
+  }
+  if(Platform.isLinux) {
+    return PathProviderLinux();
+  }
+  if(Platform.isWindows) {
+    return PathProviderWindows();
+  }
+
+  return PathProviderPlatform.instance;
+}
+
 
 /// Path to the temporary directory on the device that is not backed up and is
 /// suitable for storing caches of downloaded files.
