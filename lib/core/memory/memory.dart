@@ -441,7 +441,7 @@ class Memory {
 
   /// Reloads loaded [_currentData] map from [Memory].
   Future <bool> refreshMemory() async{
-    debugPrint("Memory: refreshMemory called");
+    //debugPrint("Memory: refreshMemory called");
     await stageMemory();
     return true;
   }
