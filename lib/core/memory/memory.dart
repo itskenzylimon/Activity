@@ -1,11 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
+import 'package:activity/activity.dart' as act;
 import 'package:flutter/services.dart';
-
-import 'memory_functions.dart';
 
 /// Memory is a class that is used to store data in a file.
 class Memory {
@@ -17,9 +13,9 @@ class Memory {
   /// [filename] is the name of the file you want to store the data in. this can have an extension e.g appdata.txt
   ///You cannot override [filename] once it is set
 
-  ///This [currentData] will be used to cache loaded data in memory and
+  ///This [_currentData] will be used to cache loaded data in memory and
   ///user to read data in a synchronous way O(1) time
-  Map<String,dynamic> currentData = {};
+  Map<String,dynamic> _currentData = {};
 
   static Memory? _instance;
   static Memory instance({String? filename}) {
@@ -36,27 +32,29 @@ class Memory {
     }
   }
 
-
-   Future<bool> initMemory() async{
+  ///[initMemory] loads data into the [_currentData] variable where we
+  ///can read it using async methods
+   Future<Memory> initMemory() async{
     Directory? appDir;
     try {
-       appDir = await getApplicationDocumentsDirectory();
+       appDir = await act.getApplicationDocumentsDirectory();
     }catch(xx){
       throw PlatformException(code: "415",message: "Platform not supported: "+xx.toString());
     }
     if (appDir == null || appDir.path == null || appDir.path.isEmpty) {
       throw PlatformException(code: "415",message: "Platform not supported");
     }
-    _filePath = appDir.path + "/" + ((_filename ?? "memory.txt"));
+    _filePath = act.join(appDir.path,((_filename ?? "memory.txt")));
+        //appDir.path + "/" + ((_filename ?? "memory.txt"));
     File file = File(_filePath!);
     if (await file.exists()) {
-      loadMemory();
-      return true;
+      await refreshMemory();
+      return this;
     } else {
       try {
         FileStorage fileStorage = FileStorage(_filePath!);
         bool isSaved = fileStorage.save({});
-        return isSaved;
+        return this;
       } catch (error) {
         throw PlatformException(code: "415",message: "Platform not supported: "+error.toString());
       }
@@ -110,7 +108,7 @@ class Memory {
       return data;
     }else{
       _updateCurrentData({});
-      throw PlatformException(code: "404",message: "initMemory method not called");
+      throw PlatformException(code: "404",message: "initMemory method not called. Please see [initMemory] documentation");
     }
   }
 
@@ -122,11 +120,11 @@ class Memory {
     return data.entries.toList();
   }
 
-  /// Get all data from [Memory][currentData]map.
+  /// Get all data from [Memory][_currentData]map.
   ///
   /// Will return empty list if entries are not found
   List readMemoriesSync() {
-    return currentData.entries.toList();
+    return _currentData.entries.toList();
   }
 
   /// Get data from [Memory].
@@ -157,7 +155,7 @@ class Memory {
     }
   }
 
-  /// Get data from [Memory]pre-loaded[currentData] map.
+  /// Get data from [Memory]pre-loaded[_currentData] map.
   ///
   /// [key] is the key of the entry you want to get, this is required and is
   /// used to represent the entry as the unique identifier.
@@ -170,14 +168,14 @@ class Memory {
   /// and the value if [value] is set to true.
   dynamic readMemorySync(String key, {bool value = true})  {
     if (value) {
-      if (currentData.containsKey(key)) {
-        return currentData[key]['value'];
+      if (_currentData.containsKey(key)) {
+        return _currentData[key]['value'];
       } else {
         return null;
       }
     } else {
-      if (currentData.containsKey(key)) {
-        return currentData[key];
+      if (_currentData.containsKey(key)) {
+        return _currentData[key];
       } else {
         return null;
       }
@@ -215,6 +213,7 @@ class Memory {
       }
       data.addAll({key: entry});
       bool isSaved = fileStorage.save(data);
+      _updateCurrentData(data);
       return data[key];
     } else {
       /// Set the value of the key to mem
@@ -229,6 +228,7 @@ class Memory {
         entry.addAll({'expiresAt': _setMemoryExpiry(duration)});
       }
       data.addAll({key: entry});
+      _updateCurrentData(data);
       return data[key];
     }
   }
@@ -278,7 +278,7 @@ class Memory {
   }
 
   _updateCurrentData(Map<String, dynamic> newData){
-    currentData = newData;
+    _currentData = newData;
   }
 
   /// Removes entry from [Memory].
@@ -296,10 +296,9 @@ class Memory {
     }
   }
 
-  /// Reloads loaded [currentData] map from [Memory].
-  Future <bool> loadMemory() async{
-    Map<String, dynamic> data = await stageMemory();
-    _updateCurrentData(data);
+  /// Reloads loaded [_currentData] map from [Memory].
+  Future <bool> refreshMemory() async{
+    await stageMemory();
     return true;
   }
 
@@ -324,13 +323,13 @@ class Memory {
     return data[key]!=null;
   }
 
-  // Checks if a key exists in Active Memory [currentData] map
+  // Checks if a key exists in Active Memory [_currentData] map
   ///
   /// returns [true] if key is found.
   ///
   /// returns [false] if value does not exist.
    bool hasMemorySync(String key)  {
-    return currentData[key]!=null;
+    return _currentData[key]!=null;
   }
 
   /// Sets Active Memory entry expiry date
