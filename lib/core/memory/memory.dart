@@ -18,6 +18,10 @@ class Memory {
   /// [filename] is the name of the file you want to store the data in. this can have an extension e.g appdata.txt
   ///You cannot override [filename] once it is set
 
+  ///This [currentData] will be used to cache loaded data in memory and
+  ///user to read data in a synchronous way O(1) time
+  Map<String,dynamic> currentData = {};
+
   static Memory? _instance;
   static Memory instance({String? filename}) {
     _instance ??= Memory(filename: filename );
@@ -47,12 +51,12 @@ class Memory {
     _filePath = appDir.path + "/" + ((_filename ?? "memory.txt"));
     File file = File(_filePath!);
     if (await file.exists()) {
+      loadMemory();
       return true;
     } else {
       try {
         FileStorage fileStorage = FileStorage(_filePath!);
         bool isSaved = fileStorage.save({});
-
         return isSaved;
       } catch (error) {
         throw PlatformException(code: "415",message: "Platform not supported: "+error.toString());
@@ -102,8 +106,11 @@ class Memory {
   Future<Map<String, dynamic>> stageMemory() async {
     if (_filePath != null) {
       FileStorage fileStorage = FileStorage(_filePath!);
-      return await fileStorage.read();
+      Map<String, dynamic> data =await fileStorage.read();
+      _updateCurrentData(data);
+      return data;
     }else{
+      _updateCurrentData({});
       throw PlatformException(code: "404",message: "initMemory method not called");
     }
   }
@@ -114,6 +121,13 @@ class Memory {
   Future<List> readMemories() async {
     Map<String, dynamic> data = await stageMemory();
     return data.entries.toList();
+  }
+
+  /// Get all data from [Memory][currentData]map.
+  ///
+  /// Will return empty list if entries are not found
+  List readMemoriesSync() {
+    return currentData.entries.toList();
   }
 
   /// Get data from [Memory].
@@ -138,6 +152,33 @@ class Memory {
     } else {
       if (data.containsKey(key)) {
         return data[key];
+      } else {
+        return null;
+      }
+    }
+  }
+
+  /// Get data from [Memory]pre-loaded[currentData] map.
+  ///
+  /// [key] is the key of the entry you want to get, this is required and is
+  /// used to represent the entry as the unique identifier.
+  ///
+  /// [value] is set to true by default. If you want to get the entire entry you
+  /// can set this to false. This will return the entire entry as a Map. containing
+  /// the [key], [value], [createdAt], [updatedAt] and [expiresAt].
+  ///
+  /// Will return [null] if entry is not found or Map if [value] is set to false.
+  /// and the value if [value] is set to true.
+  dynamic readMemorySync(String key, {bool value = true})  {
+    if (value) {
+      if (currentData.containsKey(key)) {
+        return currentData[key]['value'];
+      } else {
+        return null;
+      }
+    } else {
+      if (currentData.containsKey(key)) {
+        return currentData[key];
       } else {
         return null;
       }
@@ -228,10 +269,17 @@ class Memory {
       FileStorage fileStorage = FileStorage(_filePath!);
       data.addAll({key: entry});
       bool isSaved = fileStorage.save(data);
+      if(isSaved) {
+        _updateCurrentData(data);
+      }
       return data[key]['value'];
     } else {
       return data[key]['value'];
     }
+  }
+
+  _updateCurrentData(Map<String, dynamic> newData){
+    currentData = newData;
   }
 
   /// Removes entry from [Memory].
@@ -243,7 +291,17 @@ class Memory {
       data.remove(key);
       FileStorage fileStorage = FileStorage(_filePath!);
       bool isSaved = fileStorage.save(data);
+      if(isSaved){
+        _updateCurrentData(data);
+      }
     }
+  }
+
+  /// Reloads loaded [currentData] map from [Memory].
+  Future <bool> loadMemory() async{
+    Map<String, dynamic> data = await stageMemory();
+    _updateCurrentData(data);
+    return true;
   }
 
   /// Removes all values stored on [Memory]
@@ -262,9 +320,18 @@ class Memory {
   /// returns [true] if key is found.
   ///
   /// returns [false] if value does not exist.
-  Future hasMemory(String key) async {
+  Future<bool> hasMemory(String key) async {
     Map<String, dynamic> data = await stageMemory();
-    return data.isEmpty;
+    return data[key]!=null;
+  }
+
+  // Checks if a key exists in Active Memory [currentData] map
+  ///
+  /// returns [true] if key is found.
+  ///
+  /// returns [false] if value does not exist.
+   bool hasMemorySync(String key)  {
+    return currentData[key]!=null;
   }
 
   /// Sets Active Memory entry expiry date

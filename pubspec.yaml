@@ -10,10 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  #required for linux
   ffi: ">=1.1.2 <3.0.0"
-  #linux
+  #required for linux
   xdg_directories: ">=0.2.0 <2.0.0"
-  #windows
+  #required for windows
   win32: ">=2.1.0 <6.0.0"
 
 dev_dependencies:

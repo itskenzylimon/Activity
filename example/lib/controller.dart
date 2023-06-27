@@ -385,6 +385,8 @@ class MainController extends ActiveController {
    void createMemory() async {
    printSuccess(await memory.upsertMemory('hello', 'Asia'));
    printInfo(await memory.readMemory('hello',value: true));
+   printInfo("readMemorySync==");
+   printInfo(memory.readMemorySync('hello',value: true));
   }
 
   /*updateMemory() async {
