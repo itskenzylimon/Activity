@@ -20,9 +20,9 @@
 ///
 /// If you want to work with paths for a specific platform regardless of the
 /// underlying platform that the program is running on, you can create a
-/// [Context] and give it an explicit [Style]:
+/// [Context] and give it an explicit [PathStyle]:
 ///
-///     var context = p.Context(style: Style.windows);
+///     var context = p.Context(style: PathStyle.windows);
 ///     pathContext.join('directory', 'file.txt');
 ///
 /// This will join "directory" and "file.txt" using the Windows path separator,
@@ -39,16 +39,16 @@ export 'src/path_set.dart';
 export 'src/style.dart';
 
 /// A default context for manipulating POSIX paths.
-final Context posix = Context(style: Style.posix);
+final Context posix = Context(style: PathStyle.posix);
 
 /// A default context for manipulating Windows paths.
-final Context windows = Context(style: Style.windows);
+final Context windows = Context(style: PathStyle.windows);
 
 /// A default context for manipulating URLs.
 ///
 /// URL path equality is undefined for paths that differ only in their
 /// percent-encoding or only in the case of their host segment.
-final Context url = Context(style: Style.url);
+final Context url = Context(style: PathStyle.url);
 
 /// The system path pathContext.
 ///
@@ -57,10 +57,10 @@ final Context url = Context(style: Style.url);
 /// set once when the context is created.
 final Context pathContext = createInternal();
 
-/// Returns the [Style] of the current pathContext.
+/// Returns the [PathStyle] of the current pathContext.
 ///
 /// This is the style that all top-level path functions will use.
-Style get style => pathContext.style;
+PathStyle get style => pathContext.style;
 
 /// Gets the path to the current working directory.
 ///
@@ -83,7 +83,7 @@ String get current {
   if (uri == _currentUriBase) return _current!;
   _currentUriBase = uri;
 
-  if (Style.platform == Style.url) {
+  if (PathStyle.platform == PathStyle.url) {
     _current = uri.resolve('.').toString();
   } else {
     final path = uri.toFilePath();
@@ -462,7 +462,7 @@ Uri toUri(String path) => pathContext.toUri(path);
 ///
 /// [uri] can be a [String] or a [Uri]. If it can be made relative to the
 /// current working directory, that's done. Otherwise, it's returned as-is. This
-/// gracefully handles non-`file:` URIs for [Style.posix] and [Style.windows].
+/// gracefully handles non-`file:` URIs for [PathStyle.posix] and [PathStyle.windows].
 ///
 /// The returned value is meant for human consumption, and may be either URI-
 /// or path-formatted.

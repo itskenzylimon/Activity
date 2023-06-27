@@ -5,12 +5,12 @@
 import 'context.dart';
 import 'style.dart';
 
-/// The internal interface for the [Style] type.
+/// The internal interface for the [PathStyle] type.
 ///
-/// Users should be able to pass around instances of [Style] like an enum, but
+/// Users should be able to pass around instances of [PathStyle] like an enum, but
 /// the members that [Context] uses should be hidden from them. Those members
 /// are defined on this class instead.
-abstract class InternalStyle extends Style {
+abstract class InternalStyle extends PathStyle {
   /// The default path separator for this style.
   ///
   /// On POSIX, this is `/`. On Windows, it's `\`.

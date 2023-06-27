@@ -136,7 +136,7 @@ class ParsedPath {
     }
 
     // Normalize the Windows root if needed.
-    if (root != null && style == Style.windows) {
+    if (root != null && style == PathStyle.windows) {
       if (canonicalize) root = root!.toLowerCase();
       root = root!.replaceAll('/', '\\');
     }

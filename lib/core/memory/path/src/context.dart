@@ -23,9 +23,9 @@ class Context {
   /// [current] are omitted, [current] defaults to the real current working
   /// directory.
   ///
-  /// On the browser, [style] defaults to [Style.url] and [current] defaults to
+  /// On the browser, [style] defaults to [PathStyle.url] and [current] defaults to
   /// the current URL.
-  factory Context({Style? style, String? current}) {
+  factory Context({PathStyle? style, String? current}) {
     if (current == null) {
       if (style == null) {
         current = p.current;
@@ -35,7 +35,7 @@ class Context {
     }
 
     if (style == null) {
-      style = Style.platform;
+      style = PathStyle.platform;
     } else if (style is! InternalStyle) {
       throw ArgumentError('Only styles defined by the path package are '
           'allowed.');
@@ -46,7 +46,7 @@ class Context {
 
   /// Create a [Context] to be used internally within path.
   Context._internal()
-      : style = Style.platform as InternalStyle,
+      : style = PathStyle.platform as InternalStyle,
         _current = null;
 
   Context._(this.style, this._current);
@@ -383,7 +383,7 @@ class Context {
   /// than it is to canonicalize every key.
   String canonicalize(String path) {
     path = absolute(path);
-    if (style != Style.windows && !_needsNormalization(path)) return path;
+    if (style != PathStyle.windows && !_needsNormalization(path)) return path;
 
     final parsed = _parse(path);
     parsed.normalize(canonicalize: true);
@@ -423,7 +423,7 @@ class Context {
 
       // On Windows, the root still needs to be normalized if it contains a
       // forward slash.
-      if (style == Style.windows) {
+      if (style == PathStyle.windows) {
         for (var i = 0; i < root; i++) {
           if (codeUnits[i] == chars.slash) return true;
         }
@@ -434,7 +434,7 @@ class Context {
       final codeUnit = codeUnits[i];
       if (style.isSeparator(codeUnit)) {
         // Forward slashes in Windows paths are normalized to backslashes.
-        if (style == Style.windows && codeUnit == chars.slash) return true;
+        if (style == PathStyle.windows && codeUnit == chars.slash) return true;
 
         // Multiple separators are normalized to single separators.
         if (previous != null && style.isSeparator(previous)) return true;
@@ -1067,8 +1067,8 @@ class Context {
   ///
   /// [uri] can be a [String] or a [Uri]. If it can be made relative to the
   /// current working directory, that's done. Otherwise, it's returned as-is.
-  /// This gracefully handles non-`file:` URIs for [Style.posix] and
-  /// [Style.windows].
+  /// This gracefully handles non-`file:` URIs for [PathStyle.posix] and
+  /// [PathStyle.windows].
   ///
   /// The returned value is meant for human consumption, and may be either URI-
   /// or path-formatted.
@@ -1090,11 +1090,11 @@ class Context {
   ///     context.prettyUri('file:///root/path'); // -> 'file:///root/path'
   String prettyUri(Object? uri) {
     final typedUri = _parseUri(uri!);
-    if (typedUri.scheme == 'file' && style == Style.url) {
+    if (typedUri.scheme == 'file' && style == PathStyle.url) {
       return typedUri.toString();
     } else if (typedUri.scheme != 'file' &&
         typedUri.scheme != '' &&
-        style != Style.url) {
+        style != PathStyle.url) {
       return typedUri.toString();
     }
 
