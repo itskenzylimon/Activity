@@ -27,7 +27,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: io.flutter.plugins.pathprovider
+        package: io.flutter.plugins.actpathprovider
         pluginClass: PathProviderPlugin
       ios:
         pluginClass: PathProviderPlugin
