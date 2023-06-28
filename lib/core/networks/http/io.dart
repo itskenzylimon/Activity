@@ -82,6 +82,70 @@ class HttpActiveRequest {
     return activeResponse;
   }
 
+  Future<ActiveResponse> downloadFileByteList(
+      Params params,
+      RequestSetUp setUp, {
+        String savedResponseName = '',
+        bool saveResponse = false,
+      }) async {
+    final endpoint = Uri.parse(params.endpoint);
+
+    Uri uri = Uri(
+      scheme: endpoint.scheme,
+      queryParameters: params.queryParameters,
+      path: endpoint.path,
+      host: endpoint.host,
+    );
+
+    final io.HttpClient apiRequest = _httpClientSetup(
+        setUp.idleTimeout!,
+        setUp.withTrustedRoots!,
+        setUp.connectionTimeout!,
+        setUp.privateKeyPath,
+        setUp.privateKeyPassword);
+
+    final io.HttpClientRequest request = await apiRequest.getUrl(uri);
+    setUp.httpHeaders?.forEach((String name, String value) {
+      request.headers.add(name, value);
+    });
+
+    final io.HttpClientResponse response = await request.close();
+    if (response.statusCode != io.HttpStatus.ok) {
+      ActiveResponse activeResponse = ActiveResponse(
+          statusCode: response.statusCode,
+          endpoint: params.endpoint,
+          errors: response.toString()
+      );
+      apiRequest.close(force: true);
+      return activeResponse;
+    }
+
+    var downloadData = [];
+    response.listen((d) {
+      downloadData.addAll(d);
+    },);
+    ActiveResponse activeResponse = ActiveResponse(
+        statusCode: response.statusCode,
+        errors: null,
+        data: null,
+        dataAlt: downloadData,
+        endpoint: params.endpoint,
+    );
+
+    if (setUp.logResponse == true) {
+      await _logApiRequests(activeResponse);
+    }
+
+    if (saveResponse == true) {
+      savedResponseName =
+      savedResponseName == '' ? uri.path : savedResponseName;
+      await _saveApiRequests(activeResponse, savedResponseName);
+    }
+
+
+    return activeResponse;
+  }
+
   Future<ActiveResponse> postApi(
       Params params,
       RequestSetUp setUp,
