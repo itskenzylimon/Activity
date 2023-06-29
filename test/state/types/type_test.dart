@@ -2,6 +2,7 @@ import 'package:activity/activity.dart';
 import 'package:activity/core/src/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/src/equals_matcher.dart' as match;
 
 class TypeTestController extends ActiveController {
   final ActiveType<String?> country = ActiveType(null);
@@ -65,13 +66,13 @@ void main() {
     test('Create ActiveType - passed value equals property value', () {
       const expectedValue = 10;
       final population = ActiveType<int>(expectedValue);
-      expect(population.value, equals(expectedValue));
+      expect(population.value, match.equals(expectedValue));
     });
 
     test('Create ActiveType - set optional typeName', () {
       const expectedValue = 'population';
       final population = ActiveType<int>(10, typeName: expectedValue);
-      expect(population.typeName, equals(expectedValue));
+      expect(population.typeName, match.equals(expectedValue));
     });
   });
 
@@ -197,15 +198,15 @@ void main() {
           final country = ActiveType<String?>(expectedValue, typeName: 'country');
           country.setActiveController(activeController);
 
-          expect(country.value, equals(expectedValue));
+          expect(country.value, match.equals(expectedValue));
 
           country('Jane Doe');
 
-          expect(country.value, equals('Jane Doe'));
+          expect(country.value, match.equals('Jane Doe'));
 
           country.reset();
 
-          expect(country.value, equals(expectedValue));
+          expect(country.value, match.equals(expectedValue));
         });
 
     test(
@@ -216,7 +217,7 @@ void main() {
           country.setActiveController(activeController);
           country(expectedValue);
 
-          expect(country.value, equals(expectedValue));
+          expect(country.value, match.equals(expectedValue));
 
           country.reset();
 
@@ -232,7 +233,7 @@ void main() {
 
           country('Jane Doe', setAsOriginal: false);
 
-          expect(country.originalValue, equals(expected));
+          expect(country.originalValue, match.equals(expected));
         });
 
     test('setAsOriginal - argument is true - original is set to current value',
@@ -243,7 +244,7 @@ void main() {
 
           country(expected, setAsOriginal: true);
 
-          expect(country.originalValue, equals(expected));
+          expect(country.originalValue, match.equals(expected));
         });
   });
 

@@ -10,11 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  #required for linux
+  #required for linux-getting app dir
   ffi: ">=1.1.2 <3.0.0"
-  #required for linux
+  #required for linux-getting app dir
   xdg_directories: ">=0.2.0 <2.0.0"
-  #required for windows
+  #required for windows-getting app dir
   win32: ">=2.1.0 <6.0.0"
 
 dev_dependencies:

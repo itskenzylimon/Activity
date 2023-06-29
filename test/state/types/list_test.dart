@@ -1,6 +1,7 @@
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/src/equals_matcher.dart' as match;
 
 class ListTestController extends ActiveController {
   final countries = ActiveList<String>.empty();
@@ -161,7 +162,7 @@ void main() {
 
       final result = activeController.countries.indexOf(kenya);
 
-      expect(result, equals(expectedIndex));
+      expect(result, match.equals(expectedIndex));
     });
 
     test('[countries[]] - pass valid index value - returns correct value', () {
@@ -171,7 +172,7 @@ void main() {
 
       final result = activeController.countries[0];
 
-      expect(result, equals(kenya));
+      expect(result, match.equals(kenya));
     });
 
     test(
@@ -246,7 +247,7 @@ void main() {
 
       final result = list.elementAt(index);
 
-      expect(result, equals(expected));
+      expect(result, match.equals(expected));
     });
 
     test(
@@ -257,8 +258,8 @@ void main() {
         final numbers = ActiveList([1, 2, ...expectedItems]);
         final result = numbers.where((x) => x > 2);
 
-        expect(result.length, equals(expectedLength));
-        expect(result, equals(expectedItems));
+        expect(result.length, match.equals(expectedLength));
+        expect(result, match.equals(expectedItems));
       },
     );
 
@@ -269,7 +270,7 @@ void main() {
         final numbers = ActiveList([1, 2, 3]);
         final result = numbers.firstWhere((element) => element == expected);
 
-        expect(result, equals(expected));
+        expect(result, match.equals(expected));
       },
     );
 
@@ -283,7 +284,7 @@ void main() {
           orElse: () => expected,
         );
 
-        expect(result, equals(expected));
+        expect(result, match.equals(expected));
       },
     );
 
@@ -295,7 +296,7 @@ void main() {
         final result =
         numbers.firstWhereOrNull((element) => element == expected);
 
-        expect(result, equals(expected));
+        expect(result, match.equals(expected));
       },
     );
 
@@ -318,7 +319,7 @@ void main() {
         final numbers = ActiveList([1, 2, 3]);
         final result = numbers.indexWhere((element) => element == 3);
 
-        expect(result, equals(expected));
+        expect(result, match.equals(expected));
       },
     );
 
@@ -329,7 +330,7 @@ void main() {
         final numbers = ActiveList([1, 2, 3]);
         final result = numbers.indexWhere((element) => element == expected);
 
-        expect(result, equals(expected));
+        expect(result, match.equals(expected));
       },
     );
 
@@ -337,28 +338,28 @@ void main() {
       final expected = [3, 2, 1];
       final numbers = ActiveList([1, 2, 3]);
       final reversed = numbers.reversed;
-      expect(reversed, equals(expected));
+      expect(reversed, match.equals(expected));
     });
 
     test('[first] - list is not empty - returns first item', () {
       const expected = 1;
       final numbers = ActiveList([1, 2, 3]);
       final first = numbers.first;
-      expect(first, equals(expected));
+      expect(first, match.equals(expected));
     });
 
     test('[last] - list is not empty - returns last item', () {
       const expected = 3;
       final numbers = ActiveList([1, 2, 3]);
       final last = numbers.last;
-      expect(last, equals(expected));
+      expect(last, match.equals(expected));
     });
 
     test('[single] - list contains one item - returns item', () {
       const expected = 1;
       final numbers = ActiveList([expected]);
       final single = numbers.single;
-      expect(single, equals(expected));
+      expect(single, match.equals(expected));
     });
 
     test('[insert] - returns correct item at new index', () {

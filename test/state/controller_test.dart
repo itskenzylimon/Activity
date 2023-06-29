@@ -1,5 +1,6 @@
 import 'package:activity/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/src/equals_matcher.dart' as match;
 
 class TestController extends ActiveController {
   final name = ActiveString('Bob');
@@ -28,8 +29,8 @@ void main() {
         testController.name(changedName);
         testController.age(changedAge);
 
-        expect(testController.name.value, equals(changedName));
-        expect(testController.age.value, equals(changedAge));
+        expect(testController.name.value, match.equals(changedName));
+        expect(testController.age.value, match.equals(changedAge));
 
         testController.resetAllActiveTypes();
 
@@ -38,8 +39,8 @@ void main() {
         printSuccess(testController.name.value);
         printSuccess(testController.name.originalValue);
 
-        expect(testController.name.value, equals(originalName));
-        expect(testController.age.value, equals(originalAge));
+        expect(testController.name.value, match.equals(originalName));
+        expect(testController.age.value, match.equals(originalAge));
       });
 
   test('setRunningStatus', () {
