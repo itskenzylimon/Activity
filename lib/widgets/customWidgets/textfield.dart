@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-///[FocusColor] is the outline borderline color when textfield is tapped 
+///[FocusColor] is the outline borderline color when textfield is tapped
 enum FocusColor { primary, secondary }
 
 ///[FocusErrorColor] is the outline borderline color that shows error 
 enum FocusErrorColor { primary, secondary }
 
 Widget textFieldWidget({
+  Key? key,
+
   ///[hint]..is the hinttext of the textfield
   String? hint,
 
@@ -68,7 +70,10 @@ Widget textFieldWidget({
   final void Function()? onTap,
 
   ///callback function
-  final void Function()? onChanged,
+  final void Function(String value)? onChanged,
+
+  ///[controller] this is the controller of the textfield
+  TextEditingController? controller,
 }) {
 
   return Column(
@@ -83,8 +88,11 @@ Widget textFieldWidget({
         height: 10,
       ),
       TextFormField(
+        controller: controller,
+        onChanged: (value) {
+          onChanged!(value);
+        },
         onTap: onTap,
-        
         style: const TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.w600,

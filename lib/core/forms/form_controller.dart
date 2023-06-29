@@ -5,6 +5,7 @@ import '../src/controller.dart';
 class FormController extends ActiveController{
 
 
+
   TextInputType checkInputType(Map element) {
     TextInputType type = TextInputType.text;
     if (element['inputType'] != null) {
@@ -39,7 +40,7 @@ class FormController extends ActiveController{
     }
 
     // Define a regular expression for email validation
-    final emailRegex = RegExp('^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$');
+    final emailRegex = RegExp("^[w-.]+@([w-]+.)+[w-]{2,4}\$");
 
     if (!emailRegex.hasMatch(value)) {
       return 'Invalid email format';

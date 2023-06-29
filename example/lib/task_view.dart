@@ -184,6 +184,7 @@ class TaskView extends ActiveView<TaskController> {
 
 class _TaskViewState extends ActiveState<TaskView, TaskController> {
   _TaskViewState(super.activeController);
+
   // SchemaData schema = SchemaData();
 
   @override
@@ -217,7 +218,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
       debugShowCheckedModeBanner: true,
       title: ActiveString('Prop Title', typeName: 'appTitle').toString(),
       theme: ThemeData(
-        primarySwatch: activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
+        primarySwatch:
+            activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: Scaffold(
@@ -226,215 +228,246 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         //   title: Text(activeController.appTitle.value),
         // ),
         body: SafeArea(
-            child:
-
-                // SurveyJSForm(
-                //       schema: activeController.schema,
-                //       context: context,
-                //       formResults: formResults,
-                //     onFormValueSubmit: (Map results) {
-                //       /// At this point, the form has been submitted and the
-                //       /// results are available in the formResults variable
-                //       /// handle the results here
-                //     })
-
-                Column(
-          children: [
-            TextButton(
-                onPressed: () {
-                  double width = context.size!.width;
-                  double height = context.size!.height;
-                  showDialog<String>(
-                    context: context,
-                    builder: (BuildContext context) => AlertDialog(
-                      title: const Text('Add User Task'),
-                      content: SizedBox(
-                          width: width,
-                          height: height,
-                          child: userTaskForm(activeController.globalKey)),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, 'Cancel'),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            ///testing the navigation abstract class
-                            Nav.off(context, 'OK');
-                            if (activeController.userName.text.isNotEmpty &&
-                                activeController.userEmail.text.isNotEmpty &&
-                                activeController.taskName.text.isNotEmpty &&
-                                activeController.taskBody.text.isNotEmpty) {
-                              activeController.saveEntry();
-                              // activeController.syncMemory();
-                            }
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                child: const Text('Add Task')),
-            Container(
-              margin: const EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
-              child: Card(
-                child: SizedBox(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(activeController.tasks.length.toString()),
-                          const Text(
-                            'Total tasks',
-                            style: TextStyle(fontSize: 8),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        width: 50,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(activeController.tasksLevel.toString()),
-                          const Text(
-                            'Total task level : Max > 100',
-                            style: TextStyle(fontSize: 8),
-                          ),
-                        ],
-                      ),
+            child: SurveyJSForm(
+          schema: const {
+            "pages": [
+              {
+                "name": "page1",
+                "elements": [
+                  {
+                    "type": "dropdown",
+                    "name": "Sex",
+                    "title": "Select your Sex:",
+                    "description": "Enter your Sex",
+                    "isRequired": true,
+                    "choices": [
+                      {
+                        "value": "Item 1",
+                        "text": "Male"
+                      },
+                      {
+                        "value": "Item 2",
+                        "text": "Female"
+                      },
+                      {
+                        "value": "Item 3",
+                        "text": "Other"
+                      }
                     ],
-                  ),
-                ),
-              ),
-            ),
-            ifRunning(const CircularProgressIndicator(),
-                otherwise: Expanded(
-                    child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ListView.builder(
-                    reverse: true,
-                    shrinkWrap: true,
-                    itemCount: activeController.tasks
-                        .paginate(
-                            pageNumber: activeController.pageNumber.value,
-                            pageSize: activeController.pageSize.value)
-                        .length,
-                    itemBuilder: (context, i) {
-                      ActiveModel<Task> taskModel = activeController.tasks.paginate(
-                          pageNumber: activeController.pageNumber.value,
-                          pageSize: activeController.pageSize.value)[i];
-                      return ListTile(
-                        title: Text(taskModel.value.name),
-                        subtitle: Text(taskModel.value.body),
-                        leading: IconButton(
-                            onPressed: () {
-                              activeController.userName.text = taskModel.value.user.name;
-                              activeController.userEmail.text = taskModel.value.user.email!;
-                              activeController.taskName.text = taskModel.value.name;
-                              activeController.taskBody.text = taskModel.value.body;
-                              activeController.taskLevel.text = taskModel.value.level.toString();
+                    "placeholder": "Select Gender"
+                  }
+                ]
+              }
+            ]
+          },
+          context: context,
+          formResults: formResults,
+          onFormValueSubmit: (Map results) {
+            /// At this point, the form has been submitted and the
+            /// results are available in the formResults variable
+            /// handle the results here
+          },
+          defaultValues: {},
+        )
 
-                              showDialog<String>(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: Text('Edit ${taskModel.value.name} Task'),
-                                      content: SizedBox(
-                                          height: 600,
-                                          width: 600,
-                                          child: userTaskForm(activeController.globalKey)),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            /**
-                                                     * Clear fields and refresh Page
-                                                     */
-                                            activeController.userName.clear();
-                                            activeController.userEmail.clear();
-                                            activeController.taskName.clear();
-                                            activeController.taskBody.clear();
-                                            activeController.taskLevel.clear();
-                                            Navigator.pop(context, 'Cancel');
-                                          },
-                                          child: const Text('Cancel'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            if (activeController.userName.text.isNotEmpty &&
-                                                activeController.userEmail.text.isNotEmpty &&
-                                                activeController.taskName.text.isNotEmpty &&
-                                                activeController.taskLevel.text.isNotEmpty &&
-                                                activeController.taskBody.text.isNotEmpty) {
-                                              activeController.editUserTask(
-                                                  activeController.tasks[i], i);
-                                              // activeController.syncMemory();
-                                            }
-
-                                            ///testing the navigation abstract class
-                                            Nav.off(context, 'Cancel');
-                                          },
-                                          child: const Text('SUBMIT'),
-                                        ),
-                                      ],
-                                    );
-                                  });
-                            },
-                            icon: const Icon(Icons.edit)),
-                        trailing: IconButton(
-                            onPressed: () {
-                              showDialog<String>(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                  title: Text(taskModel.value.name),
-                                  content:
-                                      const Text('Are you sure you want to delete this task.?'),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () => Nav.off(context, 'Cancel'),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Nav.off(context, 'OK');
-                                        activeController.deleteUserTask(activeController.tasks[i]);
-                                        // activeController.syncMemory();
-                                      },
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.deepOrange,
-                            )),
-                      );
-                    },
-                  ),
-                ))),
-            // SizedBox(
-            //   height: 70,
-            //   child: Center(
-            //     child: GestureDetector(
-            //       onTap: (){
-            //         /// you can avoid writing boiler plate code pagination by
-            //         activeController.pageNumber.set(1);
-            //         activeController.pageSize.set(3);
-            //         printInfo(activeController.pageNumber.set(1));
-            //         printInfo(activeController.pageSize.set(4));
-            //       },
-            //       child: const Text('Load More'),
+            //         Column(
+            //   children: [
+            //     TextButton(
+            //         onPressed: () {
+            //           double width = context.size!.width;
+            //           double height = context.size!.height;
+            //           showDialog<String>(
+            //             context: context,
+            //             builder: (BuildContext context) => AlertDialog(
+            //               title: const Text('Add User Task'),
+            //               content: SizedBox(
+            //                   width: width,
+            //                   height: height,
+            //                   child: userTaskForm(activeController.globalKey)),
+            //               actions: <Widget>[
+            //                 TextButton(
+            //                   onPressed: () => Navigator.pop(context, 'Cancel'),
+            //                   child: const Text('Cancel'),
+            //                 ),
+            //                 TextButton(
+            //                   onPressed: () {
+            //                     ///testing the navigation abstract class
+            //                     Nav.off(context, 'OK');
+            //                     if (activeController.userName.text.isNotEmpty &&
+            //                         activeController.userEmail.text.isNotEmpty &&
+            //                         activeController.taskName.text.isNotEmpty &&
+            //                         activeController.taskBody.text.isNotEmpty) {
+            //                       activeController.saveEntry();
+            //                       // activeController.syncMemory();
+            //                     }
+            //                   },
+            //                   child: const Text('OK'),
+            //                 ),
+            //               ],
+            //             ),
+            //           );
+            //         },
+            //         child: const Text('Add Task')),
+            //     Container(
+            //       margin: const EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
+            //       child: Card(
+            //         child: SizedBox(
+            //           height: 50,
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //             children: [
+            //               Column(
+            //                 mainAxisAlignment: MainAxisAlignment.center,
+            //                 children: [
+            //                   Text(activeController.tasks.length.toString()),
+            //                   const Text(
+            //                     'Total tasks',
+            //                     style: TextStyle(fontSize: 8),
+            //                   ),
+            //                 ],
+            //               ),
+            //               const SizedBox(
+            //                 width: 50,
+            //               ),
+            //               Column(
+            //                 mainAxisAlignment: MainAxisAlignment.center,
+            //                 children: [
+            //                   Text(activeController.tasksLevel.toString()),
+            //                   const Text(
+            //                     'Total task level : Max > 100',
+            //                     style: TextStyle(fontSize: 8),
+            //                   ),
+            //                 ],
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
             //     ),
-            //   ),
+            //     ifRunning(const CircularProgressIndicator(),
+            //         otherwise: Expanded(
+            //             child: Align(
+            //           alignment: Alignment.topCenter,
+            //           child: ListView.builder(
+            //             reverse: true,
+            //             shrinkWrap: true,
+            //             itemCount: activeController.tasks
+            //                 .paginate(
+            //                     pageNumber: activeController.pageNumber.value,
+            //                     pageSize: activeController.pageSize.value)
+            //                 .length,
+            //             itemBuilder: (context, i) {
+            //               ActiveModel<Task> taskModel = activeController.tasks.paginate(
+            //                   pageNumber: activeController.pageNumber.value,
+            //                   pageSize: activeController.pageSize.value)[i];
+            //               return ListTile(
+            //                 title: Text(taskModel.value.name),
+            //                 subtitle: Text(taskModel.value.body),
+            //                 leading: IconButton(
+            //                     onPressed: () {
+            //                       activeController.userName.text = taskModel.value.user.name;
+            //                       activeController.userEmail.text = taskModel.value.user.email!;
+            //                       activeController.taskName.text = taskModel.value.name;
+            //                       activeController.taskBody.text = taskModel.value.body;
+            //                       activeController.taskLevel.text = taskModel.value.level.toString();
+            //
+            //                       showDialog<String>(
+            //                           context: context,
+            //                           builder: (context) {
+            //                             return AlertDialog(
+            //                               title: Text('Edit ${taskModel.value.name} Task'),
+            //                               content: SizedBox(
+            //                                   height: 600,
+            //                                   width: 600,
+            //                                   child: userTaskForm(activeController.globalKey)),
+            //                               actions: <Widget>[
+            //                                 TextButton(
+            //                                   onPressed: () {
+            //                                     /**
+            //                                              * Clear fields and refresh Page
+            //                                              */
+            //                                     activeController.userName.clear();
+            //                                     activeController.userEmail.clear();
+            //                                     activeController.taskName.clear();
+            //                                     activeController.taskBody.clear();
+            //                                     activeController.taskLevel.clear();
+            //                                     Navigator.pop(context, 'Cancel');
+            //                                   },
+            //                                   child: const Text('Cancel'),
+            //                                 ),
+            //                                 TextButton(
+            //                                   onPressed: () {
+            //                                     if (activeController.userName.text.isNotEmpty &&
+            //                                         activeController.userEmail.text.isNotEmpty &&
+            //                                         activeController.taskName.text.isNotEmpty &&
+            //                                         activeController.taskLevel.text.isNotEmpty &&
+            //                                         activeController.taskBody.text.isNotEmpty) {
+            //                                       activeController.editUserTask(
+            //                                           activeController.tasks[i], i);
+            //                                       // activeController.syncMemory();
+            //                                     }
+            //
+            //                                     ///testing the navigation abstract class
+            //                                     Nav.off(context, 'Cancel');
+            //                                   },
+            //                                   child: const Text('SUBMIT'),
+            //                                 ),
+            //                               ],
+            //                             );
+            //                           });
+            //                     },
+            //                     icon: const Icon(Icons.edit)),
+            //                 trailing: IconButton(
+            //                     onPressed: () {
+            //                       showDialog<String>(
+            //                         context: context,
+            //                         builder: (BuildContext context) => AlertDialog(
+            //                           title: Text(taskModel.value.name),
+            //                           content:
+            //                               const Text('Are you sure you want to delete this task.?'),
+            //                           actions: <Widget>[
+            //                             TextButton(
+            //                               onPressed: () => Nav.off(context, 'Cancel'),
+            //                               child: const Text('Cancel'),
+            //                             ),
+            //                             TextButton(
+            //                               onPressed: () {
+            //                                 Nav.off(context, 'OK');
+            //                                 activeController.deleteUserTask(activeController.tasks[i]);
+            //                                 // activeController.syncMemory();
+            //                               },
+            //                               child: const Text('OK'),
+            //                             ),
+            //                           ],
+            //                         ),
+            //                       );
+            //                     },
+            //                     icon: const Icon(
+            //                       Icons.delete,
+            //                       color: Colors.deepOrange,
+            //                     )),
+            //               );
+            //             },
+            //           ),
+            //         ))),
+            //     // SizedBox(
+            //     //   height: 70,
+            //     //   child: Center(
+            //     //     child: GestureDetector(
+            //     //       onTap: (){
+            //     //         /// you can avoid writing boiler plate code pagination by
+            //     //         activeController.pageNumber.set(1);
+            //     //         activeController.pageSize.set(3);
+            //     //         printInfo(activeController.pageNumber.set(1));
+            //     //         printInfo(activeController.pageSize.set(4));
+            //     //       },
+            //     //       child: const Text('Load More'),
+            //     //     ),
+            //     //   ),
+            //     // )
+            //   ],
             // )
-          ],
-        )),
+            ),
       ),
     );
   }
