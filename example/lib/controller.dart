@@ -385,6 +385,10 @@ class MainController extends ActiveController {
    void createMemory() async {
    printSuccess(await memory.upsertMemory('hello', 'Asia'));
    printInfo(await memory.readMemory('hello',value: true));
+   printInfo("readMemorySync==");
+   memory = await Memory.instance().initMemory();
+   printInfo(memory.readMemorySync('hello',value: true));
+
   }
 
   /*updateMemory() async {
@@ -403,6 +407,56 @@ class MainController extends ActiveController {
 
   }*/
 
+
+/* _testDownloadImage() async{
+    try {
+      ActiveRequest _req = ActiveRequest();
+      _req.setUp = RequestSetUp(
+          idleTimeout: 10,
+          connectionTimeout: 20,
+          logResponse: true,
+          withTrustedRoots: true);
+      ActiveResponse? response;
+      try {
+         response = await _req.downloadFileByteList(
+          Params(
+            endpoint: "https://demoadmin.ecitizen.pesaflow.com/assets/media/kenya-kenya-dairy-board.jpg",),);
+         printInfo("_testDownloadImage: response runtimeType==");
+         if(response!=null && response.dataAlt != null){
+           printInfo("response.dataAlt!=null ==");
+           printInfo(response.dataAlt.runtimeType.toString());
+         }else{
+           printInfo("!!!response!=null && response!.dataAlt");
+         }
+         printInfo(response.runtimeType.toString());
+         printInfo("_testDownloadImage: response==");
+         printInfo(response.toString());
+      }catch(e){
+        printInfo("_testDownloadImage response e==");
+        printInfo(e.toString());
+      }
+      printInfo("_testDownloadImage _testDownloadImage: response==");
+      //printInfo(response.toString());
+      //printInfo("_testDownloadImage response.runtimeType==");
+      //print(response.runtimeType.toString());
+
+      if (response!= null && isApiResponseSuccessfull(response!.statusCode)) {
+        printInfo("_testDownloadImage: response.dataAlt==");
+        printInfo(response.dataAlt.toString());
+
+        printInfo("_testDownloadImage: response.dataAlt runtimeType==");
+        try {
+          printInfo(response.dataAlt.runtimeType.toString());
+        }catch(e){
+          printInfo("_testDownloadImage runtimeType e==");
+          printInfo(e.toString());
+        }
+      }
+    }catch(e){
+      printInfo("_testDownloadImage error e==");
+      printInfo(e.toString());
+    }
+  }*/
 }
 
 

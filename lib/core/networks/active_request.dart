@@ -77,17 +77,19 @@ class ActiveResponse {
   String endpoint = '';
   String? errors;
   String? data;
+  var dataAlt;
 
   ActiveResponse({
     required this.statusCode,
     required this.endpoint,
     this.errors,
     this.data,
+    this.dataAlt,
   });
 
   @override
   String toString() {
-    return "( $statusCode ) : $endpoint \n $data \n $errors";
+    return "( $statusCode ) : $endpoint \n $data \n $errors${((dataAlt!=null? '\n $dataAlt':'' ))}";
   }
 }
 
@@ -141,6 +143,15 @@ class ActiveRequest {
 
     return await HttpActiveRequest().getApi(params, setUp, saveResponse: saveResponse,
       savedResponseName: savedResponseName);
+  }
+
+downloadFileByteList(Params params, {
+    bool saveResponse = false,
+    String savedResponseName = '',
+    }) async{
+
+    return await HttpActiveRequest().downloadFileByteList(params, setUp, saveResponse: saveResponse,
+    savedResponseName: savedResponseName);
   }
 
   /// [postApi] Get request.

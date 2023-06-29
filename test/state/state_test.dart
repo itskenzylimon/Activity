@@ -1,5 +1,6 @@
 import 'package:activity/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/src/equals_matcher.dart' as match;
 
 void main() {
   group('ActiveStateChanged Extension Tests', () {
@@ -39,7 +40,7 @@ void main() {
       final result = events.firstForPropertyName(typeName);
 
       expect(result, isNotNull);
-      expect(result, equals(event));
+      expect(result, match.equals(event));
     });
 
     test(
@@ -60,7 +61,7 @@ void main() {
       final events = [ActiveStateChanged(nextValue, null, typeName: typeName)];
 
       final result = events.newValueFor(typeName);
-      expect(result, equals(nextValue));
+      expect(result, match.equals(nextValue));
     });
 
     test(
@@ -83,7 +84,7 @@ void main() {
       ];
 
       final result = events.oldValueFor(typeName);
-      expect(result, equals(previousValue));
+      expect(result, match.equals(previousValue));
     });
 
     test(

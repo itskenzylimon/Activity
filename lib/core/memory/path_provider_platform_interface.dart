@@ -33,6 +33,7 @@ abstract class PathProviderPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+
   /// Path to the temporary directory on the device that is not backed up and is
   /// suitable for storing caches of downloaded files.
   Future<String?> getTemporaryPath() {
