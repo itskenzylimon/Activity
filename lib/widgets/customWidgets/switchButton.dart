@@ -46,33 +46,86 @@ class SwitchButton extends StatefulWidget {
         super(key: key);
   final bool value;
   final ValueChanged<bool> onToggle;
+
+  ///[showOnOff]sets either to show or not show the 'on' and 'off' text 
   final bool showOnOff;
+
   final String? activeText;
   final String? inactiveText;
+
+  ///[activeColor]color of the switchbutton when the button is active
   final Color activeColor;
+
+  ///[inactiveColor]color of the switchbutton when the button is inactive
   final Color inactiveColor;
+
+  ///[activeTextColor] text color of the switchbutton when its active
   final Color activeTextColor;
+
+  ///[inactiveTextColor] text color of the switchbutton when its inactive
   final Color inactiveTextColor;
+
+  ///[activeTextFontWeight] text fontweight  of the switchbutton when its active
   final FontWeight? activeTextFontWeight;
+
+  ///[inactiveTextFontWeight] text fontweight  of the switchbutton when its inactive
   final FontWeight? inactiveTextFontWeight;
+
+  ///[toggleColor] this is the color of the switchbutton when it is switched
   final Color toggleColor;
+
+  ///[activeToggleColor] toggle color when the switchbutton is switched to active
   final Color? activeToggleColor;
+
+  ///[inactiveToggleColor] toggle color when the switchbutton is switched to inactive
   final Color? inactiveToggleColor;
+
+  ///[width]width of the switchbutton
   final double width;
+
+  ///[height]height of the switchbutton
   final double height;
+
+  ///[toggleSize] size of the toggle 
   final double toggleSize;
+  
+  ///[valueFontSize] this is the font size of the value of the switchbutton
   final double valueFontSize;
+
+  ///[borderRadius] radius of the  switchbutton.
   final double borderRadius;
+
+  ///[padding] inside padding of the swithcbutton
   final double padding;
+
+  ///[switchBorder] this is the outline border.
   final BoxBorder? switchBorder;
+
+  ///[activeSwitchBorder] this is the outline border when the switch is active.
   final BoxBorder? activeSwitchBorder;
+
+  ///[inactiveSwitchBorder] this is the outline border when the switch is inactive.
   final BoxBorder? inactiveSwitchBorder;
+
+  ///[toggleBorder] border of the toggle
   final BoxBorder? toggleBorder;
+
+  ///[activeToggleBorder] border of the toggle when its active.
   final BoxBorder? activeToggleBorder;
+
+  ///[inactiveToggleBorder] border of the toggle when its inactive.
   final BoxBorder? inactiveToggleBorder;
+
+  ///[activeIcon] icon of the switch when its active.
   final Widget? activeIcon;
+
+  ///[inactiveIcon] icon of the switch when its inactive.
   final Widget? inactiveIcon;
+
+  ///[duration] the time the switch takes to turn on or off.
   final Duration duration;
+
+  
   final bool disabled;
 
   @override
@@ -115,50 +168,52 @@ class _SwitchButtonState extends State<SwitchButton>
 
     if (oldWidget.value == widget.value) return;
 
-    if (widget.value)
+    if (widget.value) {
       _animationController.forward();
-    else
+    } else {
       _animationController.reverse();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Color _toggleColor = Colors.white;
-    Color _switchColor = Colors.white;
-    Border? _switchBorder;
-    Border? _toggleBorder;
+    Color toggleColor = Colors.white;
+    Color switchColor = Colors.white;
+    Border? switchBorder;
+    Border? toggleBorder;
 
     if (widget.value) {
-      _toggleColor = widget.activeToggleColor ?? widget.toggleColor;
-      _switchColor = widget.activeColor;
-      _switchBorder = widget.activeSwitchBorder as Border? ??
+      toggleColor = widget.activeToggleColor ?? widget.toggleColor;
+      switchColor = widget.activeColor;
+      switchBorder = widget.activeSwitchBorder as Border? ??
           widget.switchBorder as Border?;
-      _toggleBorder = widget.activeToggleBorder as Border? ??
+      toggleBorder = widget.activeToggleBorder as Border? ??
           widget.toggleBorder as Border?;
     } else {
-      _toggleColor = widget.inactiveToggleColor ?? widget.toggleColor;
-      _switchColor = widget.inactiveColor;
-      _switchBorder = widget.inactiveSwitchBorder as Border? ??
+      toggleColor = widget.inactiveToggleColor ?? widget.toggleColor;
+      switchColor = widget.inactiveColor;
+      switchBorder = widget.inactiveSwitchBorder as Border? ??
           widget.switchBorder as Border?;
-      _toggleBorder = widget.inactiveToggleBorder as Border? ??
+      toggleBorder = widget.inactiveToggleBorder as Border? ??
           widget.toggleBorder as Border?;
     }
 
-    double _textSpace = widget.width - widget.toggleSize;
+    double textSpace = widget.width - widget.toggleSize;
 
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
-        return Container(
+        return SizedBox(
           width: widget.width,
           child: Align(
             child: GestureDetector(
               onTap: () {
                 if (!widget.disabled) {
-                  if (widget.value)
+                  if (widget.value) {
                     _animationController.forward();
-                  else
+                  } else {
                     _animationController.reverse();
+                  }
 
                   widget.onToggle(!widget.value);
                 }
@@ -171,8 +226,8 @@ class _SwitchButtonState extends State<SwitchButton>
                   padding: EdgeInsets.all(widget.padding),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(widget.borderRadius),
-                    color: _switchColor,
-                    border: _switchBorder,
+                    color: switchColor,
+                    border: switchBorder,
                   ),
                   child: Stack(
                     children: <Widget>[
@@ -180,8 +235,8 @@ class _SwitchButtonState extends State<SwitchButton>
                         opacity: widget.value ? 1.0 : 0.0,
                         duration: widget.duration,
                         child: Container(
-                          width: _textSpace,
-                          padding: EdgeInsets.symmetric(horizontal: 4.0),
+                          width: textSpace,
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           alignment: Alignment.centerLeft,
                           child: _activeText,
                         ),
@@ -192,47 +247,43 @@ class _SwitchButtonState extends State<SwitchButton>
                           opacity: !widget.value ? 1.0 : 0.0,
                           duration: widget.duration,
                           child: Container(
-                            width: _textSpace,
-                            padding: EdgeInsets.symmetric(horizontal: 4.0),
+                            width: textSpace,
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             alignment: Alignment.centerRight,
                             child: _inactiveText,
                           ),
                         ),
                       ),
-                      Container(
-                        child: Align(
-                          alignment: _toggleAnimation.value,
-                          child: Container(
-                            width: widget.toggleSize,
-                            height: widget.toggleSize,
-                            padding: EdgeInsets.all(4.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _toggleColor,
-                              border: _toggleBorder,
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Container(
-                                child: Stack(
-                                  children: [
-                                    Center(
-                                      child: AnimatedOpacity(
-                                        opacity: widget.value ? 1.0 : 0.0,
-                                        duration: widget.duration,
-                                        child: widget.activeIcon,
-                                      ),
-                                    ),
-                                    Center(
-                                      child: AnimatedOpacity(
-                                        opacity: !widget.value ? 1.0 : 0.0,
-                                        duration: widget.duration,
-                                        child: widget.inactiveIcon,
-                                      ),
-                                    ),
-                                  ],
+                      Align(
+                        alignment: _toggleAnimation.value,
+                        child: Container(
+                          width: widget.toggleSize,
+                          height: widget.toggleSize,
+                          padding: const EdgeInsets.all(4.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: toggleColor,
+                            border: toggleBorder,
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Stack(
+                              children: [
+                                Center(
+                                  child: AnimatedOpacity(
+                                    opacity: widget.value ? 1.0 : 0.0,
+                                    duration: widget.duration,
+                                    child: widget.activeIcon,
+                                  ),
                                 ),
-                              ),
+                                Center(
+                                  child: AnimatedOpacity(
+                                    opacity: !widget.value ? 1.0 : 0.0,
+                                    duration: widget.duration,
+                                    child: widget.inactiveIcon,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -253,6 +304,8 @@ class _SwitchButtonState extends State<SwitchButton>
   FontWeight get _inactiveTextFontWeight =>
       widget.inactiveTextFontWeight ?? FontWeight.w900;
 
+
+  ///[_activeText] this is the text when the switch is active.
   Widget get _activeText {
     if (widget.showOnOff) {
       return Text(
@@ -265,9 +318,11 @@ class _SwitchButtonState extends State<SwitchButton>
       );
     }
 
-    return Text("");
+    return const Text("");
   }
 
+
+  ///[_inactiveText] this is the text when the switch is inactive.
   Widget get _inactiveText {
     if (widget.showOnOff) {
       return Text(
@@ -281,6 +336,6 @@ class _SwitchButtonState extends State<SwitchButton>
       );
     }
 
-    return Text("");
+    return const Text("");
   }
 }

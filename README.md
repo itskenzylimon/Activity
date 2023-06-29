@@ -757,6 +757,37 @@ memory.resetMemory(); // This resets all the entries on ActiveMemory
 memory.hasMemory(); // Checks if a key exists in ActiveMemory  
   
 ```  
+## ActiveNavigation
+
+Active Navigation is an abstraction on top of the flutter's Navigation API's to reduce boilerplate
+
+```dart  
+
+/// Call the Nav class when depending on Activity
+Nav.to(context,()=> View());
+  
+```  
+
+```dart  
+//Navigates to the next view in this case page View()
+  Nav.to(context,()=> View());
+  
+///You can also pass arguments to the next page
+    Nav.to(context,()=> View(),"Hello from First view");//takes arguments as Objects so you can pass any data type
+
+//To get arguments passed on the second creen use this api
+ Sreing argument =   Nav.getArguments();
+ print(argument);//"Hello from First view"
+      
+//Pop off from a view
+Nav.off(context);
+//pop off all pages on the navigation stack to the page provided
+Nav.offAll(context,()=> FirstView());
+
+// Corresponding alternative for pushUntill api :
+Nav.pushUntil(context,()=> FirstView(),()=> AnotherView());
+  
+```  
 
 ## ActiveSockets
 
