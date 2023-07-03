@@ -7,6 +7,15 @@ import 'package:flutter/material.dart';
 /// Each MessageType has its own corresponding colors
 enum MessageType { success, warning, info, error, normal }
 
+/// [MessageTime] used to dictate the time a snackbar will be shown on the
+/// screen
+/// [short] Message will be displayed for 1 second
+///
+/// [medium] Message will be displayed for 3 seconds
+///
+/// [long] Message will be displayed for 4/5 seconds
+enum MessageTime { short, medium, long }
+
 Color infoColor = const Color(0xff0047BA);
 Color infoShade = const Color(0xFFDDEAFE);
 Color successColor = const Color(0xFF065F46);
@@ -19,8 +28,9 @@ Color errorShade = const Color(0xFFFEFAFA);
 class ShowMessage {
   final String message;
   final MessageType messageType;
+  final MessageTime messageTime;
 
-  ShowMessage(this.message, this.messageType);
+  ShowMessage(this.message, this.messageType, this.messageTime);
 }
 
 /// [SnackbarMessage]A class for displaying snackbar-like messages as overlays.
@@ -34,7 +44,6 @@ abstract class SnackbarMessage {
   /// The [showMessage] represents the message to be displayed.
   /// The [removeOverlay] function is called to remove the overlay when needed.
   static void showSnackMessage(BuildContext context, ShowMessage showMessage) {
-
     OverlayState? overlayState = Overlay.of(context);
 
     /// This is a null check for overlayState created above. If the state is
@@ -118,11 +127,21 @@ abstract class SnackbarMessage {
 
     overlayState!.insert(overlayEntry);
 
+    Duration shortTime = const Duration(seconds: 1);
+    Duration mediumTime = const Duration(seconds: 3);
+    Duration longTime = const Duration(seconds: 5);
+
     /// After a delay of 4 seconds, the overlayEntry is removed using the remove method.
-    Future.delayed(Duration(seconds: 4)).then((_) {
+    Future.delayed(Duration(
+      seconds: showMessage.messageTime == MessageTime.short
+          ? 1
+          : showMessage.messageTime == MessageTime.short
+              ? 3
+              : showMessage.messageTime == MessageTime.short
+                  ? 5
+                  : 4,
+    )).then((_) {
       overlayEntry.remove();
     });
   }
 }
-
-
