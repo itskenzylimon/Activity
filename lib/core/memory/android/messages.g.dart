@@ -25,11 +25,11 @@ enum StorageDirectory {
   documents,
 }
 
-class PathProviderApi {
-  /// Constructor for [PathProviderApi].  The [binaryMessenger] named argument is
+class PathApi {
+  /// Constructor for [PathApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  PathProviderApi({BinaryMessenger? binaryMessenger})
+  PathApi({BinaryMessenger? binaryMessenger})
       : _binaryMessenger = binaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
@@ -37,7 +37,7 @@ class PathProviderApi {
 
   Future<String?> getTemporaryPath() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getTemporaryPath', codec,
+        'dev.flutter.pigeon.PathApi.getTemporaryPath', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
@@ -58,7 +58,7 @@ class PathProviderApi {
 
   Future<String?> getApplicationSupportPath() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getApplicationSupportPath', codec,
+        'dev.flutter.pigeon.PathApi.getApplicationSupportPath', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
@@ -79,7 +79,7 @@ class PathProviderApi {
 
   Future<String?> getApplicationDocumentsPath() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getApplicationDocumentsPath', codec,
+        'dev.flutter.pigeon.PathApi.getApplicationDocumentsPath', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
@@ -100,7 +100,7 @@ class PathProviderApi {
 
   Future<String?> getExternalStoragePath() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getExternalStoragePath', codec,
+        'dev.flutter.pigeon.PathApi.getExternalStoragePath', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
@@ -121,7 +121,7 @@ class PathProviderApi {
 
   Future<List<String?>> getExternalCachePaths() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getExternalCachePaths', codec,
+        'dev.flutter.pigeon.PathApi.getExternalCachePaths', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
     if (replyList == null) {
@@ -148,7 +148,7 @@ class PathProviderApi {
   Future<List<String?>> getExternalStoragePaths(
       StorageDirectory arg_directory) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getExternalStoragePaths', codec,
+        'dev.flutter.pigeon.PathApi.getExternalStoragePaths', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
         await channel.send(<Object?>[arg_directory.index]) as List<Object?>?;

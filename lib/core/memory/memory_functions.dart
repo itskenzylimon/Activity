@@ -1,11 +1,8 @@
-import 'dart:developer';
 import 'dart:io';
-import 'ios/path_provider_foundation.dart';
-import 'android/path_provider_android.dart';
-import 'linux/path_provider_linux.dart';
-import 'path_provider_platform_interface.dart';
+import 'ios/path_foundation.dart';
+import 'android/path_android.dart';
+import 'path_platform_interface.dart';
 import 'enums.dart';
-import 'windows/path_provider_windows.dart';
 
 /// An exception thrown when a directory that should always be available on
 /// the current platform cannot be obtained.
@@ -28,23 +25,10 @@ class MissingPlatformDirectoryException implements Exception {
   }
 }
 
-PathProviderPlatform get _platform {
-  if(Platform.isAndroid) {
-    return PathProviderAndroid();
-  }
-  if(Platform.isIOS||Platform.isMacOS) {
-    return PathProviderFoundation();
-  }
-  if(Platform.isLinux) {
-    return PathProviderLinux();
-  }
-  if(Platform.isWindows) {
-    return PathProviderWindows();
-  }
-
-  return PathProviderPlatform.instance;
-}
-
+PathPlatform get _platform =>
+    ((Platform.isAndroid? PathAndroid():
+    ((Platform.isIOS? PathFoundation() :
+    PathPlatform.instance))));
 
 /// Path to the temporary directory on the device that is not backed up and is
 /// suitable for storing caches of downloaded files.
@@ -128,7 +112,6 @@ Future<Directory> getLibraryDirectory() async {
 Future<Directory> getApplicationDocumentsDirectory() async {
   final String? path = await _platform.getApplicationDocumentsPath();
   if (path == null) {
-    log("Unable to get application documents directory");
     throw MissingPlatformDirectoryException(
         'Unable to get application documents directory');
   }

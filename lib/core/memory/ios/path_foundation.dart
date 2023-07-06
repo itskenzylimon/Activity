@@ -5,35 +5,35 @@
 import 'dart:io';
 
 import '../enums.dart';
-import '../path_provider_platform_interface.dart';
+import '../path_platform_interface.dart';
 
 import 'package:flutter/foundation.dart';
 import 'messages.g.dart';
 
-/// The iOS and macOS implementation of [PathProviderPlatform].
-class PathProviderFoundation extends PathProviderPlatform {
-  /// Constructor that accepts a testable PathProviderPlatformProvider.
-  PathProviderFoundation({
-    @visibleForTesting PathProviderPlatformProvider? platform,
-  }) : _platformProvider = platform ?? PathProviderPlatformProvider();
+/// The iOS and macOS implementation of [PathPlatform].
+class PathFoundation extends PathPlatform {
+  /// Constructor that accepts a testable PathPlatformProvider.
+  PathFoundation({
+    @visibleForTesting PathPlatformProvider? platform,
+  }) : _platformProvider = platform ?? PathPlatformProvider();
 
-  final PathProviderPlatformProvider _platformProvider;
-  final PathProviderApi _pathProvider = PathProviderApi();
+  final PathPlatformProvider _platformProvider;
+  final PathApi _Path = PathApi();
 
-  /// Registers this class as the default instance of [PathProviderPlatform]
+  /// Registers this class as the default instance of [PathPlatform]
   static void registerWith() {
-    PathProviderPlatform.instance = PathProviderFoundation();
+    PathPlatform.instance = PathFoundation();
   }
 
   @override
   Future<String?> getTemporaryPath() {
-    return _pathProvider.getDirectoryPath(DirectoryType.temp);
+    return _Path.getDirectoryPath(DirectoryType.temp);
   }
 
   @override
   Future<String?> getApplicationSupportPath() async {
     final String? path =
-        await _pathProvider.getDirectoryPath(DirectoryType.applicationSupport);
+        await _Path.getDirectoryPath(DirectoryType.applicationSupport);
     if (path != null) {
       // Ensure the directory exists before returning it, for consistency with
       // other platforms.
@@ -44,12 +44,12 @@ class PathProviderFoundation extends PathProviderPlatform {
 
   @override
   Future<String?> getLibraryPath() {
-    return _pathProvider.getDirectoryPath(DirectoryType.library);
+    return _Path.getDirectoryPath(DirectoryType.library);
   }
 
   @override
   Future<String?> getApplicationDocumentsPath() {
-    return _pathProvider.getDirectoryPath(DirectoryType.applicationDocuments);
+    return _Path.getDirectoryPath(DirectoryType.applicationDocuments);
   }
 
   @override
@@ -74,7 +74,7 @@ class PathProviderFoundation extends PathProviderPlatform {
 
   @override
   Future<String?> getDownloadsPath() {
-    return _pathProvider.getDirectoryPath(DirectoryType.downloads);
+    return _Path.getDirectoryPath(DirectoryType.downloads);
   }
 
   /// Returns the path to the container of the specified App Group.
@@ -84,13 +84,13 @@ class PathProviderFoundation extends PathProviderPlatform {
       throw UnsupportedError(
           'getContainerPath is not supported on this platform');
     }
-    return _pathProvider.getContainerPath(appGroupIdentifier);
+    return _Path.getContainerPath(appGroupIdentifier);
   }
 }
 
 /// Helper class for returning information about the current platform.
 @visibleForTesting
-class PathProviderPlatformProvider {
+class PathPlatformProvider {
   /// Specifies whether the current platform is iOS.
   bool get isIOS => Platform.isIOS;
 }
