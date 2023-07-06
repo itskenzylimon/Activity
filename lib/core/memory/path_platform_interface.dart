@@ -2,33 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'method_channel_path_provider.dart';
+import 'method_channel_path.dart';
 import 'enums.dart';
 import 'plugin_platform_interface.dart';
 
 /// The interface that implementations of path_provider must implement.
 ///
-/// Platform implementations should extend this class rather than implement it as `PathProvider`
+/// Platform implementations should extend this class rather than implement it as `Path`
 /// does not consider newly added methods to be breaking changes. Extending this class
 /// (using `extends`) ensures that the subclass will get the default implementation, while
 /// platform implementations that `implements` this interface will be broken by newly added
-/// [PathProviderPlatform] methods.
-abstract class PathProviderPlatform extends PlatformInterface {
-  /// Constructs a PathProviderPlatform.
-  PathProviderPlatform() : super(token: _token);
+/// [PathPlatform] methods.
+abstract class PathPlatform extends PlatformInterface {
+  /// Constructs a PathPlatform.
+  PathPlatform() : super(token: _token);
 
   static final Object _token = Object();
 
-  static PathProviderPlatform _instance = MethodChannelPathProvider();
+  static PathPlatform _instance = MethodChannelPath();
 
-  /// The default instance of [PathProviderPlatform] to use.
+  /// The default instance of [PathPlatform] to use.
   ///
-  /// Defaults to [MethodChannelPathProvider].
-  static PathProviderPlatform get instance => _instance;
+  /// Defaults to [MethodChannelPath].
+  static PathPlatform get instance => _instance;
 
   /// Platform-specific plugins should set this with their own platform-specific
-  /// class that extends [PathProviderPlatform] when they register themselves.
-  static set instance(PathProviderPlatform instance) {
+  /// class that extends [PathPlatform] when they register themselves.
+  static set instance(PathPlatform instance) {
     PlatformInterface.verify(instance, _token);
     _instance = instance;
   }

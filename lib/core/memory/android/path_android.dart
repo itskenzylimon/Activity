@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../enums.dart';
-import '../path_provider_platform_interface.dart';
+import '../path_platform_interface.dart';
 import 'messages.g.dart' as messages;
 
 messages.StorageDirectory _convertStorageDirectory(
@@ -34,13 +34,13 @@ messages.StorageDirectory _convertStorageDirectory(
   }
 }
 
-/// The Android implementation of [PathProviderPlatform].
-class PathProviderAndroid extends PathProviderPlatform {
-  final messages.PathProviderApi _api = messages.PathProviderApi();
+/// The Android implementation of [PathPlatform].
+class PathAndroid extends PathPlatform {
+  final messages.PathApi _api = messages.PathApi();
 
-  /// Registers this class as the default instance of [PathProviderPlatform].
+  /// Registers this class as the default instance of [PathPlatform].
   static void registerWith() {
-    PathProviderPlatform.instance = PathProviderAndroid();
+    PathPlatform.instance = PathAndroid();
   }
 
   @override

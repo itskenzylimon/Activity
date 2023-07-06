@@ -4,13 +4,13 @@
 
 import 'dart:io' show Platform;
 import 'enums.dart';
-import './path_provider_platform_interface.dart';
+import './path_platform_interface.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 
 
-/// An implementation of [PathProviderPlatform] that uses method channels.
-class MethodChannelPathProvider extends PathProviderPlatform {
+/// An implementation of [PathPlatform] that uses method channels.
+class MethodChannelPath extends PathPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   MethodChannel methodChannel =

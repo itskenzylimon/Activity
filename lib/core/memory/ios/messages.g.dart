@@ -19,11 +19,11 @@ enum DirectoryType {
   temp,
 }
 
-class PathProviderApi {
-  /// Constructor for [PathProviderApi].  The [binaryMessenger] named argument is
+class PathApi {
+  /// Constructor for [PathApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  PathProviderApi({BinaryMessenger? binaryMessenger})
+  PathApi({BinaryMessenger? binaryMessenger})
       : _binaryMessenger = binaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
@@ -31,7 +31,7 @@ class PathProviderApi {
 
   Future<String?> getDirectoryPath(DirectoryType arg_type) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getDirectoryPath', codec,
+        'dev.flutter.pigeon.PathApi.getDirectoryPath', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
         await channel.send(<Object?>[arg_type.index]) as List<Object?>?;
@@ -53,7 +53,7 @@ class PathProviderApi {
 
   Future<String?> getContainerPath(String arg_appGroupIdentifier) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.PathProviderApi.getContainerPath', codec,
+        'dev.flutter.pigeon.PathApi.getContainerPath', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
         await channel.send(<Object?>[arg_appGroupIdentifier]) as List<Object?>?;
