@@ -14,7 +14,7 @@ class MethodChannelPath extends PathPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   MethodChannel methodChannel =
-  const MethodChannel('plugins.flutter.io/path_provider');
+  const MethodChannel('plugins.flutter.io/path');
 
 
   // Ideally, this property shouldn't exist, and each platform should

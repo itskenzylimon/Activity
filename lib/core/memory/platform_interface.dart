@@ -7,7 +7,7 @@ import 'plugin_platform_interface.dart';
 import 'enums.dart';
 import './method_channel_path.dart';
 
-/// The interface that implementations of path_provider must implement.
+/// The interface that implementations of path must implement.
 ///
 /// Platform implementations should extend this class rather than implement it as `Path`
 /// does not consider newly added methods to be breaking changes. Extending this class
