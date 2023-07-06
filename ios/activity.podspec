@@ -4,7 +4,7 @@
 Pod::Spec.new do |s|
   s.name             = 'activity'
   s.version          = '0.0.1'
-  s.summary          = 'An iOS and macOS implementation of the path_provider plugin.'
+  s.summary          = 'An iOS and macOS implementation of the path plugin.'
   s.description      = <<-DESC
   An iOS and macOS implementation of the Flutter plugin for getting commonly used locations on the filesystem.
                        DESC

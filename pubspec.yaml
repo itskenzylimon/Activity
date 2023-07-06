@@ -10,6 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  #required for linux-getting app dir
+  ffi: ">=1.1.2 <3.0.0"
+  #required for linux-getting app dir
+  xdg_directories: ">=0.2.0 <2.0.0"
+  #required for windows-getting app dir
+  win32: ">=2.1.0 <6.0.0"
 
 dev_dependencies:
   flutter_test:
@@ -21,9 +27,19 @@ flutter:
   plugin:
     platforms:
       android:
-        package: io.flutter.plugins.pathprovider
-        pluginClass: PathProviderPlugin
+        package: io.flutter.plugins.path
+        pluginClass: PathPlugin
       ios:
         pluginClass: PathProviderPlugin
+        dartPluginClass: PathProviderFoundation
+        sharedDarwinSource: true
+      linux:
+        dartPluginClass: PathProviderLinux
+      windows:
+        dartPluginClass: PathProviderWindows
+      macos:
+        pluginClass: PathProviderPlugin
+        dartPluginClass: PathProviderFoundation
+        sharedDarwinSource: true
 
   uses-material-design: true

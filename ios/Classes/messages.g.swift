@@ -45,17 +45,17 @@ enum DirectoryType: Int {
   case temp = 4
 }
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
-protocol PathProviderApi {
+protocol PathApi {
   func getDirectoryPath(type: DirectoryType) throws -> String?
   func getContainerPath(appGroupIdentifier: String) throws -> String?
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
-class PathProviderApiSetup {
-  /// The codec used by PathProviderApi.
-  /// Sets up an instance of `PathProviderApi` to handle messages through the `binaryMessenger`.
-  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: PathProviderApi?) {
-    let getDirectoryPathChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.PathProviderApi.getDirectoryPath", binaryMessenger: binaryMessenger)
+class PathApiSetup {
+  /// The codec used by PathApi.
+  /// Sets up an instance of `PathApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: PathApi?) {
+    let getDirectoryPathChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.PathApi.getDirectoryPath", binaryMessenger: binaryMessenger)
     if let api = api {
       getDirectoryPathChannel.setMessageHandler { message, reply in
         let args = message as! [Any]
@@ -70,7 +70,7 @@ class PathProviderApiSetup {
     } else {
       getDirectoryPathChannel.setMessageHandler(nil)
     }
-    let getContainerPathChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.PathProviderApi.getContainerPath", binaryMessenger: binaryMessenger)
+    let getContainerPathChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.PathApi.getContainerPath", binaryMessenger: binaryMessenger)
     if let api = api {
       getContainerPathChannel.setMessageHandler { message, reply in
         let args = message as! [Any]
