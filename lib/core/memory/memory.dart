@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:activity/activity.dart' as act;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../helpers/logger.dart';
 
 /// Memory is a class that is used to store data in a file.
 class Memory {
@@ -19,10 +21,10 @@ class Memory {
   ///user to read data in a synchronous way O(1) time
   Map<String,dynamic> _currentData = {};
 
-  static Memory? _instance;
+  static Memory? _memoryInstance;
   static Memory instance({String? filename}) {
-    _instance ??= Memory(filename: filename );
-    return _instance!;
+    _memoryInstance ??= Memory(filename: filename );
+    return _memoryInstance!;
   }
   /// [Memory] constructor.
   /// filename is the name of the file you want to store the data in.
@@ -34,62 +36,30 @@ class Memory {
     }
   }
 
-  ///[initMemory] loads data into the [_currentData] variable where we
-  ///can read it using async methods
-   Future<Memory> initMemory() async{
-    Directory? appDir;
+  initMemory() async {
+    Directory appDir;
     try {
-       appDir = await act.getApplicationDocumentsDirectory();
+      appDir = await getApplicationDocumentsDirectory();
     }catch(xx){
       throw PlatformException(code: "415",message: "Platform not supported: "+xx.toString());
     }
-    if (appDir == null || appDir.path == null || appDir.path.isEmpty) {
-      throw PlatformException(code: "415",message: "Platform not supported");
+    if (appDir.path.isEmpty) {
+      throw PlatformException(code: "415",message: "Platform path is empty");
     }
-    _filePath = act.join(appDir.path,((_filename ?? "memory.txt")));
-        //appDir.path + "/" + ((_filename ?? "memory.txt"));
+    _filePath= "${appDir.path}/${_filename ?? "memory.act"}";
     File file = File(_filePath!);
     if (await file.exists()) {
-      await refreshMemory();
-      return this;
+      refreshMemory();
+      return ;
     } else {
       try {
         FileStorage fileStorage = FileStorage(_filePath!);
-        bool isSaved = fileStorage.save({});
-        return this;
+        fileStorage.save({});
       } catch (error) {
-        throw PlatformException(code: "415",message: "Platform not supported: "+error.toString());
+        throw PlatformException(code: "415",message: "Error saving file to memory: $error");
       }
     }
   }
-
-  // initMemory() async {
-  //   bool isCreated = false;
-  //   final appDir = await getApplicationDocumentsDirectory();
-  //   printError("initMemory appDir==");
-  //   printError(appDir);
-  //   if(appDir==null||appDir.path==null||appDir.path.isEmpty){
-  //     return;
-  //   }
-  //   _filePath= appDir.path+"/"+((_filename ?? "memory.txt"));
-  //   //_filePath = join(appDir.path, _filename ?? "memory.txt");
-  //   File file = File(_filePath!);
-  //   if (await file.exists()) {
-  //     return true;
-  //   } else {
-  //     try {
-  //       FileStorage fileStorage = FileStorage(_filePath!);
-  //       bool isSaved = fileStorage.save({});
-  //       printError("isSaved ==${isSaved.toString()}");
-  //       //file.writeAsBytesSync(utf8.encode(""));
-  //       return isSaved;
-  //     } catch (error) {
-  //       printError("writeAsBytesSync error==");
-  //       printError(error.toString());
-  //       return false;
-  //     }
-  //   }
-  // }
 
   /// Check if [Memory] is empty.
   Future<bool> get isDataEmpty async {
@@ -441,7 +411,6 @@ class Memory {
 
   /// Reloads loaded [_currentData] map from [Memory].
   Future <bool> refreshMemory() async{
-    //debugPrint("Memory: refreshMemory called");
     await stageMemory();
     return true;
   }
