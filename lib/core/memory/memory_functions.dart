@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'ios/path_provider_foundation.dart';
 import 'android/path_provider_android.dart';
@@ -31,7 +32,7 @@ PathProviderPlatform get _platform {
   if(Platform.isAndroid) {
     return PathProviderAndroid();
   }
-  if(Platform.isIOS) {
+  if(Platform.isIOS||Platform.isMacOS) {
     return PathProviderFoundation();
   }
   if(Platform.isLinux) {
@@ -127,6 +128,7 @@ Future<Directory> getLibraryDirectory() async {
 Future<Directory> getApplicationDocumentsDirectory() async {
   final String? path = await _platform.getApplicationDocumentsPath();
   if (path == null) {
+    log("Unable to get application documents directory");
     throw MissingPlatformDirectoryException(
         'Unable to get application documents directory');
   }

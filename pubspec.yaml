@@ -31,9 +31,15 @@ flutter:
         pluginClass: PathProviderPlugin
       ios:
         pluginClass: PathProviderPlugin
+        dartPluginClass: PathProviderFoundation
+        sharedDarwinSource: true
       linux:
         dartPluginClass: PathProviderLinux
       windows:
         dartPluginClass: PathProviderWindows
+      macos:
+        pluginClass: PathProviderPlugin
+        dartPluginClass: PathProviderFoundation
+        sharedDarwinSource: true
 
   uses-material-design: true
