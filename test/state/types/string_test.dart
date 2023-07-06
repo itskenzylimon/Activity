@@ -1,6 +1,7 @@
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/src/equals_matcher.dart' as match;
 
 class StringTestController extends ActiveController {
   final country = ActiveString('Kenya');
@@ -111,7 +112,7 @@ void main() {
       activeController.country.set(nameValue);
       final result = activeController.country.length;
 
-      expect(result, equals(expectedValue));
+      expect(result, match.equals(expectedValue));
     });
 
     test('[contains] function test - finds matching string - returns true', () {
@@ -140,7 +141,7 @@ void main() {
 
           final result = activeController.country.substring(1);
 
-          expect(result, equals(expectedValue));
+          expect(result, match.equals(expectedValue));
         });
 
     test(
@@ -152,7 +153,7 @@ void main() {
 
           final result = activeController.country.substring(2, 5);
 
-          expect(result, equals(expectedValue));
+          expect(result, match.equals(expectedValue));
         });
   });
 
@@ -182,7 +183,7 @@ void main() {
       activeController.country.set(null);
       final result = activeController.country.length;
 
-      expect(result, equals(expectedValue));
+      expect(result, match.equals(expectedValue));
     });
 
     test('[contains] function test - value is null - returns false', () {

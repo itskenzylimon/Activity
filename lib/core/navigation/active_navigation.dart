@@ -17,6 +17,13 @@ class Nav {
           ),
         ),
       );
+  //Push with a named route
+  static pushNamed(BuildContext context, String routeName, [final Object? arguments]) =>
+      Navigator.pushNamed(
+        context,
+       routeName,
+        arguments: arguments ?? {},
+      );
 
   ///create predicate route
   static Route<dynamic> predicateRoute(BuildContext context, predicate) {

@@ -724,22 +724,83 @@ Docs coming soon
 
 Active memory is meant to make data management of [activeTypes] fast and easy. You can easily get any type  of datatype (Int, Strings, Booleans, Doubles, Map, Models and T Any kind of data) from within any state of the app.
 
+### Instantiation
+```dart 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); 
+  await Memory.instance(filename:"ttt.act").initMemory();
+  runApp(const MyApp());
+}
+```  
+To reference an instance of Memory, use one of the following methods
+```dart 
+///No need to pass [filename:"memory.txt"] since the filename created when initMemory() was called will not be overwritten
+///Note: this will retrieve the current initialization of the Memory object
+///It is not assured you will get the most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+///To get most current data, either use the instantiation below or retrieve data using async function await memory.readMemory('key')
+Memory memory = Memory.instance();
+///Note: this will retrieve the current initialization of the Memory object as well as refetch data stored in memmory: use
+///this if you want to access most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+var memory = await Memory.instance().initMemory();
+```  
+
+### Methods
+Storage and retrieval methods are demonstrated in the code snippet below:
+
 ```dart  
 
 /// initialise Memory instance
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ///initialize memory
   await Memory.instance(filename:"memory.txt").initMemory();
   runApp(const MyApp());
 } 
 
-///to retrieve an instance of Memory in another dart file do:
-///no need to pass filename:"memory.txt" since the filename created when initMemory() was called will not be overwritten
+///To retrieve an instance of Memory in another dart file, use one of the following ways:
+///No need to pass [filename:"memory.txt"] since the filename created when initMemory() was called will not be overwritten
+///Note: this will retrieve the current initialization of the Memory object
+///It is not assured you will get the most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+///To get most current data, either use the instantiation below or retrieve data using async function await memory.readMemory('key')
 Memory memory = Memory.instance();
+///Note: this will retrieve the current initialization of the Memory object as well as refetch data stored in memmory: use
+///this if you want to access most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+var memory = await Memory.instance().initMemory();
 
 /// you can easily check if any data is saved on memory
 memory.isDataEmpty  
+
+///Storing data
+///Note: [Duration] is used to set length of time of validity of the data stored.
+///String
+///Future<bool> setString(String key, String value, {Duration? duration})
+bool isStringSaved = await memory.setString('key', 'value');
+///Bool
+///Future<bool> setBool(String key, bool value, {Duration? duration})
+bool isBoolSaved = await memory.setBool('key', true);
+///Double
+///Future<bool> setDouble(String key, Double value, {Duration? duration})
+bool isDoubleSaved = await memory.setDouble('key', 3.2);
+///Int
+///Future<bool> setInt(String key, Int value, {Duration? duration}) 
+bool? isIntSaved = await memory.setInt('key',9);
+
+///store any type of data
+///Future upsertMemory<T>(String key, T mem, {Duration? duration})
+var savedData = await memory.upsertMemory('key', 'data');
+
+
+
+///Reading data
+///synchronous methods : no awaiting
+String? stringVal = memory.getString('key');
+bool? boolVal = memory.getBool('key');
+Double? doubleVal = memory.getDouble('key');
+Int? intVal = memory.getInt('key');
+
+///asynchronous methods : needs awaiting : can be used to retrieve any data type
+var data = await memory.readMemory('key');
   
 ```  
 
@@ -755,6 +816,37 @@ memory.upsertMemory('key', value, {Duration? duration}); // Creates an entry and
 memory.deleteMemory('key'); // Remove an entry from ActiveMemory  
 memory.resetMemory(); // This resets all the entries on ActiveMemory  
 memory.hasMemory(); // Checks if a key exists in ActiveMemory  
+  
+```  
+## ActiveNavigation
+
+Active Navigation is an abstraction on top of the flutter's Navigation API's to reduce boilerplate
+
+```dart  
+
+/// Call the Nav class when depending on Activity
+Nav.to(context,()=> View());
+  
+```  
+
+```dart  
+//Navigates to the next view in this case page View()
+  Nav.to(context,()=> View());
+  
+///You can also pass arguments to the next page
+    Nav.to(context,()=> View(),"Hello from First view");//takes arguments as Objects so you can pass any data type
+
+//To get arguments passed on the second creen use this api
+ Sreing argument =   Nav.getArguments();
+ print(argument);//"Hello from First view"
+      
+//Pop off from a view
+Nav.off(context);
+//pop off all pages on the navigation stack to the page provided
+Nav.offAll(context,()=> FirstView());
+
+// Corresponding alternative for pushUntill api :
+Nav.pushUntil(context,()=> FirstView(),()=> AnotherView());
   
 ```  
 

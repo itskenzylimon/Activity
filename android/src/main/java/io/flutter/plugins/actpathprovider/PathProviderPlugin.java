@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.plugins.pathprovider;
+package io.flutter.plugins.actpathprovider;
 
 import android.content.Context;
 import android.os.Build.VERSION;
@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugins.pathprovider.Messages.PathProviderApi;
+import io.flutter.plugins.actpathprovider.Messages.PathProviderApi;
 import io.flutter.util.PathUtils;
 import java.io.File;
 import java.util.ArrayList;

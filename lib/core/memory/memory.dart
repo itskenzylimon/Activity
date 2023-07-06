@@ -1,12 +1,9 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:activity/core/helpers/logger.dart';
+import 'package:activity/activity.dart' as act;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-
-import 'memory_functions.dart';
 
 /// Memory is a class that is used to store data in a file.
 class Memory {
@@ -17,6 +14,10 @@ class Memory {
   /// [instance] is a [Memory] factory method. This will instantiate a singleton of the [Memory] class appwide
   /// [filename] is the name of the file you want to store the data in. this can have an extension e.g appdata.txt
   ///You cannot override [filename] once it is set
+
+  ///This [_currentData] will be used to cache loaded data in memory and
+  ///user to read data in a synchronous way O(1) time
+  Map<String,dynamic> _currentData = {};
 
   static Memory? _instance;
   static Memory instance({String? filename}) {
@@ -33,27 +34,29 @@ class Memory {
     }
   }
 
-
-   Future<bool> initMemory() async{
+  ///[initMemory] loads data into the [_currentData] variable where we
+  ///can read it using async methods
+   Future<Memory> initMemory() async{
     Directory? appDir;
     try {
-       appDir = await getApplicationDocumentsDirectory();
+       appDir = await act.getApplicationDocumentsDirectory();
     }catch(xx){
       throw PlatformException(code: "415",message: "Platform not supported: "+xx.toString());
     }
     if (appDir == null || appDir.path == null || appDir.path.isEmpty) {
       throw PlatformException(code: "415",message: "Platform not supported");
     }
-    _filePath = appDir.path + "/" + ((_filename ?? "memory.txt"));
+    _filePath = act.join(appDir.path,((_filename ?? "memory.txt")));
+        //appDir.path + "/" + ((_filename ?? "memory.txt"));
     File file = File(_filePath!);
     if (await file.exists()) {
-      return true;
+      await refreshMemory();
+      return this;
     } else {
       try {
         FileStorage fileStorage = FileStorage(_filePath!);
         bool isSaved = fileStorage.save({});
-
-        return isSaved;
+        return this;
       } catch (error) {
         throw PlatformException(code: "415",message: "Platform not supported: "+error.toString());
       }
@@ -99,12 +102,16 @@ class Memory {
   /// Get all data from [Memory].
   ///
   /// Will return empty list if entries are not found
+  ///throws PlatformException if [initMemory]  not called
   Future<Map<String, dynamic>> stageMemory() async {
     if (_filePath != null) {
       FileStorage fileStorage = FileStorage(_filePath!);
-      return await fileStorage.read();
+      Map<String, dynamic> data =await fileStorage.read();
+      _updateCurrentData(data);
+      return data;
     }else{
-      throw PlatformException(code: "404",message: "initMemory method not called");
+      _updateCurrentData({});
+      throw PlatformException(code: "404",message: "initMemory method not called. Please see [initMemory] documentation");
     }
   }
 
@@ -114,6 +121,13 @@ class Memory {
   Future<List> readMemories() async {
     Map<String, dynamic> data = await stageMemory();
     return data.entries.toList();
+  }
+
+  /// Get all data from [Memory][_currentData]map.
+  ///
+  /// Will return empty list if entries are not found
+  List readMemoriesSync() {
+    return _currentData.entries.toList();
   }
 
   /// Get data from [Memory].
@@ -138,6 +152,33 @@ class Memory {
     } else {
       if (data.containsKey(key)) {
         return data[key];
+      } else {
+        return null;
+      }
+    }
+  }
+
+  /// Get data from [Memory]pre-loaded[_currentData] map.
+  ///
+  /// [key] is the key of the entry you want to get, this is required and is
+  /// used to represent the entry as the unique identifier.
+  ///
+  /// [value] is set to true by default. If you want to get the entire entry you
+  /// can set this to false. This will return the entire entry as a Map. containing
+  /// the [key], [value], [createdAt], [updatedAt] and [expiresAt].
+  ///
+  /// Will return [null] if entry is not found or Map if [value] is set to false.
+  /// and the value if [value] is set to true.
+  dynamic readMemorySync(String key, {bool value = true})  {
+    if (value) {
+      if (_currentData.containsKey(key)) {
+        return _currentData[key]['value'];
+      } else {
+        return null;
+      }
+    } else {
+      if (_currentData.containsKey(key)) {
+        return _currentData[key];
       } else {
         return null;
       }
@@ -175,6 +216,7 @@ class Memory {
       }
       data.addAll({key: entry});
       bool isSaved = fileStorage.save(data);
+      _updateCurrentData(data);
       return data[key];
     } else {
       /// Set the value of the key to mem
@@ -189,6 +231,7 @@ class Memory {
         entry.addAll({'expiresAt': _setMemoryExpiry(duration)});
       }
       data.addAll({key: entry});
+      _updateCurrentData(data);
       return data[key];
     }
   }
@@ -210,6 +253,146 @@ class Memory {
     }
   }
 
+  ///Set bool [setBool]
+  Future<bool> setBool(String key, bool value, {Duration? duration}) async {
+    Map<String, dynamic> data = await stageMemory();
+    if (data.containsKey(key)) {
+      var updatedMap;
+      try {
+        updatedMap = await _updateMemory(key, value);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    } else {
+      var updatedMap;
+      try{
+        updatedMap = await insertMemory(key, value, duration: duration);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    }
+  }
+
+  ///Get bool [getBool]
+  bool? getBool(String key)  {
+      if (_currentData.containsKey(key)) {
+        var boolVar = _currentData[key]['value'];
+        if(boolVar ==null || boolVar is! bool){
+          return null;
+        }
+        return boolVar;
+      } else {
+        return null;
+      }
+  }
+
+  ///Set String [setString]
+  Future<bool> setString(String key, String value, {Duration? duration}) async {
+    Map<String, dynamic> data = await stageMemory();
+    if (data.containsKey(key)) {
+      var updatedMap;
+      try {
+        updatedMap = await _updateMemory(key, value);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    } else {
+      var updatedMap;
+      try{
+        updatedMap = await insertMemory(key, value, duration: duration);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    }
+  }
+
+  ///Get String [getString]
+  String? getString(String key)  {
+    if (_currentData.containsKey(key)) {
+      var strVar = _currentData[key]['value'];
+      if(strVar == null || strVar is! String){
+        return null;
+      }
+      return strVar;
+    } else {
+      return null;
+    }
+  }
+
+  ///Set Double [setDouble]
+  Future<bool> setDouble(String key, Double value, {Duration? duration}) async {
+    Map<String, dynamic> data = await stageMemory();
+    if (data.containsKey(key)) {
+      var updatedMap;
+      try {
+        updatedMap = await _updateMemory(key, value);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    } else {
+      var updatedMap;
+      try{
+        updatedMap = await insertMemory(key, value, duration: duration);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    }
+  }
+
+  ///Get Double [getDouble]
+  Double? getDouble(String key)  {
+    if (_currentData.containsKey(key)) {
+      var strVar = _currentData[key]['value'];
+      if(strVar == null || strVar is! Double){
+        return null;
+      }
+      return strVar;
+    } else {
+      return null;
+    }
+  }
+
+  ///Set Int [setInt]
+  Future<bool> setInt(String key, Int value, {Duration? duration}) async {
+    Map<String, dynamic> data = await stageMemory();
+    if (data.containsKey(key)) {
+      var updatedMap;
+      try {
+        updatedMap = await _updateMemory(key, value);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    } else {
+      var updatedMap;
+      try{
+        updatedMap = await insertMemory(key, value, duration: duration);
+      }catch(e){
+        ///suppress this exception
+      }
+      return  updatedMap != null;
+    }
+  }
+
+  ///Get Int [getInt]
+  Int? getInt(String key)  {
+    if (_currentData.containsKey(key)) {
+      var strVar = _currentData[key]['value'];
+      if(strVar == null || strVar is! Int){
+        return null;
+      }
+      return strVar;
+    } else {
+      return null;
+    }
+  }
+
   /// Updates a [key] value in [Memory] with the new value.
   ///
   /// If the [key] is not found it returns [false].
@@ -228,10 +411,17 @@ class Memory {
       FileStorage fileStorage = FileStorage(_filePath!);
       data.addAll({key: entry});
       bool isSaved = fileStorage.save(data);
+      if(isSaved) {
+        _updateCurrentData(data);
+      }
       return data[key]['value'];
     } else {
       return data[key]['value'];
     }
+  }
+
+  _updateCurrentData(Map<String, dynamic> newData){
+    _currentData = newData;
   }
 
   /// Removes entry from [Memory].
@@ -243,18 +433,30 @@ class Memory {
       data.remove(key);
       FileStorage fileStorage = FileStorage(_filePath!);
       bool isSaved = fileStorage.save(data);
+      if(isSaved){
+        _updateCurrentData(data);
+      }
     }
   }
+
+  /// Reloads loaded [_currentData] map from [Memory].
+  Future <bool> refreshMemory() async{
+    //debugPrint("Memory: refreshMemory called");
+    await stageMemory();
+    return true;
+  }
+
 
   /// Removes all values stored on [Memory]
   ///
   /// Clears every entry
-  Future<void> resetMemory() async {
-    if(_filePath==Null){
+  Future<void> clear() async {
+    if(_filePath==null){
       throw PlatformException(code: "404",message: "initMemory method not called");
     }
     FileStorage fileStorage = FileStorage(_filePath!);
     bool isSaved = fileStorage.save({});
+    _updateCurrentData({});
   }
 
   /// Checks if a key exists in Active Memory
@@ -262,9 +464,18 @@ class Memory {
   /// returns [true] if key is found.
   ///
   /// returns [false] if value does not exist.
-  Future hasMemory(String key) async {
+  Future<bool> hasMemory(String key) async {
     Map<String, dynamic> data = await stageMemory();
-    return data.isEmpty;
+    return data[key]!=null;
+  }
+
+  // Checks if a key exists in Active Memory [_currentData] map
+  ///
+  /// returns [true] if key is found.
+  ///
+  /// returns [false] if value does not exist.
+   bool hasMemorySync(String key)  {
+    return _currentData[key]!=null;
   }
 
   /// Sets Active Memory entry expiry date
