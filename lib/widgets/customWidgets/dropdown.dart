@@ -3,72 +3,72 @@ import 'package:flutter/material.dart';
 class DropdownWidget extends StatefulWidget {
 
   ///[items] list of the dropdown menu
-  List<DropdownMenuItem<String>> items;
+  final List<DropdownMenuItem<String>> items;
 
    /// [color] dropdown widget color.
-  Color? color;
+  final Color? color;
 
   ///[border] this is the borderline around the dropdown.
-  Border? border;
+  final Border? border;
 
   ///[borderRadius] this is the radius of th dropdown widget.
-  BorderRadius? borderRadius;
+  final BorderRadius? borderRadius;
 
   ///[gradient] color gradient of the dropdown widget.
-  Gradient? gradient;
+  final Gradient? gradient;
 
   ///[shape] this is the shape of the  dropdown widget.
-  BoxShape shape;
+  final BoxShape shape;
 
   ///[icon] the dropdown icon.
-  Icon icon;
+  final Icon icon;
 
   ///[leadIcon] the leading icon of the dropdown.
-  IconData leadIcon;
+  final IconData leadIcon;
 
 
-  String value;
+  final String value;
 
   ///[iconPadding] padding around the icon.
-  EdgeInsets iconPadding;
+  final EdgeInsets iconPadding;
   
   ///[padding] padding around the dropdown widget.
-  EdgeInsets padding;
+  final EdgeInsets padding;
 
   ///[style] style of the dropdown text i.e fontsize ,fontweight
-  TextStyle? style;
+  final TextStyle? style;
 
   ///[underline] this is the focused line of the dropdown
-  Widget? underline;
+  final Widget? underline;
 
   ///[isExpanded] sets either the dropdown to be expanded
-  bool isExpanded;
+  final bool isExpanded;
 
   ///[addLeadicon] adds icon at the beggining of the dropdown
-  bool addLeadicon;
+  final bool addLeadicon;
 
-  bool autoFocus;
+  final bool autoFocus;
 
   ///[iconEnableColor] color of the icon when its enabled
-  Color? iconEnableColor;
+  final Color? iconEnableColor;
 
   ///[iconDisableColor] color of the icon when its disabled
-  Color? iconDisableColor;
+  final Color? iconDisableColor;
 
   ///[dropdownColor] color of the dropdown
-  Color? dropdownColor;
+  final Color? dropdownColor;
 
   ///[focusColor] color of the dropdown when its focused
-  Color? focusColor;
+  final Color? focusColor;
 
-  
-  void Function(Object? value) onChanged;
-  AlignmentGeometry alignment;
-  FocusNode? node;
-  Widget? hint;
-  Widget? disabledHint;
 
-  DropdownWidget({
+  final void Function(String value) onChanged;
+  final AlignmentGeometry alignment;
+  final FocusNode? node;
+  final Widget? hint;
+  final Widget? disabledHint;
+
+  const DropdownWidget({
     Key? key,
     required this.value,
     required this.items,
@@ -134,7 +134,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                         return e;
                       }).toList(),
                       onChanged: (value) {
-                        widget.onChanged(value);
+                        widget.onChanged(value!);
                       },
                       onTap: onTap,
                       icon: Padding(padding: widget.iconPadding, child: widget.icon),
