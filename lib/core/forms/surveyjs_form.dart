@@ -86,7 +86,7 @@ class _SurveyJSFormState extends State<SurveyJSForm> {
     pages =
         widget.schema['pages'] ?? widget.schema['service']['schema']['pages'];
     for (var page in pages) {
-      dataKeyList.add([]);
+      dataKeyList.add(page);
     }
     // metaData.putIfAbsent('customWidgets', () => customWidgets());
   }
@@ -1876,12 +1876,12 @@ class Next extends StatelessWidget {
 class Previous extends StatelessWidget {
   const Previous({
     super.key,
-    required GlobalKey<FormState> formKey,
+    required this.formKey,
     required this.context,
     required this.onPrevious,
-  }) : _formKey = formKey;
+  });
 
-  final GlobalKey<FormState> _formKey;
+  final GlobalKey<FormState> formKey;
   final BuildContext context;
   final VoidCallback onPrevious;
 

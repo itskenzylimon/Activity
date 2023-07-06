@@ -91,15 +91,15 @@ void main() {
   late _MyWidget mainWidget;
   late _TestController activeController;
   late TestViewController testActiveView;
-  late _TestActiveView _testActiveView;
+  late _TestActiveView testActiveView0;
   setUp(() {
     activeController = _TestController();
     testActiveView = TestViewController();
-    _testActiveView = _TestActiveView();
+    testActiveView0 = _TestActiveView();
     mainWidget = _MyWidget(
       activeController: activeController,
       testActiveView: testActiveView,
-      testActiveView2: _testActiveView,
+      testActiveView2: testActiveView0,
     );
   });
 
@@ -191,7 +191,7 @@ void main() {
       (tester) async {
     await tester.pumpWidget(mainWidget);
 
-    expect(find.text(_testActiveView.testActiveView.value), findsOneWidget);
+    expect(find.text(testActiveView0.testActiveView.value), findsOneWidget);
   });
 
   testWidgets(

@@ -1,5 +1,6 @@
 import 'package:activity/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
+// ignore: depend_on_referenced_packages
 import 'package:matcher/src/equals_matcher.dart' as match;
 
 class TestController extends ActiveController {

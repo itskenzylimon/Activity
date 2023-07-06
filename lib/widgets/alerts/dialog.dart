@@ -221,7 +221,7 @@ class ActiveAlertDialog {
                   alignment: WrapAlignment.spaceEvenly,
                   spacing: 12,
                   runSpacing: 12,
-                  children: actions!,
+                  children: actions,
                 ),
               )
             ],

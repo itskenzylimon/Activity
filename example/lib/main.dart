@@ -1,14 +1,6 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:example/controller.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:activity/activity.dart';
-
-import 'model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -132,10 +124,10 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   var taskController = TaskController();
 
   void afterFirstLayout(BuildContext context) {

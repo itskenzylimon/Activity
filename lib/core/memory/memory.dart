@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
-import 'package:activity/activity.dart' as act;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../helpers/logger.dart';
 
 /// Memory is a class that is used to store data in a file.
 class Memory {
@@ -185,7 +182,7 @@ class Memory {
         entry.addAll({'expiresAt': _setMemoryExpiry(duration)});
       }
       data.addAll({key: entry});
-      bool isSaved = fileStorage.save(data);
+      fileStorage.save(data);
       _updateCurrentData(data);
       return data[key];
     } else {
@@ -424,7 +421,7 @@ class Memory {
       throw PlatformException(code: "404",message: "initMemory method not called");
     }
     FileStorage fileStorage = FileStorage(_filePath!);
-    bool isSaved = fileStorage.save({});
+    fileStorage.save({});
     _updateCurrentData({});
   }
 
@@ -480,7 +477,7 @@ class FileStorage {
       String stringDecrypt = decrypt(decodedData, 134523452346);
       return jsonDecode(stringDecrypt) as Map<String, dynamic>;
     } else {
-      bool isSaved = save({});
+      save({});
       return {};
     }
   }

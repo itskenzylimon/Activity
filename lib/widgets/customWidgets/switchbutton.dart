@@ -129,10 +129,10 @@ class SwitchButton extends StatefulWidget {
   final bool disabled;
 
   @override
-  _SwitchButtonState createState() => _SwitchButtonState();
+  SwitchButtonState createState() => SwitchButtonState();
 }
 
-class _SwitchButtonState extends State<SwitchButton>
+class SwitchButtonState extends State<SwitchButton>
     with SingleTickerProviderStateMixin {
   late final Animation _toggleAnimation;
   late final AnimationController _animationController;

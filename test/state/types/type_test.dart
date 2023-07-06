@@ -2,6 +2,7 @@ import 'package:activity/activity.dart';
 import 'package:activity/core/src/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+// ignore: depend_on_referenced_packages
 import 'package:matcher/src/equals_matcher.dart' as match;
 
 class TypeTestController extends ActiveController {

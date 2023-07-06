@@ -154,12 +154,12 @@ class SignatureState extends State<Signature> {
 
     // IF WIDGET IS USED WITHOUT DIMENSIONS, WE WILL FALLBACK TO SCREENSIZE
     // DIMENSIONS
-    final double _maxSafeWidth = maxWidth == double.infinity ? screenSize!.width : maxWidth;
-    final double _maxSafeHeight = maxHeight == double.infinity ? screenSize!.height : maxHeight;
+    final double maxSafeWidth = maxWidth == double.infinity ? screenSize!.width : maxWidth;
+    final double maxSafeHeight = maxHeight == double.infinity ? screenSize!.height : maxHeight;
 
     //SAVE POINT ONLY IF IT IS IN THE SPECIFIED BOUNDARIES
-    if ((screenSize?.width == null || o.dx > 0 && o.dx < _maxSafeWidth) &&
-        (screenSize?.height == null || o.dy > 0 && o.dy < _maxSafeHeight)) {
+    if ((screenSize?.width == null || o.dx > 0 && o.dx < maxSafeWidth) &&
+        (screenSize?.height == null || o.dy > 0 && o.dy < maxSafeHeight)) {
       // IF USER LEFT THE BOUNDARY AND ALSO RETURNED BACK
       // IN ONE MOVE, RETYPE IT AS TAP, AS WE DO NOT WANT TO
       // LINK IT WITH PREVIOUS POINT
@@ -355,17 +355,17 @@ class SignatureController extends ValueNotifier<List<Point>> {
 
   /// Calculates a default width based on existing points.
   /// Will return `null` if there are no points.
-  List<Point>? _translatePoints(List<Point> points) => isEmpty
-      ? null
-      : points
-      .map((Point p) => Point(
-      Offset(
-        p.offset.dx - minXValue! + penStrokeWidth,
-        p.offset.dy - minYValue! + penStrokeWidth,
-      ),
-      p.type,
-      p.pressure))
-      .toList();
+  // List<Point>? _translatePoints(List<Point> points) => isEmpty
+  //     ? null
+  //     : points
+  //     .map((Point p) => Point(
+  //     Offset(
+  //       p.offset.dx - minXValue! + penStrokeWidth,
+  //       p.offset.dy - minYValue! + penStrokeWidth,
+  //     ),
+  //     p.type,
+  //     p.pressure))
+  //     .toList();
 
   /// Clear the canvas
   void clear() {
@@ -482,6 +482,8 @@ class SignatureController extends ValueNotifier<List<Point>> {
       );
     }
 
+    return null;
+
     // final img.Color pColor = img.ColorRgb8(
     //   exportPenColor?.red ?? penColor.red,
     //   exportPenColor?.green ?? penColor.green,
@@ -496,10 +498,10 @@ class SignatureController extends ValueNotifier<List<Point>> {
     //   backgroundColor.alpha.toInt(),
     // );
 
-    final List<Point> translatedPoints = _translatePoints(points)!;
+    // final List<Point> translatedPoints = _translatePoints(points)!;
 
-    final int canvasWidth = width ?? defaultWidth!;
-    final int canvasHeight = height ?? defaultHeight!;
+    // final int canvasWidth = width ?? defaultWidth!;
+    // final int canvasHeight = height ?? defaultHeight!;
     //
     // // create the image with the given size
     // final img.Image signatureImage = img.Image(width: canvasWidth, height: canvasHeight);

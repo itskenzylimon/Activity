@@ -33,5 +33,4 @@ export 'widgets/customWidgets/fragment.dart';
 export 'core/navigation/active_navigation.dart';
 
 ///Scrollable positioned list
-export 'widgets/scrollable_positioned_list/scrollable_positioned_list.dart';
 export 'widgets/carousel/src/carousel_slider.dart';

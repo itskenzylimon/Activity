@@ -125,7 +125,7 @@ abstract class SnackbarMessage {
       );
     });
 
-    overlayState!.insert(overlayEntry);
+    overlayState.insert(overlayEntry);
 
     Duration shortTime = const Duration(seconds: 1);
     Duration mediumTime = const Duration(seconds: 3);

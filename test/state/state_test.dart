@@ -1,5 +1,6 @@
 import 'package:activity/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
+// ignore: depend_on_referenced_packages
 import 'package:matcher/src/equals_matcher.dart' as match;
 
 void main() {
@@ -24,7 +25,7 @@ void main() {
         '[contains] function test - does not contain event matching property name - returns false',
         () {
       const String typeName = 'loading';
-      final events = <ActiveStateChanged<String>>[];
+      final List events = <ActiveStateChanged<String>>[];
 
       final foundEvent = events.contains(typeName);
 
