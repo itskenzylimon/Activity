@@ -730,16 +730,54 @@ Active memory is meant to make data management of [activeTypes] fast and easy. Y
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ///initialize memory
   await Memory.instance(filename:"memory.txt").initMemory();
   runApp(const MyApp());
 } 
 
-///to retrieve an instance of Memory in another dart file do:
-///no need to pass filename:"memory.txt" since the filename created when initMemory() was called will not be overwritten
+///To retrieve an instance of Memory in another dart file, use one of the following ways:
+///No need to pass [filename:"memory.txt"] since the filename created when initMemory() was called will not be overwritten
+///Note: this will retrieve the current initialization of the Memory object
+///It is not assured you will get the most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+///To get most current data, either use the instantiation below or retrieve data using async function await memory.readMemory('key')
 Memory memory = Memory.instance();
+///Note: this will retrieve the current initialization of the Memory object as well as refetch data stored in memmory: use
+///this if you want to access most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+var memory = await Memory.instance().initMemory();
 
 /// you can easily check if any data is saved on memory
 memory.isDataEmpty  
+
+///Storing data
+///Note: [Duration] is used to set length of time of validity of the data stored.
+///String
+///Future<bool> setString(String key, String value, {Duration? duration})
+bool isStringSaved = await memory.setString('key', 'value');
+///Bool
+///Future<bool> setBool(String key, bool value, {Duration? duration})
+bool isBoolSaved = await memory.setBool('key', true);
+///Double
+///Future<bool> setDouble(String key, Double value, {Duration? duration})
+bool isDoubleSaved = await memory.setDouble('key', 3.2);
+///Int
+///Future<bool> setInt(String key, Int value, {Duration? duration}) 
+bool? isIntSaved = await memory.setInt('key',9);
+
+///store any type of data
+///Future upsertMemory<T>(String key, T mem, {Duration? duration})
+var savedData = await memory.upsertMemory('key', 'data');
+
+
+
+///Reading data
+///synchronous methods : no awaiting
+String? stringVal = memory.getString('key');
+bool? boolVal = memory.getBool('key');
+Double? doubleVal = memory.getDouble('key');
+Int? intVal = memory.getInt('key');
+
+///asynchronous methods : needs awaiting : can be used to retrieve any data type
+var data = await memory.readMemory('key');
   
 ```  
 
