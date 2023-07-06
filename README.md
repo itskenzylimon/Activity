@@ -724,6 +724,29 @@ Docs coming soon
 
 Active memory is meant to make data management of [activeTypes] fast and easy. You can easily get any type  of datatype (Int, Strings, Booleans, Doubles, Map, Models and T Any kind of data) from within any state of the app.
 
+### Instantiation
+```dart 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); 
+  await Memory.instance(filename:"ttt.act").initMemory();
+  runApp(const MyApp());
+}
+```  
+To reference an instance of Memory, use one of the following methods
+```dart 
+///No need to pass [filename:"memory.txt"] since the filename created when initMemory() was called will not be overwritten
+///Note: this will retrieve the current initialization of the Memory object
+///It is not assured you will get the most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+///To get most current data, either use the instantiation below or retrieve data using async function await memory.readMemory('key')
+Memory memory = Memory.instance();
+///Note: this will retrieve the current initialization of the Memory object as well as refetch data stored in memmory: use
+///this if you want to access most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
+var memory = await Memory.instance().initMemory();
+```  
+
+### Methods
+Storage and retrieval methods are demonstrated in the code snippet below:
+
 ```dart  
 
 /// initialise Memory instance
