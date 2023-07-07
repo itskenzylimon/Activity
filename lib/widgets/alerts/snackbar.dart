@@ -135,11 +135,11 @@ abstract class SnackbarMessage {
     Future.delayed(Duration(
       seconds: showMessage.messageTime == MessageTime.short
           ? 1
-          : showMessage.messageTime == MessageTime.short
+          : showMessage.messageTime == MessageTime.medium
               ? 3
-              : showMessage.messageTime == MessageTime.short
+              : showMessage.messageTime == MessageTime.long
                   ? 5
-                  : 4,
+                  : 3,
     )).then((_) {
       overlayEntry.remove();
     });
