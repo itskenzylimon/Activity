@@ -348,10 +348,10 @@ class Memory {
   }
 
   ///Get Int [getInt]
-  Int? getInt(String key)  {
+  int? getInt(String key)  {
     if (_currentData.containsKey(key)) {
       var strVar = _currentData[key]['value'];
-      if(strVar == null || strVar is! Int){
+      if(strVar == null || strVar is! int){
         return null;
       }
       return strVar;
