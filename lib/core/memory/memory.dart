@@ -326,7 +326,7 @@ class Memory {
   }
 
   ///Set Int [setInt]
-  Future<bool> setInt(String key, Int value, {Duration? duration}) async {
+  Future<bool> setInt(String key, int value, {Duration? duration}) async {
     Map<String, dynamic> data = await stageMemory();
     if (data.containsKey(key)) {
       var updatedMap;
