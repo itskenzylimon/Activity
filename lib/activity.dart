@@ -46,6 +46,6 @@ export 'widgets/scrollable_positioned_list/scrollable_positioned_list.dart';
 export 'widgets/carousel/src/carousel_slider.dart';
 ///Export memory
 export 'core/memory/android/path_provider_android.dart';
-export 'core/memory/linux/path_provider_linux.dart';
+//export 'core/memory/linux/path_provider_linux.dart';
 export 'core/memory/ios/path_provider_foundation.dart';
-export 'core/memory/windows/path_provider_windows.dart';
+//export 'core/memory/windows/path_provider_windows.dart';
