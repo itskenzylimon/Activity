@@ -33,7 +33,7 @@ class Memory {
     }
   }
 
-  initMemory() async {
+  Future<Memory> initMemory() async {
     Directory appDir;
     try {
       appDir = await getApplicationDocumentsDirectory();
@@ -46,12 +46,13 @@ class Memory {
     _filePath= "${appDir.path}/${_filename ?? "memory.act"}";
     File file = File(_filePath!);
     if (await file.exists()) {
-      refreshMemory();
-      return ;
+      await refreshMemory();
+      return this;
     } else {
       try {
         FileStorage fileStorage = FileStorage(_filePath!);
         fileStorage.save({});
+        return this;
       } catch (error) {
         throw PlatformException(code: "415",message: "Error saving file to memory: $error");
       }
