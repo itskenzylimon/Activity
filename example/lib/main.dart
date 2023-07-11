@@ -5,6 +5,11 @@ import 'package:activity/activity.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Path Provider Helpers Functions
+  PathProviderHelpers pathProviderHelpers = PathProviderHelpers();
+  printError(await pathProviderHelpers.temporaryPath());
+  printError(await pathProviderHelpers.applicationDocumentsPath());
+  printError(await pathProviderHelpers.eExternalStoragePath());
 
   // ENVSetup envSetup = ENVSetup();
   // Map<String, String> envMap = await envSetup.readENVFile(
