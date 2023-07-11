@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # this package is used to get the current platform true path
   path_provider: ^2.0.15
 
 dev_dependencies:

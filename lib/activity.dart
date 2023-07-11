@@ -31,6 +31,8 @@ export 'widgets/alerts/dialog.dart';
 export 'widgets/customWidgets/fragment.dart';
 //navigation
 export 'core/navigation/active_navigation.dart';
+//Path Provider Helpers Functions
+export 'core/path/path.dart';
 
 ///Scrollable positioned list
 export 'widgets/carousel/src/carousel_slider.dart';
