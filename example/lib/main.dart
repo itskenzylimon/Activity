@@ -252,36 +252,37 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                     onPressed: () {
                       double width = context.size!.width;
                       double height = context.size!.height;
-                      showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          title: const Text('Add User Task'),
-                          content: SizedBox(
-                              width: width,
-                              height: height,
-                              child: userTaskForm(activeController.globalKey)),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pop(context, 'Cancel'),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 'OK');
-                                if (activeController.userName.text.isNotEmpty &&
-                                    activeController.userEmail.text.isNotEmpty &&
-                                    activeController.taskName.text.isNotEmpty &&
-                                    activeController.taskBody.text.isNotEmpty) {
-                                  activeController.saveEntry();
-                                  // activeController.syncMemory();
-                                }
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
+                      activeController.createMemory();
+                      // showDialog<String>(
+                      //   context: context,
+                      //   builder: (BuildContext context) => AlertDialog(
+                      //     title: const Text('Add User Task'),
+                      //     content: SizedBox(
+                      //         width: width,
+                      //         height: height,
+                      //         child: userTaskForm(activeController.globalKey)),
+                      //     actions: <Widget>[
+                      //       TextButton(
+                      //         onPressed: () =>
+                      //             Navigator.pop(context, 'Cancel'),
+                      //         child: const Text('Cancel'),
+                      //       ),
+                      //       TextButton(
+                      //         onPressed: () {
+                      //           Navigator.pop(context, 'OK');
+                      //           if (activeController.userName.text.isNotEmpty &&
+                      //               activeController.userEmail.text.isNotEmpty &&
+                      //               activeController.taskName.text.isNotEmpty &&
+                      //               activeController.taskBody.text.isNotEmpty) {
+                      //             activeController.saveEntry();
+                      //             // activeController.syncMemory();
+                      //           }
+                      //         },
+                      //         child: const Text('OK'),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // );
                     },
                     child: const Text('Add Task')),
                 Container(

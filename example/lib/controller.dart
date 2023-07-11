@@ -9,7 +9,7 @@ class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
 
   /// Initialise area
-  Memory memory = Memory(filename: '${Directory.current.path}activity-data.act');
+  // Memory memory = Memory(filename: '${Directory.current.path}activity-data.act');
 
   /// Assign Active values
   /// You can ideally check
@@ -384,18 +384,18 @@ class MainController extends ActiveController {
   }
 
   updateMemory() async {
-    printSuccess(await memory.upsertMemory('hello', 'Asia'));
-    printSuccess(await memory.upsertMemory('Jambo', DateTime.now().
-    subtract(const Duration(days: 5)).toIso8601String()));
+    // printSuccess(await memory.upsertMemory('hello', 'Asia'));
+    // printSuccess(await memory.upsertMemory('Jambo', DateTime.now().
+    // subtract(const Duration(days: 5)).toIso8601String()));
   
     getMemory();
   }
 
   getMemory() async {
-    printSuccess(await memory.readMemory('hellos'));
-    printSuccess(await memory.readMemory('Jambos'));
-    printSuccess(await memory.readMemory('hello'));
-    printSuccess(await memory.readMemory('Jambo'));
+    // printSuccess(await memory.readMemory('hellos'));
+    // printSuccess(await memory.readMemory('Jambos'));
+    // printSuccess(await memory.readMemory('hello'));
+    // printSuccess(await memory.readMemory('Jambo'));
 
   }
 
