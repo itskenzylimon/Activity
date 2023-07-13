@@ -865,7 +865,7 @@ ActiveSocket activeSocket = WebSocket();
 // create an activeSocket connection to a wss/ws endpoint
 activeSocket.open('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');  
 
-// onSuccess callback to alert you when a successfull connection is made
+// onSuccess callback to alert you when a successful connection is made
 activeSocket.onSuccess(() {  
   print("onSuccess");  
 });  
@@ -891,7 +891,63 @@ activeSocket.send('Hello world....');
 activeSocket.onClose(() {  
   print('onClose');  
 });
-``` 
+```
+
+### WebSockets
+This is an implementation of ActiveSocket.
+
+#### Methods
+
+1. Connect to a web socket.
+```dart 
+ /// initialise an ActiveSocket instance
+WebSocket activeSocket = WebSocket(); 
+
+// create an activeSocket connection to a wss/ws endpoint
+activeSocket.open('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');  
+```
+
+2. Get alerted when a successful connection is made
+```dart
+// onSuccess callback to alert you when a successful connection is made
+activeSocket.onSuccess(() {  
+  print("onSuccess");  
+}); 
+```
+
+3. Get alerted if connection to the socket fails
+```dart
+// onFailure callback to alert you when a failed connection is made
+activeSocket.onFailure(() {  
+  print("onFailure");  
+});  
+```
+
+4. Retrieve data as a stream from a web socket.
+```dart
+// onMessage callback to alert you on new messages and pass data from server
+activeSocket.onMessage((data) {  
+  print('onMessage @@@');  
+  print(data);  
+  if(data == 'Hello Activity'){  
+  activeSocket.send('Hello world....');  
+ }  print('onMessage');  
+});  
+```
+
+5. Send data to the channel
+```dart
+// send function is used to send data to the channel you are connected to.
+activeSocket.send('Hello world....'); 
+```
+
+6. Close a web socket connection
+```dart
+// onClose callback used to alert you when a connection is closed.
+activeSocket.onClose(() {  
+  print('onClose');  
+});
+```
 
 ## ActiveRequests
 Activity allows you to connect with your severs using HTTP Request easily, you can have full controll over the connection. ActiveRequests allows for easy integration between android/ios, windows/linux/macos and web.

@@ -403,6 +403,49 @@ class MainController extends ActiveController {
 
   }
 
+  testWebSocket(){
+   /* WebSocket d = WebSocket();
+    d.open("wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self");
+    d.onMessage((data) {
+      printInfo("d.onMessage==${data.toString()}");
+      if(data!="UUUIIII") {
+        d.send("UUUIIII");
+      }
+    });*/
+    /// initialise an ActiveSocket instance
+    ActiveSocket activeSocket = WebSocket();
+
+// create an activeSocket connection to a wss/ws endpoint
+    activeSocket.open('ws://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
+
+// onSuccess callback to alert you when a successfull connection is made
+    activeSocket.onSuccess(() {
+      printInfo("onSuccess");
+    });
+
+// onFailure callback to alert you when a failed connection is made
+    activeSocket.onFailure(() {
+      printInfo("onFailure");
+    });
+
+// onMessage callback to alert you on new messages and pass data from server
+    activeSocket.onMessage((data) {
+      printInfo('onMessage @@@');
+      printInfo(data);
+      if(data != 'Hello Activity'){
+        activeSocket.send('Hello Activity');
+      }  printInfo('onMessage');
+    });
+
+// send function is used to send data to the channel you are connected to.
+    activeSocket.send('Hello world....');
+
+// onClose callback used to alert you when a connection is closed.
+    activeSocket.onClose(() {
+      printInfo('onClose');
+    });
+  }
+
   /*updateMemory() async {
     printSuccess(await memory.upsertMemory('hello', 'Asia'));
     printSuccess(await memory.upsertMemory('Jambo', DateTime.now().
