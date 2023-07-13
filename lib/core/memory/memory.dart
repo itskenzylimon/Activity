@@ -292,7 +292,7 @@ class Memory {
   }
 
   ///Set Double [setDouble]
-  Future<bool> setDouble(String key, Double value, {Duration? duration}) async {
+  Future<bool> setDouble(String key, double value, {Duration? duration}) async {
     Map<String, dynamic> data = await stageMemory();
     if (data.containsKey(key)) {
       var updatedMap;
@@ -314,13 +314,13 @@ class Memory {
   }
 
   ///Get Double [getDouble]
-  Double? getDouble(String key)  {
+  double? getDouble(String key)  {
     if (_currentData.containsKey(key)) {
-      var strVar = _currentData[key]['value'];
-      if(strVar == null || strVar is! Double){
+      var _val = _currentData[key]['value'];
+      if(_val == null || _val is! double){
         return null;
       }
-      return strVar;
+      return _val;
     } else {
       return null;
     }
