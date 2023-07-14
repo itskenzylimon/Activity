@@ -132,15 +132,17 @@ abstract class SnackbarMessage {
     Duration longTime = const Duration(seconds: 5);
 
     /// After a delay of 4 seconds, the overlayEntry is removed using the remove method.
-    Future.delayed(Duration(
-      seconds: showMessage.messageTime == MessageTime.short
-          ? 1
-          : showMessage.messageTime == MessageTime.short
-              ? 3
-              : showMessage.messageTime == MessageTime.short
-                  ? 5
-                  : 4,
-    )).then((_) {
+    Future.delayed(
+      Duration(
+        seconds: showMessage.messageTime == MessageTime.short
+            ? 1
+            : showMessage.messageTime == MessageTime.medium
+                ? 3
+                : showMessage.messageTime == MessageTime.long
+                    ? 5
+                    : 3,
+      ),
+    ).then((_) {
       overlayEntry.remove();
     });
   }
