@@ -136,7 +136,8 @@ class MyAppState extends State<MyApp> {
   var taskController = TaskController();
 
   void afterFirstLayout(BuildContext context) {
-    taskController.createMemory();
+    //taskController.createMemory();
+    taskController.testWebSocket();
   }
 
   @override
