@@ -70,7 +70,7 @@ abstract class SnackbarMessage {
             0.5, // Interpolation value between 0.0 and 1.0
           ),
           child: Container(
-            height: 100,
+            height: 70,
             padding: const EdgeInsets.all(16),
             decoration: ShapeDecoration(
               color: showMessage.messageType == MessageType.success
