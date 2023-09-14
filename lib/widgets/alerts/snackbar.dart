@@ -70,7 +70,7 @@ abstract class SnackbarMessage {
             0.5, // Interpolation value between 0.0 and 1.0
           ),
           child: Container(
-            height: 75,
+            height: 100,
             padding: const EdgeInsets.all(16),
             decoration: ShapeDecoration(
               color: showMessage.messageType == MessageType.success
@@ -113,7 +113,7 @@ abstract class SnackbarMessage {
                                 : showMessage.messageType == MessageType.normal
                                     ? Colors.black
                                     : Colors.black,
-                    fontSize: 14,
+                    fontSize: 12,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
                   ),
