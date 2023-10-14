@@ -19,9 +19,6 @@ class TaskController extends MainController {
   
 
   getMemoryData() async {
-    // print(memory.isDataEmpty);
-    memory.upsertMemory('tasks', tasks);
-
     // print(testBool);
     testBool.set(true);
     // print(testBool);

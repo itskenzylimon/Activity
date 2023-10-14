@@ -191,7 +191,6 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    activeController.createMemory();
 
     // activeController.memory.resetMemory();
     // activeController.createMemory();

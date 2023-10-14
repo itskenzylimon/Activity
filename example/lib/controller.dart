@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +7,6 @@ import 'model.dart';
 
 class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
-
-  /// Initialise area
-  /*Memory memory = Memory(
-      //filename: '${Directory.current.path}activity-data.act'
-  );*/
-  Memory memory = Memory.instance();
 
   /// Assign Active values
   /// You can ideally check
@@ -383,25 +376,6 @@ class MainController extends ActiveController {
 
   ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({});
 
-   void createMemory() async {
-   printSuccess(await memory.upsertMemory('hello', 'Asia'));
-   printInfo(await memory.readMemory('hello',value: true));
-   printInfo("readMemorySync==");
-   printInfo(memory.readMemorySync('hello',value: true));
-
-   await memory.setBool("boolKey", true);
-   printInfo("boolKey==${memory.getBool('boolKey')}");
-
-   await memory.setString("stringKey", "string");
-   printInfo("stringKey==${memory.getString('stringKey')}");
-
-   await memory.setInt("intKey", 9);
-   printInfo("intKey==${memory.getInt('intKey')}");
-
-   await memory.setDouble("dbKey", 9.5);
-   printInfo("dbKey==${memory.getDouble('dbKey')}");
-
-  }
 
   testWebSocket(){
    /* WebSocket d = WebSocket();

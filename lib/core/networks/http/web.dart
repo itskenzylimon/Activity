@@ -138,8 +138,6 @@ class HttpActiveRequest {
   }
 
   _saveApiRequests(String responseName, ActiveResponse activeResponse) async {
-    // Memory memory = Memory;
-    // memory.upsertMemory(responseName, activeResponse);
   }
 
 }

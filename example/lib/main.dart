@@ -1,15 +1,18 @@
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:activity/activity.dart';
+import 'package:flutter/services.dart';
+
+import 'dart:html' as html;
+
+
+import 'model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Path Provider Helpers Functions
-  PathProviderHelpers pathProviderHelpers = PathProviderHelpers();
-  printError(await pathProviderHelpers.temporaryPath());
-  printError(await pathProviderHelpers.applicationDocumentsPath());
-  printError(await pathProviderHelpers.eExternalStoragePath());
+  var window = html.Window;
+
 
   // ENVSetup envSetup = ENVSetup();
   // Map<String, String> envMap = await envSetup.readENVFile(
@@ -75,8 +78,6 @@ printError(activeResponse.data);
   //   printError(error);
   // }
 
-  ///Instantiate memory here
-  await Memory.instance(filename:"ttt.act").initMemory();
   runApp(const MyApp());
 }
 
@@ -136,7 +137,6 @@ class MyAppState extends State<MyApp> {
   var taskController = TaskController();
 
   void afterFirstLayout(BuildContext context) {
-    //taskController.createMemory();
     taskController.testWebSocket();
   }
 
@@ -164,45 +164,45 @@ class MyAppState extends State<MyApp> {
           developerMode: true,
           onActivityStateChanged: () =>
               DateTime.now().microsecondsSinceEpoch.toString(),
-          child: activePage(taskController)
+          child: TaskView(activeController: taskController,)
           //fragmentView(),
           ),
     );
   }
 }
 
-Widget activePage(TaskController taskController) {
-  return ADialog(
-    activeController: taskController,
-    viewContext: (BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Activity Task App'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              GestureDetector(
-                child: const Text(
-                  "close dialog",
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
+// Widget activePage(TaskController taskController) {
+//   return ADialog(
+//     activeController: taskController,
+//     viewContext: (BuildContext context) {
+//       return Scaffold(
+//         appBar: AppBar(
+//           title: const Text('Activity Task App'),
+//         ),
+//         body: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: <Widget>[
+//               const Text(
+//                 'You have pushed the button this many times:',
+//               ),
+//               GestureDetector(
+//                 child: const Text(
+//                   "close dialog",
+//                 ),
+//                 onTap: () {
+//                   Navigator.pop(context);
+//                 },
+//               ),
+//             ],
+//           ),
+//         ),
+//       );
+//     },
+//   );
+// }
 
-/*class TaskView extends ActiveView<TaskController> {
+class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
   @override
@@ -218,11 +218,6 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    activeController.createMemory();
-
-    // activeController.memory.resetMemory();
-    // activeController.createMemory();
-    // activeController.getMemory();
 
     // activeController.initCalculations();
     // activeController.validateJSON();
@@ -295,7 +290,6 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                     activeController.taskName.text.isNotEmpty &&
                                     activeController.taskBody.text.isNotEmpty) {
                                   activeController.saveEntry();
-                                  // activeController.syncMemory();
                                 }
                               },
                               child: const Text('OK'),
@@ -383,9 +377,9 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                                 TextButton(
                                                   onPressed: ()
                                                   {
-                                                    */ /**
+                                                    /**
                                                      * Clear fields and refresh Page
-                                                     */ /*
+                                                     */
                                                     activeController.userName.clear();
                                                     activeController.userEmail.clear();
                                                     activeController.taskName.clear();
@@ -403,7 +397,6 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                                         activeController.taskLevel.text.isNotEmpty &&
                                                         activeController.taskBody.text.isNotEmpty) {
                                                       activeController.editUserTask(activeController.tasks[i], i);
-                                                      // activeController.syncMemory();
                                                     }
                                                     Navigator.pop(context, 'Cancel');
                                                   },
@@ -432,7 +425,6 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
                                               onPressed: () {
                                                 Navigator.pop(context, 'OK');
                                                 activeController.deleteUserTask(activeController.tasks[i]);
-                                                // activeController.syncMemory();
                                               },
                                               child: const Text('OK'),
                                             ),
@@ -567,4 +559,4 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
           ),
         ));
   }
-}*/
+}
