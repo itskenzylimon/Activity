@@ -956,6 +956,12 @@ ActiveRequest activeRequest = ActiveRequest();
 
 ```
 
+## Deamons (Event Listeners)
+
+Helpers are function that performs part of the computation of another function .  
+Activity has helper functions that make programing fun while making your code much easier to read
+
+
 ## Helpers
 
 Helpers are function that performs part of the computation of another function .  

@@ -157,7 +157,7 @@ class HttpActiveRequest {
 
     Uri uri = Uri(
       scheme: endpoint.scheme,
-      queryParameters: params.queryParameters,
+      // query: params.body,
       path: endpoint.path,
       host: endpoint.host,
     );
@@ -173,9 +173,13 @@ class HttpActiveRequest {
     setUp.httpHeaders?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
+
+    /// Convert map data to JSON string
+    String jsonBody = jsonEncode(params.body);
+
     ///Write the body
-    if(params.body!=null) {
-      request.write(params.body);
+    if(params.body != null) {
+      request.write(jsonBody);
     }
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
@@ -426,7 +430,7 @@ class HttpActiveRequest {
   }
 
   _logApiRequests(ActiveResponse activeResponse) async {
-    
+
   }
 
   /// Save the [ActiveResponse] to the [Memory] class.

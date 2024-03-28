@@ -1,9 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:activity/activity.dart';
 import 'package:flutter/services.dart';
 
-import 'dart:html' as html;
+// import 'dart:html' as html;
 
 
 import 'model.dart';
@@ -11,7 +14,7 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  var window = html.Window;
+  // var window = html.Window;
 
 
   // ENVSetup envSetup = ENVSetup();
@@ -46,32 +49,65 @@ void main() async {
   //   });
   //
 
-/*try {
+try {
 
-  File file = await sendAssetFile('assets/index.html', 'index.html');
+  ActiveRequest activeRequest =  ActiveRequest();
+  /// request
+  activeRequest.setUp = RequestSetUp(
+      idleTimeout: 10,
+      connectionTimeout: 20,
+      logResponse: true,
+      withTrustedRoots: true,
+      httpHeaders: {
+        // "Authorization": "Bearer $access_token",
+        "Content-type": "application/json"
+      });
+  /// you can do the complete [getApi], [postApi], [putApi] and
+  /// [deleteApi] and still get a successful [activeResponse].
 
-    ActiveRequest activeRequest =  ActiveRequest();
-  printError('activeResponse.data');
-    ActiveResponse activeResponse = await activeRequest
-        .uploadFileApi(
-          Params(endpoint: 'https://www.filestackapi.com/api/store/S3?key=Azb7pTmKLQFGojQWsXwroz',
-          queryParameters: {}),
-          file,'ndex.html', RequestSetUp(
-        idleTimeout: 10,
-        connectionTimeout: 10,
-        logResponse: true,
-        withTrustedRoots: true,
-        httpHeaders: {        }
-    ));
+  ///here is an implementation of [postApi]
+  /// set your parameters
+  Map<String, dynamic> params = {
+    "name": "Apple MacBook Pro 16",
+    "data": {
+      "year": 2019,
+      "price": 1849.99,
+      "CPU model": "Intel Core i9",
+      "Hard disk size": "1 TB"
+    }
+  };
 
-printError(activeResponse.statusCode);
-printError(activeResponse.data);
-         final Map<String, dynamic> convertedData = jsonDecode(activeResponse.data!);
-    printError(activeResponse.data);
+  printWarning(params);
+
+  ///make the request
+  ActiveResponse response = await activeRequest
+      .postApi(Params(endpoint: 'https://api.restful-api.dev/objects', body: params));
+
+//   File file = await sendAssetFile('assets/index.html', 'index.html');
+//
+//     ActiveRequest activeRequest =  ActiveRequest();
+//   printError('activeResponse.data');
+//     ActiveResponse activeResponse = await activeRequest
+//         .uploadFileApi(
+//           Params(endpoint: 'https://www.filestackapi.com/api/store/S3?key=Azb7pTmKLQFGojQWsXwroz',
+//           queryParameters: {}),
+//           file,'ndex.html', RequestSetUp(
+//         idleTimeout: 10,
+//         connectionTimeout: 10,
+//         logResponse: true,
+//         withTrustedRoots: true,
+//         httpHeaders: {        }
+//     ));
+//
+
+          printError(response.statusCode);
+          printError(response.data);
+          final Map<String, dynamic> convertedData = jsonDecode(response.data!);
+          printError(convertedData);
 
 } catch (error){
   printError(error);
-}*/
+}
 
   //
   // } catch (error){
@@ -81,7 +117,7 @@ printError(activeResponse.data);
   runApp(const MyApp());
 }
 
-/*Future<File> sendAssetFile(String assetPath, String fileName) async {
+Future<File> sendAssetFile(String assetPath, String fileName) async {
   // Load the asset file as a ByteData object.
   final byteData = await rootBundle.load(assetPath);
 
@@ -91,7 +127,7 @@ printError(activeResponse.data);
   // Write the ByteData object to the output file.
   await outputFile.writeAsBytes(byteData.buffer.asUint8List());
   return outputFile;
-}*/
+}
 
 /*Widget fragmentView(){
   return Fragment(

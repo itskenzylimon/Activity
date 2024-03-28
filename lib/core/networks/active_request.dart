@@ -53,7 +53,7 @@ class RequestSetUp {
 class Params {
   Map<String, dynamic>? queryParameters = {};
   String endpoint = '';
-  dynamic? body;
+  dynamic body;
 
   Params({
     this.queryParameters,
@@ -63,7 +63,7 @@ class Params {
 
   @override
   String toString() {
-    return '$endpoint \n $queryParameters';
+    return '$endpoint \n $queryParameters \n $body';
   }
 }
 
