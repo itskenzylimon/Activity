@@ -157,7 +157,7 @@ class HttpActiveRequest {
 
     Uri uri = Uri(
       scheme: endpoint.scheme,
-      // query: params.body,
+      queryParameters: params.queryParameters,
       path: endpoint.path,
       host: endpoint.host,
     );
@@ -173,13 +173,9 @@ class HttpActiveRequest {
     setUp.httpHeaders?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
-
-    /// Convert map data to JSON string
-    String jsonBody = jsonEncode(params.body);
-
     ///Write the body
-    if(params.body != null) {
-      request.write(jsonBody);
+    if(params.body!=null) {
+      request.write(params.body);
     }
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != io.HttpStatus.ok) {
