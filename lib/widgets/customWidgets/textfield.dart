@@ -42,7 +42,7 @@ Widget textFieldWidget({
   ///[suffixContainer] leading container of the textfield that you can add any widget
   Container? suffixContainer,
 
-  ///[title]this is the text on top of the textfield that shows wat data is to typed in the textfield..i.e password ,email
+  ///[titleTopBar]this is the text on top of the textfield that shows wat data is to typed in the textfield..i.e password ,email
   String? title,
 
   ///[helpertext] this the text on the bottom of the textfield to help you know wat is needed on the textfield
