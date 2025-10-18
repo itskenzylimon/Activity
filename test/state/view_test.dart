@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:math' as math;
 
-class TestViewController extends ActiveController {
-  final loading = ActiveType<bool>(false, typeName: 'loading');
+// === Controllers ===
 
-  void change() => loading(!loading.value);
+class TestViewController extends ActiveController {
+  final loading = ActiveBool(false, typeName: 'loading');
+
+  void change() => loading.set(!loading.value);
 
   @override
   Iterable<ActiveType> get activities => [loading];
@@ -28,6 +30,8 @@ class _TestController extends ActiveController {
   Iterable<ActiveType> get activities => [firstName, lastName, age];
 }
 
+// === View & State ===
+
 class _MyWidget extends ActiveView<_TestController> {
   final TestViewController testActiveView;
   final _TestActiveView testActiveView2;
@@ -40,7 +44,7 @@ class _MyWidget extends ActiveView<_TestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, _TestController> createActivity() {
+  ActiveState<_MyWidget, _TestController> createActivity() {
     return _MyWidgetState(activeController);
   }
 }
@@ -50,36 +54,27 @@ class _MyWidgetState extends ActiveState<_MyWidget, _TestController> {
 
   @override
   Widget build(BuildContext context) {
-    return Activity<TestViewController>(
-      widget.testActiveView,
-      onActivityStateChanged: () => math.Random().nextInt(1000000).toString(),
-      child: MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (outerContext) {
-              return Activity(
-                widget.testActiveView2,
-                onActivityStateChanged: () =>
-                    math.Random().nextInt(1000000).toString(),
-                child: Builder(builder: (innerContext) {
-                  return Center(
-                    child: Column(
-                      children: [
-                        Text(activeController.firstName.value ?? ''),
-                        Text(activeController.lastName.value ?? ''),
-                        Text(
-                          activeController.age.value.toString(),
-                        ),
-                        Text(
-                            '${Activity.of<TestViewController>(outerContext).activeController().loading}'),
-                        Text(
-                            '${Activity.of<_TestActiveView>(innerContext).activeController().testActiveView}')
-                      ],
-                    ),
-                  );
-                }),
-              );
-            },
+    return MaterialApp(
+      home: Activity<TestViewController>(
+        widget.testActiveView,
+        onActivityStateChanged: () => math.Random().nextInt(999999).toString(),
+        child: Scaffold(
+          body: Activity<_TestActiveView>(
+            widget.testActiveView2,
+            onActivityStateChanged: () => math.Random().nextInt(999999).toString(),
+            child: Builder(
+              builder: (context) => Center(
+                child: Column(
+                  children: [
+                    Text(activeController.firstName.value ?? ''),
+                    Text(activeController.lastName.value ?? ''),
+                    Text(activeController.age.value.toString()),
+                    Text('${Activity.of<TestViewController>(context).activeController().loading.value}'),
+                    Text(Activity.of<_TestActiveView>(context).activeController().testActiveView.value),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -87,15 +82,19 @@ class _MyWidgetState extends ActiveState<_MyWidget, _TestController> {
   }
 }
 
+// === Tests ===
+
 void main() {
   late _MyWidget mainWidget;
   late _TestController activeController;
   late TestViewController testActiveView;
   late _TestActiveView testActiveView0;
+
   setUp(() {
     activeController = _TestController();
     testActiveView = TestViewController();
     testActiveView0 = _TestActiveView();
+
     mainWidget = _MyWidget(
       activeController: activeController,
       testActiveView: testActiveView,
@@ -104,8 +103,7 @@ void main() {
   });
 
   testWidgets(
-      'ActiveView Test - Finds Correct Text Widget After ActiveType Update',
-      (tester) async {
+      'Widget updates on single ActiveType update', (tester) async {
     activeController.firstName("John");
     await tester.pumpWidget(mainWidget);
 
@@ -117,23 +115,19 @@ void main() {
     expect(find.text("Jane"), findsOneWidget);
   });
 
-  testWidgets('Active State - Widgets Update on Controller ActiveType Update',
-      (tester) async {
+  testWidgets(
+      'Widget updates when bool ActiveType changes', (tester) async {
     await tester.pumpWidget(mainWidget);
-
-    final text = find.text("false");
-    expect(text, findsOneWidget);
+    expect(find.text("false"), findsOneWidget);
 
     testActiveView.change();
-
     await tester.pumpAndSettle();
 
-    final textTwo = find.text("true");
-    expect(textTwo, findsOneWidget);
+    expect(find.text("true"), findsOneWidget);
   });
 
-  testWidgets('Test [activateTypes] - Update More Than One ActiveTypes - All Widgets Update',
-      (tester) async {
+  testWidgets(
+      'activateTypes - update multiple properties simultaneously', (tester) async {
     const initialFirstName = 'John';
     const initialLastName = 'Doe';
     const initialAge = 88;
@@ -149,8 +143,8 @@ void main() {
     expect(find.text(initialAge.toString()), findsOneWidget);
 
     const newFirstName = 'Jane';
-    const newLastName = 'Doe';
-    const newAge = 20;
+    const newLastName = 'Smith';
+    const newAge = 42;
 
     activeController.activateTypes([
       {activeController.firstName: newFirstName},
@@ -166,13 +160,12 @@ void main() {
   });
 
   testWidgets(
-      'Test [activateTypes 2] - Update More Than One Null ActiveTypes update - All Widgets Update',
-      (tester) async {
+      'activateTypes - update initially null properties', (tester) async {
     await tester.pumpWidget(mainWidget);
 
-    const newFirstName = 'Jane';
-    const newLastName = 'Doe';
-    const newAge = 20;
+    const newFirstName = 'Sarah';
+    const newLastName = 'Connor';
+    const newAge = 35;
 
     activeController.activateTypes([
       {activeController.firstName: newFirstName},
@@ -187,40 +180,47 @@ void main() {
     expect(find.text(newAge.toString()), findsOneWidget);
   });
 
-  testWidgets('ActiveView Test - Finds ActiveType Data From Controller',
-      (tester) async {
+  testWidgets(
+      'Widget reflects nested Activity state from controller', (tester) async {
     await tester.pumpWidget(mainWidget);
 
     expect(find.text(testActiveView0.testActiveView.value), findsOneWidget);
   });
 
   testWidgets(
-      'ActiveView Test - Increment ActiveInt Type - Finds Correct Text Widget After Property Change',
-      (tester) async {
+      'Widget updates after increment on ActiveInt', (tester) async {
     const int initialAge = 10;
     activeController.age(initialAge);
-    await tester.pumpWidget(mainWidget);
 
+    await tester.pumpWidget(mainWidget);
     expect(find.text("$initialAge"), findsOneWidget);
 
-    final int newAge = activeController.age.increment();
+    final newAge = activeController.age.increment();
     await tester.pumpAndSettle();
 
     expect(find.text("$newAge"), findsOneWidget);
   });
 
   testWidgets(
-      'ActiveView Test - Decrement ActiveInt Type - Finds Correct Text Widget After Property Change',
-      (tester) async {
-    const int initialAge = 10;
+      'Widget updates after decrement on ActiveInt', (tester) async {
+    const int initialAge = 5;
     activeController.age(initialAge);
-    await tester.pumpWidget(mainWidget);
 
+    await tester.pumpWidget(mainWidget);
     expect(find.text("$initialAge"), findsOneWidget);
 
-    final int newAge = activeController.age.decrement();
+    final newAge = activeController.age.decrement();
     await tester.pumpAndSettle();
 
     expect(find.text("$newAge"), findsOneWidget);
   });
+
+  testWidgets(
+      'Multiple nested Activity contexts resolve their respective controllers correctly',
+          (tester) async {
+        await tester.pumpWidget(mainWidget);
+
+        expect(find.text(testActiveView.loading.value.toString()), findsOneWidget);
+        expect(find.text(testActiveView0.testActiveView.value), findsOneWidget);
+      });
 }

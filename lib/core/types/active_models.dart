@@ -1,6 +1,8 @@
 import 'package:activity/core/src/exceptions.dart';
 import 'package:activity/core/src/controller.dart';
 
+import '../src/state.dart';
+
 abstract class ActiveModelValue<T> {
   T? get value;
 }

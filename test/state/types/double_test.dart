@@ -18,7 +18,7 @@ class DoubleTestView extends ActiveView<DoubleTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, DoubleTestController>
+  ActiveState<DoubleTestView, DoubleTestController>
       createActivity() {
     return _DoubleTestViewState(activeController);
   }

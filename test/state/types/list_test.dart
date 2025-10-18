@@ -18,7 +18,7 @@ class ListTestView extends ActiveView<ListTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, ListTestController> createActivity() {
+  ActiveState<ListTestView, ListTestController> createActivity() {
     return _ListTestWidgetState(activeController);
   }
 }

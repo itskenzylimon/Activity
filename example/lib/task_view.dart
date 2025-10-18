@@ -142,43 +142,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Widget activePage(TaskController taskController) {
-  return ADialog(
-    activeController: taskController,
-    viewContext: (BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Activity Task App'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              GestureDetector(
-                child: const Text(
-                  "close dialog",
-                ),
-                onTap: () {
-                  ///Using the navigation abstract class
-                  Nav.off(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-
 class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
   @override
-  ActiveState<ActiveView<ActiveController>, TaskController> createActivity() =>
+  ActiveState<TaskView, TaskController> createActivity() =>
       _TaskViewState(activeController);
 }
 
@@ -226,48 +194,8 @@ class _TaskViewState extends ActiveState<TaskView, TaskController> {
         // appBar: AppBar(
         //   title: Text(activeController.appTitle.value),
         // ),
-        body: SafeArea(
-            child: SurveyJSForm(
-          schema: const {
-            "pages": [
-              {
-                "name": "page1",
-                "elements": [
-                  {
-                    "type": "dropdown",
-                    "name": "Sex",
-                    "title": "Select your Sex:",
-                    "description": "Enter your Sex",
-                    "isRequired": true,
-                    "choices": [
-                      {
-                        "value": "Item 1",
-                        "text": "Male"
-                      },
-                      {
-                        "value": "Item 2",
-                        "text": "Female"
-                      },
-                      {
-                        "value": "Item 3",
-                        "text": "Other"
-                      }
-                    ],
-                    "placeholder": "Select Gender"
-                  }
-                ]
-              }
-            ]
-          },
-          context: context,
-          formResults: formResults,
-          onFormValueSubmit: (Map results) {
-            /// At this point, the form has been submitted and the
-            /// results are available in the formResults variable
-            /// handle the results here
-          },
-          defaultValues: const {},
-        )
+        body: const SafeArea(
+          child: SizedBox(),
 
             //         Column(
             //   children: [

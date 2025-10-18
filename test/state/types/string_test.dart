@@ -25,7 +25,7 @@ class StringTestView extends ActiveView<StringTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, StringTestController> createActivity() {
+  ActiveState<StringTestView, StringTestController> createActivity() {
     return _StringTestViewState(activeController);
   }
 }

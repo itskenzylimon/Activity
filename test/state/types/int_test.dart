@@ -18,7 +18,7 @@ class IntTestView extends ActiveView<IntTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, IntTestController> createActivity() {
+  ActiveState<IntTestView, IntTestController> createActivity() {
     return _IntTestViewState(activeController);
   }
 }
