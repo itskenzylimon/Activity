@@ -49,66 +49,6 @@ void main() async {
   //   });
   //
 
-try {
-
-  ActiveRequest activeRequest =  ActiveRequest();
-  /// request
-  activeRequest.setUp = RequestSetUp(
-      idleTimeout: 10,
-      connectionTimeout: 20,
-      logResponse: true,
-      withTrustedRoots: true,
-      httpHeaders: {
-        // "Authorization": "Bearer $access_token",
-        "Content-type": "application/json"
-      });
-  /// you can do the complete [getApi], [postApi], [putApi] and
-  /// [deleteApi] and still get a successful [activeResponse].
-
-  ///here is an implementation of [postApi]
-  /// set your parameters
-  Map<String, dynamic> params = {
-    "name": "Apple MacBook Pro 16",
-    "data": {
-      "year": 2019,
-      "price": 1849.99,
-      "CPU model": "Intel Core i9",
-      "Hard disk size": "1 TB"
-    }
-  };
-
-  printWarning(params);
-
-  ///make the request
-  ActiveResponse response = await activeRequest
-      .postApi(Params(endpoint: 'https://api.restful-api.dev/objects', body: params));
-
-//   File file = await sendAssetFile('assets/index.html', 'index.html');
-//
-//     ActiveRequest activeRequest =  ActiveRequest();
-//   printError('activeResponse.data');
-//     ActiveResponse activeResponse = await activeRequest
-//         .uploadFileApi(
-//           Params(endpoint: 'https://www.filestackapi.com/api/store/S3?key=Azb7pTmKLQFGojQWsXwroz',
-//           queryParameters: {}),
-//           file,'ndex.html', RequestSetUp(
-//         idleTimeout: 10,
-//         connectionTimeout: 10,
-//         logResponse: true,
-//         withTrustedRoots: true,
-//         httpHeaders: {        }
-//     ));
-//
-
-          printError(response.statusCode);
-          printError(response.data);
-          final Map<String, dynamic> convertedData = jsonDecode(response.data!);
-          printError(convertedData);
-
-} catch (error){
-  printError(error);
-}
-
   //
   // } catch (error){
   //   printError(error);
@@ -172,19 +112,9 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   var taskController = TaskController();
 
-  void afterFirstLayout(BuildContext context) {
-    taskController.testWebSocket();
-  }
-
   @override
   void initState() {
     super.initState();
-    printError("text");
-    WidgetsBinding.instance.endOfFrame.then(
-      (_) {
-        if (mounted) afterFirstLayout(context);
-      },
-    );
   }
 
   @override
@@ -242,7 +172,7 @@ class TaskView extends ActiveView<TaskController> {
   const TaskView({super.key, required super.activeController});
 
   @override
-  ActiveState<ActiveView<ActiveController>, TaskController> createActivity() =>
+  ActiveState<TaskView, TaskController> createActivity() =>
       _TaskViewState(activeController);
 }
 

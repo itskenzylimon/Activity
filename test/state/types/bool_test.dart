@@ -23,7 +23,7 @@ class BoolTestView extends ActiveView<BoolTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, BoolTestController> createActivity() =>
+  ActiveState<BoolTestView, BoolTestController> createActivity() =>
       _BoolTestState(activeController);
 }
 

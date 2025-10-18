@@ -1,6 +1,6 @@
-import 'package:activity/core/helpers/logger.dart';
 import 'package:activity/core/src/exceptions.dart';
 import 'package:activity/core/src/controller.dart';
+import '../src/state.dart';
 
 part 'active_bool.dart';
 part 'active_int.dart';
@@ -10,200 +10,154 @@ part 'active_map.dart';
 part 'active_list.dart';
 part 'active_datetime.dart';
 
+/// Base interface defining readable value access for Active types.
 abstract class ActiveTypeValue<T> {
   T? get value;
 }
 
-
-/// An [ActiveType] can take the nature of any any object type. When an update is
-/// done an [ActiveStateChanged] event is triggered which in-turn makes a UI rebuild of that widget.
-/// [UseCases]
+/// [ActiveType] is a reactive container class designed to hold a mutable value
+/// that can automatically notify an [ActiveController] when changed.
 ///
-///*Using [set]*:
-///```dart
-/////initialize the property value to zero.
-///final age = createProperty<int>(0);
+/// It enables reactive UI updates and state tracking via the `activity` package.
 ///
-/////update the property value to five.
-///age.set(5);
-///```
-///
-///-----------------------------------------
-///
-///*Calling the property*:
-///```dart
-/////initialize the property value to zero.
-///final age = createProperty<int>(0);
-///
-/////update the property value to five.
-///age(5);
-///```
+/// Example usage:
+/// ```dart
+/// final name = ActiveType<String>('Bob');
+/// name('Alice'); // Updates and notifies the controller
+/// name.reset();  // Reverts to the original value
+/// ```
 class ActiveType<T> implements ActiveTypeValue<T> {
+  /// Optional name identifier for this type.
   String? typeName;
 
+  /// Stores the original value before any changes.
   late T _originalValue;
   T get originalValue => _originalValue;
 
+  /// Stores a mock or temporary value (optional, for testing or preview purposes).
   late T _mockValue;
   T get mockValue => _mockValue;
 
+  /// The current value.
   T _value;
 
   @override
   T get value => _value;
 
-  /// Returns true if the value of [this] is null.
-  ///
+  /// Returns `true` if the value is `null`.
   bool get isNull => _value == null;
 
-  /// Returns true if the value of [this] is not null.
+  /// Returns `true` if the value is **not** `null`.
   bool get isNotNull => !isNull;
 
+  /// The controller managing this active type.
   ActiveController? _activeController;
 
-  /// Returns the instance of the [ActiveController] this
-  /// property is associated with.
-  ///
+  /// Returns the assigned [ActiveController] or throws an exception
+  /// if this ActiveType is not linked to any controller.
   ActiveController get activeController {
     if (_activeController == null) {
       throw ActiveTypeNotAssignedException(
           StackTrace.current, typeName, runtimeType);
-    } else {
-      return _activeController!;
     }
+    return _activeController!;
   }
 
+  /// Creates a new instance of [ActiveType] with the given [value].
   ActiveType(this._value, {this.typeName}) {
     _originalValue = _value;
   }
 
-  ///Links this ActiveType instance with an [ActiveController].
-  ///
+  /// Links this ActiveType instance to an [ActiveController].
   void setActiveController(ActiveController activeController) {
     _activeController = activeController;
   }
 
-  /// Updates the underlying [value] for this ActiveType.
+  /// Function-call syntax for setting a new value.
   ///
-  /// If [notifyChange] is true, a UI update will be triggered after the change occurs. Otherwise,
-  /// only the value will be set.
-  ///
-  /// If [setAsOriginal] is true, updating the value will also set the [originalValue] to the
-  /// current value. See also [setOriginalValueToCurrent] and [reset]
-  ///
+  /// Example:
+  /// ```dart
+  /// final age = ActiveType<int>(10);
+  /// age(25); // same as age.set(25)
+  /// ```
   void call(T value, {bool notifyChange = true, bool setAsOriginal = false}) {
     set(value, notifyChange: notifyChange, setAsOriginal: setAsOriginal);
   }
 
-  ///Updates the original value to what the current value of this property is.
+  /// Updates the original value to the current value.
   ///
-  ///If this function is called, the [reset] function will then use the updated
-  ///original value to set the current value
-  ///
-  ///## Example
-  ///```dart
-  ///final user = createNullProperty<User>();
-  ///
-  ///user(await userService.loadUser());
-  ///
-  ///user.reset(); //user value would be reset to null
-  ///
-  ///user(await userService.loadUser());
-  ///
-  ///user.setOriginalValueToCurrent();
-  ///
-  ///user(null);
-  ///
-  ///user.reset(); //user value would be reset to the user returned from the userService
-  ///
-  ///```
-  void setOriginalValueToCurrent(String typeName) async {
-    _originalValue = _value;
-  }
-  
-  void setToOriginal(dynamic value, String typeName) async {
+  /// Example:
+  /// ```dart
+  /// user.setOriginalValueToCurrent();
+  /// ```
+  void setOriginalValueToCurrent(String? typeName) {
     _originalValue = _value;
   }
 
-  ///Updates the property value. Notifies any listeners to the change
+  /// Forces the original value to a specific one.
   ///
-  ///Returns the updated value
+  /// Useful for programmatically overriding what is considered the “original state”.
+  void setToOriginal(T value) {
+    _originalValue = value;
+  }
+
+  /// Updates the internal [value].
+  ///
+  /// If [notifyChange] is true, it will trigger UI rebuilds
+  /// through the controller's [notifyActivities].
+  ///
+  /// Optionally mark this new value as the new [originalValue].
   T set(T value, {bool notifyChange = true, bool setAsOriginal = false}) {
-
     final oldValue = _value;
     _value = value;
+
     if (notifyChange && oldValue != value) {
       activeController.notifyActivities([
-        ActiveStateChanged(value, oldValue, typeName: typeName)
+        ActiveStateChanged(value, oldValue, typeName: typeName),
       ]);
-     
     }
 
     if (setAsOriginal) {
-      _originalValue = _value;
+      _originalValue = value;
     }
 
     return _value;
   }
 
-  ///Resets the [value] to the [originalValue].
+  /// Resets the value back to the original state.
   ///
-  ///If [T] is a  class with properties, changing the properties directly on the object
-  ///instead of updating this ActiveType with a new instance of [T] with the updated values will
-  ///prevent [reset] from performing as expected. Tracking the original value is done by reference
-  ///internally.
+  /// If [notifyChange] is true, triggers state rebuilds.
   ///
-  ///## Usage
-  ///
-  ///```dart
-  ///final age = ActiveType<int>(10); //age.value is 10
-  ///
-  ///age(20); //age.value is 20
-  ///age(25); //age.value is 25
-  ///
-  ///age.reset(); //age.value is back to 10. Triggers UI rebuild or...
-  ///
-  ///age.reset(notifyChange: false); //age.value is back to 10 but UI does not rebuild
-  ///```
+  /// Example:
+  /// ```dart
+  /// final age = ActiveType<int>(20);
+  /// age(30);
+  /// age.reset(); // back to 20
+  /// ```
   void reset({bool notifyChange = true}) {
     final currentValue = _value;
     _value = _originalValue;
 
     if (notifyChange) {
       activeController.notifyActivities([
-        ActiveStateChanged(
-          _originalValue,
-          currentValue,
-          typeName: typeName,
-        )
+        ActiveStateChanged(_originalValue, currentValue, typeName: typeName),
       ]);
     }
   }
 
+  /// Compares the current value to another [ActiveType] or raw object.
+  ///
+  /// Example:
+  /// ```dart
+  /// age.equals(10);
+  /// otherAge.equals(age);
+  /// ```
+  bool equals(dynamic other) {
+    return other is ActiveType ? other.value == value : other == value;
+  }
+
   @override
   String toString() => _value?.toString() ?? '';
-
-  ///Checks if [other] is equal to the [value] of this ActiveType
-  ///
-  ///### Usage
-  ///
-  ///```dart
-  ///final age = ActiveType<int>(10);
-  ///
-  ///age.equals(10); //returns true
-  ///
-  ///
-  ///final ageTwo = ActiveType<int>(10);
-  ///
-  ///age.equals(ageTwo); //returns true
-  ///```
-  bool equals(dynamic other) {
-    if (other is ActiveType) {
-      return other.value == value;
-    } else {
-      return other == value;
-    }
-  }
 
   @override
   bool operator ==(dynamic other) => equals(other);
@@ -212,36 +166,22 @@ class ActiveType<T> implements ActiveTypeValue<T> {
   int get hashCode => _value.hashCode;
 }
 
-/// ## createActiveType
-/// Short hand helper function to Create a non nullable value
-/// An [ActiveType] can take the nature of any any object type. When an update is
-/// done an [ActiveStateChanged] event is triggered which in-turn makes a UI rebuild of that widget.
+/// Creates a non-nullable [ActiveType] with an initial value.
 ///
-///## Example
-///
-///```dart
-///late final ActiveType<String> name;
-///
-///name = createProperty('Bob');
-///```
+/// Example:
+/// ```dart
+/// final name = createActiveType('Alice');
+/// ```
 ActiveType<T> createActiveType<T>(T value, {String? typeName}) {
   return ActiveType<T>(value, typeName: typeName);
 }
 
-
-/// [createActiveNullableType]
-/// Create a nullable value
-/// An [ActiveType] can take the nature of any any object type. When an update is
-/// done an [ActiveStateChanged] event is triggered which in-turn makes a UI rebuild of that widget.
+/// Creates a nullable [ActiveType] with no initial value.
 ///
-///## Example
-///
-///```dart
-///late final ActiveType<String?> name;
-///
-///name = createNullProperty();
-///
-///```
+/// Example:
+/// ```dart
+/// final name = createActiveNullableType<String>();
+/// ```
 ActiveType<T?> createActiveNullableType<T>({String? typeName}) {
   return createActiveType(null, typeName: typeName);
 }

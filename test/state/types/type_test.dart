@@ -20,7 +20,7 @@ class TypeTestView extends ActiveView<TypeTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, TypeTestController> createActivity() {
+  ActiveState<TypeTestView, TypeTestController> createActivity() {
     return _MyWidgetState(activeController);
   }
 }

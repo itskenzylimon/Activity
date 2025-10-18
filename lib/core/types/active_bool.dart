@@ -1,53 +1,71 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// An [ActiveType] with similar characteristics as a an
-/// ordinary dart bool object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// [ActiveBool]
+/// A strongly-typed reactive boolean property that is **non-nullable**.
 ///
-/// Has similar characteristics as bool and The value cannot be null
-
+/// It notifies its [ActiveController] when updated,
+/// causing reactive widgets to rebuild.
+///
+/// ### Example:
+/// ```dart
+/// final isVisible = ActiveBool(false);
+/// isVisible.setTrue();  // Sets to true and notifies listeners
+/// if (isVisible.isFalse) { ... }
+/// ```
 class ActiveBool extends ActiveType<bool> {
-  ActiveBool(super.value, {super.typeName});
+  ActiveBool(super.value, {super.typeName}) {
+    assert(value != null, '[ActiveBool] must be initialized with non-null value');
+  }
 
-  ///Whether the underlying value is true
-  bool get isTrue => _value;
+  /// Returns true if the current value is true.
+  bool get isTrue => value;
 
-  ///Whether the underlying value is false
-  bool get isFalse => !_value;
+  /// Returns true if the current value is false.
+  bool get isFalse => !value;
 
-  ///Sets the value to true
+  /// Updates the value to true.
   void setTrue({bool notifyChange = true}) =>
-      super.set(true, notifyChange: notifyChange);
+      set(true, notifyChange: notifyChange);
 
-  ///Sets the value to false
+  /// Updates the value to false.
   void setFalse({bool notifyChange = true}) =>
-      super.set(false, notifyChange: notifyChange);
+      set(false, notifyChange: notifyChange);
 }
 
 /// [ActiveNullableBool]
-/// ordinary dart bool object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// A reactive boolean property that **can be null**.
 ///
-/// Has similar characteristics as bool and The value can exist as null
-
+/// Behaves similarly to Dart's `bool?` and supports null safety,
+/// while maintaining the reactivity of [ActiveType].
+///
+/// ### Example:
+/// ```dart
+/// final isLoading = ActiveNullableBool();
+/// isLoading.setTrue();
+/// if (isLoading.isFalse) { ... }
+/// isLoading.setNull();
+/// ```
 class ActiveNullableBool extends ActiveType<bool?> {
   ActiveNullableBool({bool? value, super.typeName}) : super(value);
 
-  ///Whether the underlying value is not null and true
-  bool get isTrue => isNotNull && _value == true;
+  /// Returns true if the current value is not null and equals true.
+  bool get isTrue => value == true;
 
-  ///Whether the underlying value is not null and false
-  bool get isFalse => isNotNull && _value == false;
+  /// Returns true if the current value is not null and equals false.
+  bool get isFalse => value == false;
 
-  ///Sets the value to true
+  /// Returns true if the current value is null.
+  bool get isNull => value == null;
+
+  /// Updates the value to true.
   void setTrue({bool notifyChange = true}) =>
-      super.set(true, notifyChange: notifyChange);
+      set(true, notifyChange: notifyChange);
 
-  ///Sets the value to false
+  /// Updates the value to false.
   void setFalse({bool notifyChange = true}) =>
-      super.set(false, notifyChange: notifyChange);
+      set(false, notifyChange: notifyChange);
 
-  ///Sets the value to null
+  /// Updates the value to null.
   void setNull({bool notifyChange = true}) =>
-      super.set(null, notifyChange: notifyChange);
+      set(null, notifyChange: notifyChange);
 }

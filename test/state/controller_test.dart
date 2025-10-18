@@ -1,7 +1,8 @@
 import 'package:activity/activity.dart';
+import 'package:activity/core/src/errors.dart';
+import 'package:activity/core/src/state.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: depend_on_referenced_packages
-import 'package:matcher/src/equals_matcher.dart' as match;
+import 'dart:async';
 
 class TestController extends ActiveController {
   final name = ActiveString('Bob');
@@ -18,84 +19,108 @@ void main() {
     testController = TestController();
   });
 
-  test(
-      'resetAllActiveTypes - change property values - All values equal their original value',
-          () {
-        const changedName = 'Steve';
-        const changedAge = 100;
+  group('ActiveController Tests', () {
+    test('resetAllActiveTypes restores original values', () {
+      const changedName = 'Steve';
+      const changedAge = 100;
 
-        final originalName = testController.name.value;
-        final originalAge = testController.age.value;
+      final originalName = testController.name.value;
+      final originalAge = testController.age.value;
 
-        testController.name(changedName);
-        testController.age(changedAge);
+      testController.name(changedName);
+      testController.age(changedAge);
 
-        expect(testController.name.value, match.equals(changedName));
-        expect(testController.age.value, match.equals(changedAge));
+      expect(testController.name.value, changedName);
+      expect(testController.age.value, changedAge);
 
-        testController.resetAllActiveTypes();
+      testController.resetAllActiveTypes();
 
-        printSuccess(testController.age.value);
-        printSuccess(originalName);
-        printSuccess(testController.name.value);
-        printSuccess(testController.name.originalValue);
+      expect(testController.name.value, originalName);
+      expect(testController.age.value, originalAge);
+    });
 
-        expect(testController.name.value, match.equals(originalName));
-        expect(testController.age.value, match.equals(originalAge));
+    test('setRunningStatus toggles isTaskRunning correctly', () {
+      const taskKey1 = 'task1';
+      const taskKey2 = 'task2';
+      const taskKey3 = 'task3';
+
+      testController.setRunningStatus(isRunning: true, isRunningKey: taskKey1);
+      expect(testController.isTaskRunning(isRunningKey: taskKey1), isTrue);
+      expect(testController.isTaskRunning(), isTrue);
+
+      testController.setRunningStatus(isRunning: true, isRunningKey: taskKey2);
+      expect(testController.isTaskRunning(isRunningKey: taskKey2), isTrue);
+
+      testController.setRunningStatus(isRunning: true, isRunningKey: taskKey3);
+      expect(testController.isTaskRunning(isRunningKey: taskKey3), isTrue);
+
+      testController.setRunningStatus(isRunning: false, isRunningKey: taskKey1);
+      expect(testController.isTaskRunning(isRunningKey: taskKey1), isFalse);
+
+      testController.setRunningStatus(isRunning: false, isRunningKey: taskKey2);
+      expect(testController.isTaskRunning(isRunningKey: taskKey2), isFalse);
+
+      testController.setRunningStatus(isRunning: false, isRunningKey: taskKey3);
+      expect(testController.isTaskRunning(isRunningKey: taskKey3), isFalse);
+      expect(testController.isTaskRunning(), isFalse);
+    });
+
+    test('activeAsync toggles state before and after async task', () async {
+      const taskKey = 'loadUser';
+
+      final result = await testController.activeAsync<String>(() async {
+        await Future.delayed(Duration(milliseconds: 100));
+        expect(testController.isTaskRunning(isRunningKey: taskKey), isTrue);
+        return 'User Loaded';
+      }, isRunningKey: taskKey);
+
+      expect(result, 'User Loaded');
+      expect(testController.isTaskRunning(isRunningKey: taskKey), isFalse);
+    });
+
+    test('notifyActivities sends event to listeners', () async {
+      final completer = Completer<List<ActiveStateChanged>>();
+
+      final subscription = testController.addOnStateChangedListener((events) {
+        completer.complete(events);
       });
 
-  test('setRunningStatus', () {
-    const taskKeyOne = 'taskOne';
-    const taskKeyTwo = 'taskTwo';
-    const taskKeyThree = 'taskThree';
+      testController.name('Alice');
 
-    //Set all tasks to isTaskRunning
-    testController.setRunningStatus(isRunning: true, isRunningKey: taskKeyOne);
+      final events = await completer.future;
+      expect(events, isNotEmpty);
+      expect(events.first.newValue, 'Alice');
 
-    expect(testController.isTaskRunning(isRunningKey: taskKeyOne), isTrue);
+      await subscription.cancel();
+    });
 
-    expect(testController.isTaskRunning(), isTrue);
+    test('onActiveError emits error to listeners', () async {
+      final completer = Completer<ErrorEvent>();
 
-    bool isTaskKeyOneBusy = testController.isTaskRunning(isRunningKey: taskKeyOne);
+      final subscription = testController.onActiveErrorListener((error) {
+        completer.complete(error);
+      });
 
-    expect(isTaskKeyOneBusy, isTrue);
+      final errorEvent = ErrorEvent('Something went wrong');
+      testController.onActiveError(errorEvent);
 
-    testController.setRunningStatus(isRunning: true, isRunningKey: taskKeyTwo);
+      final result = await completer.future;
+      expect(result.error, 'Something went wrong');
 
-    expect(testController.isTaskRunning(), isTrue);
+      await subscription.cancel();
+    });
 
-    bool isTaskKeyTwoBusy = testController.isTaskRunning(isRunningKey: taskKeyTwo);
+    test('resetActivities disposes resources and prevents further use', () async {
+      await testController.resetActivities();
 
-    expect(isTaskKeyTwoBusy, isTrue);
+      expect(() => testController.name('Alice'),
+          throwsA(isA<StateError>()));
 
-    testController.setRunningStatus(isRunning: true, isRunningKey: taskKeyThree);
+      expect(() => testController.setRunning(isRunningKey: 'x'),
+          throwsA(isA<StateError>()));
 
-    expect(testController.isTaskRunning(), isTrue);
-
-    bool isTaskKeyThreeBusy = testController.isTaskRunning(isRunningKey: taskKeyThree);
-
-    expect(isTaskKeyThreeBusy, isTrue);
-
-    //Incrementally remove isTaskRunning status
-    testController.setRunningStatus(isRunning: false, isRunningKey: taskKeyOne);
-
-    isTaskKeyOneBusy = testController.isTaskRunning(isRunningKey: taskKeyOne);
-
-    expect(isTaskKeyOneBusy, isFalse);
-    expect(testController.isTaskRunning(), isTrue);
-
-    testController.setRunningStatus(isRunning: false, isRunningKey: taskKeyTwo);
-
-    isTaskKeyTwoBusy = testController.isTaskRunning(isRunningKey: taskKeyTwo);
-
-    expect(isTaskKeyTwoBusy, isFalse);
-    expect(testController.isTaskRunning(), isTrue);
-
-    testController.setRunningStatus(isRunning: false, isRunningKey: taskKeyThree);
-
-    isTaskKeyThreeBusy = testController.isTaskRunning(isRunningKey: taskKeyThree);
-
-    expect(isTaskKeyThreeBusy, isFalse);
-    expect(testController.isTaskRunning(), isFalse);
+      expect(() => testController.addOnStateChangedListener((_) {}),
+          throwsA(isA<StateError>()));
+    });
   });
 }

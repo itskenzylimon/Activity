@@ -1,101 +1,118 @@
 import 'package:activity/activity.dart';
+import 'package:activity/core/src/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 // ignore: depend_on_referenced_packages
 import 'package:matcher/src/equals_matcher.dart' as match;
 
 void main() {
   group('ActiveStateChanged Extension Tests', () {
-    test(
-        '[contains] function test - contains event matching property name - returns true',
-        () {
-      const String typeName = 'loading';
+    test('[containsPropertyName] - when matching event exists, returns true', () {
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged('new', 'old', typeName: typeName),
+      ];
 
-      final events = <ActiveStateChanged<String>>[];
-
-      ActiveStateChanged<String> activeStateChanged =
-      ActiveStateChanged('John Doe', null, typeName: typeName);
-
-      events.add(activeStateChanged);
-      final foundEvent = (events.first.typeName == typeName) ? true : false;
-
-      expect(foundEvent, isTrue);
+      expect(events.containsPropertyName(typeName), isTrue);
     });
 
-    test(
-        '[contains] function test - does not contain event matching property name - returns false',
-        () {
-      const String typeName = 'loading';
-      final List events = <ActiveStateChanged<String>>[];
+    test('[containsPropertyName] - when no matching event exists, returns false', () {
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged('new', 'old', typeName: 'other'),
+      ];
 
-      final foundEvent = events.contains(typeName);
-
-      expect(foundEvent, isFalse);
+      expect(events.containsPropertyName(typeName), isFalse);
     });
 
-    test(
-        '[firstForPropertyName] function test - contains event matching property name - returns event',
-        () {
-      const String typeName = 'loading';
-      final event = ActiveStateChanged('John Doe', null, typeName: typeName);
-      final events = [event];
+    test('[firstForPropertyName] - returns matching event when found', () {
+      const typeName = 'loading';
+      final expected = ActiveStateChanged('newValue', 'oldValue', typeName: typeName);
+      final events = <ActiveStateChanged<String>>[
+        expected,
+        ActiveStateChanged('other', 'old', typeName: 'other'),
+      ];
+
       final result = events.firstForPropertyName(typeName);
 
       expect(result, isNotNull);
-      expect(result, match.equals(event));
+      expect(result, match.equals(expected));
     });
 
-    test(
-        '[firstForPropertyName] function test - does not contain event matching property name - returns null',
-        () {
-      const String typeName = 'loading';
-      final events = <ActiveStateChanged<String>>[];
-      final result = events.firstForPropertyName(typeName);
-
-      expect(result, isNull);
-    });
-
-    test(
-        '[newValueFor] function test - contains event matching property name - returns nextValue',
-        () {
-      const String nextValue = 'Bob';
-      const String typeName = 'loading';
-      final events = [ActiveStateChanged(nextValue, null, typeName: typeName)];
-
-      final result = events.newValueFor(typeName);
-      expect(result, match.equals(nextValue));
-    });
-
-    test(
-        '[newValueFor] function test - does not contain event matching property name - returns nextValue',
-        () {
-      const String typeName = 'loading';
-      final events = <ActiveStateChanged<String>>[];
-
-      final result = events.newValueFor(typeName);
-      expect(result, isNull);
-    });
-
-    test(
-        '[oldValueFor] function test - contains event matching property name - returns previousValue',
-        () {
-      const String previousValue = 'Bob';
-      const String typeName = 'loading';
-      final events = [
-        ActiveStateChanged(null, previousValue, typeName: typeName)
+    test('[firstForPropertyName] - returns null when no match found', () {
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged('something', 'else', typeName: 'not_loading'),
       ];
 
-      final result = events.oldValueFor(typeName);
-      expect(result, match.equals(previousValue));
+      final result = events.firstForPropertyName(typeName);
+      expect(result, isNull);
     });
 
-    test(
-        '[oldValueFor] function test - does not contain event matching property name - returns previousValue',
-        () {
-      const String typeName = 'loading';
-      final events = <ActiveStateChanged<String>>[];
+    test('[newValueFor] - returns correct newValue when typeName matches', () {
+      const newValue = 'Bob';
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged(newValue, 'old', typeName: typeName)
+      ];
 
-      final result = events.oldValueFor(typeName);
-      expect(result, isNull);
+      expect(events.newValueFor(typeName), equals(newValue));
+    });
+
+    test('[newValueFor] - returns null when no match found', () {
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged('value', 'prev', typeName: 'not_loading')
+      ];
+
+      expect(events.newValueFor(typeName), isNull);
+    });
+
+    test('[oldValueFor] - returns correct oldValue when typeName matches', () {
+      const oldValue = 'Old';
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged('New', oldValue, typeName: typeName)
+      ];
+
+      expect(events.oldValueFor(typeName), equals(oldValue));
+    });
+
+    test('[oldValueFor] - returns null when no match found', () {
+      const typeName = 'loading';
+      final events = <ActiveStateChanged<String>>[
+        ActiveStateChanged('new', 'old', typeName: 'not_loading')
+      ];
+
+      expect(events.oldValueFor(typeName), isNull);
+    });
+
+    test('[toString] - returns formatted debug-friendly output', () {
+      const oldValue = 'A';
+      const newValue = 'B';
+      const typeName = 'fieldName';
+      const info = 'value updated';
+      final change = ActiveStateChanged<String>(
+        newValue,
+        oldValue,
+        typeName: typeName,
+        info: info,
+      );
+
+      final result = change.toString();
+
+      expect(result, contains('Old value : $oldValue'));
+      expect(result, contains('New value : $newValue'));
+      expect(result, contains('Type name : $typeName'));
+      expect(result, contains('Type info : $info'));
+    });
+
+    test('[equals operator] - correctly compares two identical ActiveStateChanged instances', () {
+      const typeName = 'name';
+      final a = ActiveStateChanged('Alice', 'Bob', typeName: typeName);
+      final b = ActiveStateChanged('Alice', 'Bob', typeName: typeName);
+
+      // Even though they are different instances, content is the same
+      expect(a.toString(), equals(b.toString()));
     });
   });
 }

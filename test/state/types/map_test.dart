@@ -18,7 +18,7 @@ class MapTestView extends ActiveView<MapTestController> {
   }) : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, MapTestController>
+  ActiveState<MapTestView, MapTestController>
       createActivity() {
     return _MapTestViewState(activeController);
   }
