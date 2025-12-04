@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show File, Platform, FileSystemException; // Safe on non-web targets only.
+import 'package:activity/activity.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, FlutterError;
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -16,14 +17,14 @@ abstract class EnvLogger {
 class ConsoleEnvLogger implements EnvLogger {
   const ConsoleEnvLogger();
   @override
-  void info(String message) => print('[ENV] $message');
+  void info(String message) => printInfo('[ENV] $message');
   @override
-  void warn(String message) => print('[ENV][WARN] $message');
+  void warn(String message) => printInfo('[ENV][WARN] $message');
   @override
   void error(String message, [Object? err, StackTrace? st]) {
-    print('[ENV][ERROR] $message');
-    if (err != null) print('  └─ $err');
-    if (st != null) print(st);
+    printError('[ENV][ERROR] $message');
+    if (err != null) printError('  └─ $err');
+    if (st != null) printError(st);
   }
 }
 

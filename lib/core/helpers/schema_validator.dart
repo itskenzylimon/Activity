@@ -357,7 +357,7 @@ class SchemaValidator {
       final custom = rules[Rules.custom];
       if (custom is String Function(dynamic value, Map<String, dynamic> data)) {
         final msg = custom(value, input);
-        if (msg is String && msg.isNotEmpty) {
+        if (msg.isNotEmpty) {
           _putError(errors, key, _msg(key, Rules.custom, defaultMsg: msg));
         }
       }
