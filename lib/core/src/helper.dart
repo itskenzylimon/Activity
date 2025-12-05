@@ -1,7 +1,5 @@
 import 'package:activity/core/src/state.dart';
 
-import 'controller.dart';
-
 
 /// [ActiveStateHelper]
 extension ActiveStateHelper<T> on List<ActiveStateChanged<T>> {

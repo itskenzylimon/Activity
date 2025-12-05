@@ -1,14 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
-
-import 'package:example/controller.dart';
 import 'package:example/splashscreen.dart';
 import 'package:example/task_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:activity/activity.dart';
-
-import 'model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
