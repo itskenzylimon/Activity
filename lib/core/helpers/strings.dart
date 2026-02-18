@@ -8,8 +8,10 @@ extension SuperString on String {
   bool get isUpperCase {
     if (isEmpty) return true;
     final hasLetter = RegExp(r'\p{L}', unicode: true);
-    final onlyUpperOrNonLetters =
-    RegExp(r'^(?:\p{Lu}|\P{L})+$', unicode: true).hasMatch(this);
+    final onlyUpperOrNonLetters = RegExp(
+      r'^(?:\p{Lu}|\P{L})+$',
+      unicode: true,
+    ).hasMatch(this);
     // If there are letters, they must be upper; digits/punct are fine.
     return !hasLetter.hasMatch(this) || onlyUpperOrNonLetters;
   }
@@ -18,8 +20,10 @@ extension SuperString on String {
   bool get isLowerCase {
     if (isEmpty) return true;
     final hasLetter = RegExp(r'\p{L}', unicode: true);
-    final onlyLowerOrNonLetters =
-    RegExp(r'^(?:\p{Ll}|\P{L})+$', unicode: true).hasMatch(this);
+    final onlyLowerOrNonLetters = RegExp(
+      r'^(?:\p{Ll}|\P{L})+$',
+      unicode: true,
+    ).hasMatch(this);
     return !hasLetter.hasMatch(this) || onlyLowerOrNonLetters;
   }
 
@@ -78,7 +82,36 @@ extension SuperString on String {
   String title() {
     if (isEmpty) return this;
     final parts = trim().split(RegExp(r'\s+'));
-    return parts.map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1).toLowerCase()).join(' ');
+    return parts
+        .map(
+          (w) =>
+              w.isEmpty ? w : w[0].toUpperCase() + w.substring(1).toLowerCase(),
+        )
+        .join(' ');
+  }
+
+  /// Converts camelCase / PascalCase to Title Case
+  /// Keeps abbreviations (3+ consecutive capitals) intact
+  String titleFromCamel() {
+    if (isEmpty) return this;
+
+    final withSpaces = replaceAllMapped(
+      RegExp(r'(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])'),
+      (_) => ' ',
+    );
+
+    return withSpaces
+        .trim()
+        .split(RegExp(r'\s+'))
+        .map((w) {
+          // Preserve acronyms (3+ uppercase letters)
+          if (RegExp(r'^[A-Z]{3,}$').hasMatch(w)) {
+            return w;
+          }
+          return w[0].toUpperCase() + w.substring(1).toLowerCase();
+        })
+        .join(' ')
+        .replaceAll("_", " ");
   }
 
   /// Convert into CamelCase (PascalCase by default).
@@ -94,7 +127,9 @@ extension SuperString on String {
       if (i == 0 && isLowerCamelCase) {
         buffer.write(p.toLowerCase());
       } else {
-        buffer.write(p.isEmpty ? '' : p[0].toUpperCase() + p.substring(1).toLowerCase());
+        buffer.write(
+          p.isEmpty ? '' : p[0].toUpperCase() + p.substring(1).toLowerCase(),
+        );
       }
     }
     return buffer.toString();
@@ -155,14 +190,19 @@ extension SuperString on String {
 
   /// Text between [start] and [end] (first matches). Returns empty if not found.
   String between(Pattern start, Pattern end) {
-    final a = (start is String) ? indexOf(start) : (start as RegExp).firstMatch(this)?.start ?? -1;
+    final a =
+        (start is String)
+            ? indexOf(start)
+            : (start as RegExp).firstMatch(this)?.start ?? -1;
     if (a == -1) return '';
-    final startEnd = (start is String)
-        ? a + start.length
-        : ((start as RegExp).firstMatch(this)!.end);
-    final b = (end is String)
-        ? indexOf(end, startEnd)
-        : (end as RegExp).firstMatch(substring(startEnd))?.start;
+    final startEnd =
+        (start is String)
+            ? a + start.length
+            : ((start as RegExp).firstMatch(this)!.end);
+    final b =
+        (end is String)
+            ? indexOf(end, startEnd)
+            : (end as RegExp).firstMatch(substring(startEnd))?.start;
     if (b == null || b == -1) return '';
     final endIdx = (end is String) ? b : startEnd + b;
     return substring(startEnd, endIdx);
@@ -205,8 +245,10 @@ extension SuperString on String {
   /// Strip common diacritics to ASCII equivalents (best effort).
   String removeDiacritics() {
     // Minimal map; extend as you need.
-    const from = 'ÀÁÂÃÄÅĀĂĄàáâãäåāăąÇĆĈĊČçćĉċčÐĎĐðďđÈÉÊËĒĔĖĘĚèéêëēĕėęěĞġģĞİıÌÍÎÏĪĬĮİìíîïīĭįĳÑŃŇŅñńňņÒÓÔÕÖØŌŎŐòóôõöøōŏőŔŘŖŕřŗŚŜŞŠśŝşšŤŢŦťţŧÙÚÛÜŪŬŮŰŲùúûüūŭůűųÝŸýÿŹŻŽźżž';
-    const to   = 'AAAAAAAAaaaaaaaaCCCCCcccccDDĐdddEEEEEEEEEeeeeeeeeeGggGIIIIIIIIiiiiiiijNNNnnnOOOOOOOoooooooRRRrrrSSSSssssTTTtttUUUUUUUUuuuuuuuuYYyyZZZzzz';
+    const from =
+        'ÀÁÂÃÄÅĀĂĄàáâãäåāăąÇĆĈĊČçćĉċčÐĎĐðďđÈÉÊËĒĔĖĘĚèéêëēĕėęěĞġģĞİıÌÍÎÏĪĬĮİìíîïīĭįĳÑŃŇŅñńňņÒÓÔÕÖØŌŎŐòóôõöøōŏőŔŘŖŕřŗŚŜŞŠśŝşšŤŢŦťţŧÙÚÛÜŪŬŮŰŲùúûüūŭůűųÝŸýÿŹŻŽźżž';
+    const to =
+        'AAAAAAAAaaaaaaaaCCCCCcccccDDĐdddEEEEEEEEEeeeeeeeeeGggGIIIIIIIIiiiiiiijNNNnnnOOOOOOOoooooooRRRrrrSSSSssssTTTtttUUUUUUUUuuuuuuuuYYyyZZZzzz';
     final map = <int, String>{};
     for (var i = 0; i < from.length && i < to.length; i++) {
       map[from.codeUnitAt(i)] = to[i];
@@ -225,10 +267,11 @@ extension SuperString on String {
   /// Split into "word" tokens by non-alphanumeric boundaries.
   List<String> _splitWords() {
     // Replace separators with space, then split.
-    final cleaned = trim()
-        .replaceAll(RegExp(r'[_\-\s]+'), ' ')
-        .replaceAll(RegExp(r'[^A-Za-z0-9 ]'), ' ')
-        .trim();
+    final cleaned =
+        trim()
+            .replaceAll(RegExp(r'[_\-\s]+'), ' ')
+            .replaceAll(RegExp(r'[^A-Za-z0-9 ]'), ' ')
+            .trim();
     if (cleaned.isEmpty) return <String>[];
     return cleaned.split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
   }
