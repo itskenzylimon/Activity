@@ -24,17 +24,13 @@ abstract class ActiveException implements Exception {
 /// - Evaluating a condition on `ActiveBoolNull`
 /// - Accessing `.value` on a null-initialized ActiveType
 class ActiveTypeNullException extends ActiveException {
-  ActiveTypeNullException(
-      super.stackTrace,
-      super.typeName,
-      super.type,
-      );
+  ActiveTypeNullException(super.stackTrace, super.typeName, super.type);
 
   @override
   String toString() =>
       '[ActiveTypeNullException] : '
-          'Value for ${typeName ?? type} is null.\n'
-          'Stack Trace: $stackTrace';
+      'Value for ${typeName ?? type} is null.\n'
+      'Stack Trace: $stackTrace';
 }
 
 /// [ActiveTypeNotAssignedException]
@@ -47,16 +43,12 @@ class ActiveTypeNullException extends ActiveException {
 /// - Updating a value that hasn't been linked to a controller
 /// - Forgetting to include a property in `List<ActiveType> get activities`
 class ActiveTypeNotAssignedException extends ActiveException {
-  ActiveTypeNotAssignedException(
-      super.stackTrace,
-      super.typeName,
-      super.type,
-      );
+  ActiveTypeNotAssignedException(super.stackTrace, super.typeName, super.type);
 
   @override
   String toString() =>
       '[ActiveTypeNotAssignedException] : '
-          'Value for ${typeName ?? type} was changed but not linked to a controller.\n'
-          'This likely means ${typeName ?? type} is missing from your activities list.\n'
-          'Stack Trace: $stackTrace';
+      'Value for ${typeName ?? type} was changed but not linked to a controller.\n'
+      'This likely means ${typeName ?? type} is missing from your activities list.\n'
+      'Stack Trace: $stackTrace';
 }

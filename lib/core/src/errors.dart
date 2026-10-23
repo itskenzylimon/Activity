@@ -21,11 +21,7 @@ class ErrorEvent<T> {
   /// Creates a new instance of [ErrorEvent].
   ///
   /// If [errorData] is not supplied, an empty map is used.
-  ErrorEvent(
-      this.error, {
-        this.stackTrace,
-        this.errorData = const {},
-      });
+  ErrorEvent(this.error, {this.stackTrace, this.errorData = const {}});
 
   /// Retrieves a strongly-typed value from the [errorData] map using [key].
   ///
@@ -38,7 +34,8 @@ class ErrorEvent<T> {
   /// ```
   E? getErrorData<E>(dynamic key) {
     if (errorData.containsKey(key)) {
-      return errorData[key] as E;
+      final value = errorData[key];
+      return value is E ? value : null;
     }
     return null;
   }

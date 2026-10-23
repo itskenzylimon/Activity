@@ -1,15 +1,75 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// An [ActiveList] with similar characteristics as a an
-/// ordinary dart List object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// Observable collections with shallow reset copies and mutation events.
 ///
-/// Has similar characteristics as int and The value cannot be null
-
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#collections) · browser route `/#/collections`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Mutate and paginate
+///
+/// <!-- activity-snippet: class-activelist-t-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveList<String>(['Beta', 'Alpha']);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.add('Gamma');
+///     controller.value.sort();
+///     assert(
+///       controller.value.paginate(pageNumber: 2, pageSize: 2).single == 'Gamma',
+///     );
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Derive without changing source state
+///
+/// <!-- activity-snippet: class-activelist-t-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveList<String>(['Beta', 'Alpha']);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     final matches = controller.value.where((s) => s.startsWith('A'));
+///     assert(matches.single == 'Alpha');
+///     final snapshot = controller.value.snapshotValue;
+///     controller.value.clear();
+///     assert(snapshot.length == 2);
+///     controller.value.reset();
+///     assert(controller.value.length == 2);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
 class ActiveList<T> extends ActiveType<List<T>> {
   ActiveList(super.value, {super.typeName}) {
     _originalValue = List<T>.from(value);
   }
+
+  @override
+  List<T> snapshot(List<T> value) => List<T>.from(value);
+
+  @override
+  List<T> eventSnapshot(List<T> value) => List<T>.unmodifiable(value);
 
   ///Factory constructor for initializing an [ActiveList] to an empty [List].
   ///
@@ -147,10 +207,14 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(numbers); // [1, 2, 3, 4]
   /// ```
   void add(T value, {bool notifyActivities = true}) {
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.add(value);
 
     if (notifyActivities) {
-      activeController.notifyActivities([ActiveStateChanged.addActiveList(value)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.addActiveList(value, typeName: typeName),
+      ]);
     }
   }
 
@@ -165,10 +229,15 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(numbers); // [1, 2, 3, 4, 5, 6]
   /// ```
   void addAll(Iterable<T> values, {bool notifyActivities = true}) {
+    values = List<T>.unmodifiable(values);
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.addAll(values);
 
     if (notifyActivities) {
-      activeController.notifyActivities([ActiveStateChanged.addAllActiveList(values)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.addAllActiveList(values, typeName: typeName),
+      ]);
     }
   }
 
@@ -190,10 +259,14 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(parts); // [shoulders, knees, toes]
   /// ```
   bool remove(T value, {bool notifyActivities = true}) {
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     final wasRemoved = _value.remove(value);
 
     if (notifyActivities && wasRemoved) {
-      activeController.notifyActivities([ActiveStateChanged.removeActiveList(value)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.removeActiveList(value, typeName: typeName),
+      ]);
     }
 
     return wasRemoved;
@@ -214,11 +287,14 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(parts); // [head, shoulder, toes]
   /// ```
   T removeAt(int index, {bool notifyActivities = true}) {
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     final removedValue = _value.removeAt(index);
 
     if (notifyActivities) {
-      activeController
-          .notifyActivities([ActiveStateChanged.removeActiveList(removedValue)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.removeActiveList(removedValue, typeName: typeName),
+      ]);
     }
 
     return removedValue;
@@ -235,8 +311,12 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(numbers); // []
   /// ```
   void clear({bool notifyActivities = true}) {
-    final stateChangedEvent =
-        ActiveStateChanged.clearActiveList(_value, typeName: typeName);
+    final stateChangedEvent = ActiveStateChanged.clearActiveList(
+      List<T>.unmodifiable(_value),
+      typeName: typeName,
+    );
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.clear();
 
     if (notifyActivities) {
@@ -378,18 +458,13 @@ class ActiveList<T> extends ActiveType<List<T>> {
   List<T> paginate({int pageNumber = 1, int pageSize = 2}) {
     // check if inputs are valid
     if (pageNumber < 1 || pageSize < 1) {
-      throw ArgumentError("pageNumber which is $pageNumber and pageSize which is $pageSize must be both greater than 0");
+      throw ArgumentError(
+        "pageNumber which is $pageNumber and pageSize which is $pageSize must be both greater than 0",
+      );
     }
-    try{
-      int startIndex = (pageNumber - 1) * pageSize;
-      int endIndex = startIndex + pageSize;
-      if (endIndex > _value.length) {
-        endIndex = _value.length;
-      }
-      return _value.sublist(startIndex, endIndex);
-    } catch(e){
-      return _value.sublist(0, 10);
-    }
+    final start = (pageNumber - 1) * pageSize;
+    if (start >= length) return <T>[];
+    return _value.sublist(start, (start + pageSize).clamp(0, length));
   }
 
   /// Inserts [element] at position [index] in this list.
@@ -407,11 +482,14 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(numbers); // [1, 2, 10, 3, 4]
   /// ```
   void insert(int index, T element, {bool notifyChanges = true}) {
+    ensureCanMutate();
+    if (notifyChanges) activeController;
     _value.insert(index, element);
 
     if (notifyChanges) {
-      activeController
-          .notifyActivities([ActiveStateChanged.insertIntoList(index, value)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.insertIntoList(index, element, typeName: typeName),
+      ]);
     }
   }
 
@@ -427,11 +505,15 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(numbers); // [1, 2, 10, 11, 12, 3, 4]
   /// ```
   void insertAll(int index, Iterable<T> values, {bool notifyChanges = true}) {
+    values = List<T>.unmodifiable(values);
+    ensureCanMutate();
+    if (notifyChanges) activeController;
     _value.insertAll(index, values);
 
     if (notifyChanges) {
-      activeController
-          .notifyActivities([ActiveStateChanged.insertAllIntoList(index, values)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.insertAllIntoList(index, values, typeName: typeName),
+      ]);
     }
   }
 
@@ -445,11 +527,16 @@ class ActiveList<T> extends ActiveType<List<T>> {
   /// print(numbers); // [1, 2, 3, 4, 10, 11, 12]
   /// ```
   void insertAllAtEnd(Iterable<T> values, {bool notifyChanges = true}) {
-    _value.insertAll(_value.length, values);
+    values = List<T>.unmodifiable(values);
+    final index = length;
+    ensureCanMutate();
+    if (notifyChanges) activeController;
+    _value.insertAll(index, values);
 
     if (notifyChanges) {
-      activeController.notifyActivities(
-          [ActiveStateChanged.insertAllIntoList(_value.length, values)]);
+      activeController.notifyActivities([
+        ActiveStateChanged.insertAllIntoList(index, values, typeName: typeName),
+      ]);
     }
   }
 

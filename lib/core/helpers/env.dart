@@ -1,7 +1,9 @@
 // env_setup.dart
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show File, Platform, FileSystemException; // Safe on non-web targets only.
+import 'env_platform_stub.dart'
+    if (dart.library.io) 'env_platform_io.dart'
+    as platform;
 import 'package:activity/activity.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, FlutterError;
 import 'package:flutter/services.dart' show rootBundle;
@@ -28,18 +30,40 @@ class ConsoleEnvLogger implements EnvLogger {
   }
 }
 
-/// A flexible, cross-platform .env loader & accessor.
+/// Load and parse public environment configuration across Flutter platforms.
 ///
-/// Features:
-/// - Load from file (mobile/desktop/CLI) or from Flutter asset (web/mobile).
-/// - Strict parser: supports quotes, escapes, and inline comments.
-/// - Variable expansion: FOO="${BAR}_x", with cycle protection.
-/// - Typed getters with defaults and clear errors.
-/// - Merge/override maps and reload at runtime.
+/// These examples work in the browser. loadAsset requires a declared Flutter asset; loadFile is native-only. Client assets and bundled configuration are public, never secret storage.
 ///
-/// ⚠️ SECURITY NOTE:
-/// Do not put production secrets in assets or the client app. Use server-side
-/// config or remote config for sensitive values.
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#environment) · browser route `/#/environment`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Parse typed public settings
+///
+/// <!-- activity-snippet: class-envsetup-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final env = ENVSetup();
+///   env.loadString('PAGE_SIZE=20\nENABLED=true');
+///   assert(env.getInt('PAGE_SIZE') == 20);
+///   assert(env.getBool('ENABLED'));
+/// }
+/// ```
+///
+/// ### Merge settings with defaults
+///
+/// <!-- activity-snippet: class-envsetup-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final env = ENVSetup();
+///   env.merge({'API_ORIGIN': 'https://example.com'});
+///   assert(env.getString('API_ORIGIN') == 'https://example.com');
+///   assert(env.getInt('MISSING_LIMIT', defaultValue: 10) == 10);
+/// }
+/// ```
 class ENVSetup {
   ENVSetup({EnvLogger? logger}) : _logger = logger ?? const ConsoleEnvLogger();
 
@@ -64,20 +88,17 @@ class ENVSetup {
   ///
   /// If [overrideExisting] is false, existing keys are preserved.
   Future<void> loadFile(
-      String filePath, {
-        bool overrideExisting = true,
-        bool expand = true,
-      }) async {
+    String filePath, {
+    bool overrideExisting = true,
+    bool expand = true,
+  }) async {
     if (kIsWeb) {
-      _logger.warn('loadFile("$filePath") ignored on Web. Use loadAsset() instead.');
+      _logger.warn(
+        'loadFile("$filePath") ignored on Web. Use loadAsset() instead.',
+      );
       return;
     }
-    final file = File(filePath);
-    if (!await file.exists()) {
-      _logger.error('ENV file not found at "$filePath"');
-      throw FileSystemException('ENV file not found', filePath);
-    }
-    final contents = await file.readAsString();
+    final contents = await platform.readFile(filePath);
     final parsed = _parse(contents);
     _merge(parsed, overrideExisting: overrideExisting);
     if (expand) _expandAll();
@@ -92,10 +113,10 @@ class ENVSetup {
   ///          - assets/.env
   ///   2) `await env.loadAsset('assets/.env');`
   Future<void> loadAsset(
-      String assetPath, {
-        bool overrideExisting = true,
-        bool expand = true,
-      }) async {
+    String assetPath, {
+    bool overrideExisting = true,
+    bool expand = true,
+  }) async {
     String contents;
     try {
       contents = await rootBundle.loadString(assetPath);
@@ -109,8 +130,22 @@ class ENVSetup {
     _logger.info('Loaded ${parsed.length} keys from asset "$assetPath".');
   }
 
+  /// Load configuration text directly, useful for tests and remote config.
+  void loadString(
+    String contents, {
+    bool overrideExisting = true,
+    bool expand = true,
+  }) {
+    _merge(_parse(contents), overrideExisting: overrideExisting);
+    if (expand) _expandAll();
+  }
+
   /// Merge a map of env values (e.g., from CI secrets or overrides).
-  void merge(Map<String, String> entries, {bool overrideExisting = true, bool expand = true}) {
+  void merge(
+    Map<String, String> entries, {
+    bool overrideExisting = true,
+    bool expand = true,
+  }) {
     _merge(entries, overrideExisting: overrideExisting);
     if (expand) _expandAll();
   }
@@ -131,10 +166,12 @@ class ENVSetup {
     final env = <String, String>{};
     final lines = const LineSplitter().convert(contents);
 
-    final keyValueRegex = RegExp(r'^\s*([A-Za-z_][A-Za-z0-9_\.]*)\s*=\s*(.*)\s*$');
+    final keyValueRegex = RegExp(
+      r'^\s*([A-Za-z_][A-Za-z0-9_\.]*)\s*=\s*(.*)\s*$',
+    );
 
     for (var rawLine in lines) {
-      var line = rawLine.trimRight();
+      var line = rawLine.trim();
       if (line.isEmpty || line.startsWith('#')) continue;
 
       final match = keyValueRegex.firstMatch(line);
@@ -167,13 +204,18 @@ class ENVSetup {
   }
 
   String _stripMatchingQuotes(String input, String quote) {
-    if (input.length >= 2 && input.startsWith(quote) && input.endsWith(quote)) {
-      return input.substring(1, input.length - 1);
+    var escaped = false;
+    for (var i = 1; i < input.length; i++) {
+      if (input[i] == quote && !escaped) {
+        final tail = input.substring(i + 1).trim();
+        if (tail.isNotEmpty && !tail.startsWith('#')) {
+          throw FormatException('Unexpected text after quoted value', input);
+        }
+        return input.substring(1, i);
+      }
+      escaped = quote == '"' && input[i] == r'\' && !escaped;
     }
-    // Support multi-line or dangling quotes by trimming first/last if present.
-    if (input.startsWith(quote)) input = input.substring(1);
-    if (input.endsWith(quote)) input = input.substring(0, input.length - 1);
-    return input;
+    throw FormatException('Unterminated quoted value', input);
   }
 
   String _unescapeDoubleQuoted(String input) {
@@ -208,7 +250,7 @@ class ENVSetup {
           sb.write(r'\');
           break;
         default:
-        // Unknown escape: keep literally
+          // Unknown escape: keep literally
           sb.write(r'\');
           sb.write(e);
       }
@@ -247,7 +289,7 @@ class ENVSetup {
       // Prefer in-memory, then platform environment (non-web).
       String? replacement = _env[key];
       if (replacement == null && !kIsWeb) {
-        replacement = Platform.environment[key];
+        replacement = platform.environment[key];
       }
 
       if (replacement == null) {
@@ -314,8 +356,12 @@ class ENVSetup {
       throw StateError('Missing env "$key"');
     }
     final t = s.trim().toLowerCase();
-    if (t == 'true' || t == '1' || t == 'yes' || t == 'y' || t == 'on') return true;
-    if (t == 'false' || t == '0' || t == 'no' || t == 'n' || t == 'off') return false;
+    if (t == 'true' || t == '1' || t == 'yes' || t == 'y' || t == 'on') {
+      return true;
+    }
+    if (t == 'false' || t == '0' || t == 'no' || t == 'n' || t == 'off') {
+      return false;
+    }
     throw FormatException('Env "$key" is not a bool: "$s"');
   }
 
@@ -364,7 +410,9 @@ class ENVSetup {
   Duration _parseIso8601Duration(String input) {
     final rx = RegExp(r'^P(T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)$');
     final m = rx.firstMatch(input);
-    if (m == null) throw FormatException('Unsupported ISO8601 duration: "$input"');
+    if (m == null) {
+      throw FormatException('Unsupported ISO8601 duration: "$input"');
+    }
     final h = int.tryParse(m.group(2) ?? '0') ?? 0;
     final mm = int.tryParse(m.group(3) ?? '0') ?? 0;
     final s = int.tryParse(m.group(4) ?? '0') ?? 0;

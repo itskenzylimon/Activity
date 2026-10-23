@@ -58,53 +58,47 @@ class Rules {
   static const custom = 'custom';
 }
 
-/// A flexible, map-driven validator for simple forms and DTOs.
+/// Validate form payloads with explicit unknown-field and custom-rule policies.
 ///
-/// Schema format (examples below):
+/// Validation is not authorization or network verification. A custom rule returns null on success; sanitized maps and snapshots remain shallow.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#validation) · browser route `/#/validation`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Validate and sanitize
+///
+/// <!-- activity-snippet: class-schemavalidator-1 -->
 /// ```dart
-/// final schema = {
-///   'email': {
-///     'required': true,
-///     'type': String,
-///     'email': true,
-///     'maxLength': 254,
-///   },
-///   'password': {
-///     'required': true,
-///     'type': String,
-///     'minLength': 8,
-///   },
-///   'confirmPassword': {
-///     'required': true,
-///     'type': String,
-///     'equalsTo': 'password', // must equal other field
-///   },
-///   'age': {
-///     'type': int,
-///     'min': 13, // numeric bounds
-///   },
-///   'website': {
-///     'type': String,
-///     'url': true,
-///   },
-///   'tags': {
-///     'type': List,
-///     'minItems': 1,
-///     'maxItems': 5,
-///   },
-///   'phone': {
-///     'type': String,
-///     'phone': true, // E.164 format recommended
-///     'requiredIf': {'country': 'US'}, // required when country == 'US'
-///   },
-///   'username': {
-///     'type': String,
-///     'pattern': r'^[a-z0-9_]{3,16}$',
-///     'notEmpty': true,
-///     'in': null, // or ['allowed','values']
-///     'custom': (value, data) => value == 'admin' ? 'username is reserved' : null,
-///   },
-/// };
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final validator = SchemaValidator({
+///     'age': {'type': int, 'min': 18},
+///   }, allowUnknownKeys: false);
+///   final result = validator.validate({'age': 21, 'extra': 'omitted'});
+///   assert(result.valid && !result.schema.containsKey('extra'));
+/// }
+/// ```
+///
+/// ### Explain a recoverable field error
+///
+/// <!-- activity-snippet: class-schemavalidator-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final validator = SchemaValidator({
+///     'name': {
+///       'type': String,
+///       'custom':
+///           (dynamic value, Map<String, dynamic> data) =>
+///               value == 'admin' ? 'Reserved name' : null,
+///     },
+///   });
+///   final result = validator.validate({'name': 'admin'});
+///   assert(result.errors['name'] == 'Reserved name');
+///   // Keep the form draft and display result.errors beside its fields.
+/// }
 /// ```
 class SchemaValidator {
   /// Validation schema describing constraints per key.
@@ -120,15 +114,25 @@ class SchemaValidator {
   ///
   /// Values are plain strings.
   final Map<String, String>? customErrors;
+  final bool allowUnknownKeys;
 
-  SchemaValidator(Map<String, dynamic> schema, {this.customErrors})
-      : _schema = schema.map((k, v) => MapEntry(k, Map<String, dynamic>.from(v as Map)));
+  SchemaValidator(
+    Map<String, dynamic> schema, {
+    this.customErrors,
+    this.allowUnknownKeys = true,
+  }) : _schema = schema.map(
+         (k, v) => MapEntry(k, Map<String, dynamic>.from(v as Map)),
+       );
 
   /// Validate [data] against this schema.
   SchemaResponse validate(Map<String, dynamic> data) {
     // Work on a defensive copy; never mutate caller input.
     final input = Map<String, dynamic>.from(data);
-    final sanitized = Map<String, dynamic>.from(data);
+    final sanitized = <String, dynamic>{
+      for (final entry in data.entries)
+        if (allowUnknownKeys || _schema.containsKey(entry.key))
+          entry.key: entry.value,
+    };
     final errors = <String, String>{};
 
     for (final key in _schema.keys) {
@@ -219,7 +223,11 @@ class SchemaValidator {
           _putError(
             errors,
             key,
-            _msg(key, Rules.minLength, defaultMsg: '$key is too short (min $minLen)'),
+            _msg(
+              key,
+              Rules.minLength,
+              defaultMsg: '$key is too short (min $minLen)',
+            ),
           );
         }
         final maxLen = rules[Rules.maxLength];
@@ -227,7 +235,11 @@ class SchemaValidator {
           _putError(
             errors,
             key,
-            _msg(key, Rules.maxLength, defaultMsg: '$key is too long (max $maxLen)'),
+            _msg(
+              key,
+              Rules.maxLength,
+              defaultMsg: '$key is too long (max $maxLen)',
+            ),
           );
         }
       }
@@ -239,7 +251,11 @@ class SchemaValidator {
           _putError(
             errors,
             key,
-            _msg(key, Rules.minItems, defaultMsg: '$key needs at least $minItems item(s)'),
+            _msg(
+              key,
+              Rules.minItems,
+              defaultMsg: '$key needs at least $minItems item(s)',
+            ),
           );
         }
         final maxItems = rules[Rules.maxItems];
@@ -247,7 +263,11 @@ class SchemaValidator {
           _putError(
             errors,
             key,
-            _msg(key, Rules.maxItems, defaultMsg: '$key allows at most $maxItems item(s)'),
+            _msg(
+              key,
+              Rules.maxItems,
+              defaultMsg: '$key allows at most $maxItems item(s)',
+            ),
           );
         }
       }
@@ -275,27 +295,47 @@ class SchemaValidator {
       }
 
       if (_asBool(rules[Rules.url]) == true) {
-        final ok = value is String && Uri.tryParse(value)?.hasAbsolutePath == true;
+        final uri = value is String ? Uri.tryParse(value) : null;
+        final ok =
+            uri != null &&
+            ['http', 'https'].contains(uri.scheme) &&
+            uri.host.isNotEmpty;
         if (!ok) {
-          _putError(errors, key, _msg(key, Rules.url, defaultMsg: '$key is not a valid URL'));
+          _putError(
+            errors,
+            key,
+            _msg(key, Rules.url, defaultMsg: '$key is not a valid URL'),
+          );
         }
       }
 
       if (_asBool(rules[Rules.uuid]) == true) {
         if (!(value is String && _uuidRegex.hasMatch(value))) {
-          _putError(errors, key, _msg(key, Rules.uuid, defaultMsg: '$key is not a valid UUID'));
+          _putError(
+            errors,
+            key,
+            _msg(key, Rules.uuid, defaultMsg: '$key is not a valid UUID'),
+          );
         }
       }
 
       if (_asBool(rules[Rules.ipv4]) == true) {
         if (!(value is String && _ipv4Regex.hasMatch(value))) {
-          _putError(errors, key, _msg(key, Rules.ipv4, defaultMsg: '$key is not a valid IPv4'));
+          _putError(
+            errors,
+            key,
+            _msg(key, Rules.ipv4, defaultMsg: '$key is not a valid IPv4'),
+          );
         }
       }
 
       if (_asBool(rules[Rules.ipv6]) == true) {
-        if (!(value is String && _ipv6Regex.hasMatch(value))) {
-          _putError(errors, key, _msg(key, Rules.ipv6, defaultMsg: '$key is not a valid IPv6'));
+        if (!(value is String && _isIpv6(value))) {
+          _putError(
+            errors,
+            key,
+            _msg(key, Rules.ipv6, defaultMsg: '$key is not a valid IPv6'),
+          );
         }
       }
 
@@ -306,7 +346,11 @@ class SchemaValidator {
           _putError(
             errors,
             key,
-            _msg(key, Rules.pattern, defaultMsg: '$key does not match required pattern'),
+            _msg(
+              key,
+              Rules.pattern,
+              defaultMsg: '$key does not match required pattern',
+            ),
           );
         }
       }
@@ -339,25 +383,46 @@ class SchemaValidator {
       // ---------- date & boundaries ----------
       if (_asBool(rules[Rules.date]) == true) {
         if (!(value is String && _isParsableDate(value))) {
-          _putError(errors, key, _msg(key, Rules.date, defaultMsg: '$key is not a valid date'));
+          _putError(
+            errors,
+            key,
+            _msg(key, Rules.date, defaultMsg: '$key is not a valid date'),
+          );
         } else {
           final dt = DateTime.parse(value);
           final before = rules[Rules.before];
           final after = rules[Rules.after];
-          if (before is String && _isParsableDate(before) && !(dt.isBefore(DateTime.parse(before)))) {
-            _putError(errors, key, _msg(key, Rules.before, defaultMsg: '$key must be before $before'));
+          if (before is String &&
+              _isParsableDate(before) &&
+              !(dt.isBefore(DateTime.parse(before)))) {
+            _putError(
+              errors,
+              key,
+              _msg(
+                key,
+                Rules.before,
+                defaultMsg: '$key must be before $before',
+              ),
+            );
           }
-          if (after is String && _isParsableDate(after) && !(dt.isAfter(DateTime.parse(after)))) {
-            _putError(errors, key, _msg(key, Rules.after, defaultMsg: '$key must be after $after'));
+          if (after is String &&
+              _isParsableDate(after) &&
+              !(dt.isAfter(DateTime.parse(after)))) {
+            _putError(
+              errors,
+              key,
+              _msg(key, Rules.after, defaultMsg: '$key must be after $after'),
+            );
           }
         }
       }
 
       // ---------- custom function ----------
       final custom = rules[Rules.custom];
-      if (custom is String Function(dynamic value, Map<String, dynamic> data)) {
+      if (custom
+          is String? Function(dynamic value, Map<String, dynamic> data)) {
         final msg = custom(value, input);
-        if (msg.isNotEmpty) {
+        if (msg != null && msg.isNotEmpty) {
           _putError(errors, key, _msg(key, Rules.custom, defaultMsg: msg));
         }
       }
@@ -370,9 +435,9 @@ class SchemaValidator {
 
     return SchemaResponse(
       valid: errors.isEmpty,
-      data: input,
-      schema: sanitized,
-      errors: errors,
+      data: Map.unmodifiable(input),
+      schema: Map.unmodifiable(sanitized),
+      errors: Map.unmodifiable(errors),
     );
   }
 
@@ -398,6 +463,7 @@ class SchemaValidator {
   }
 
   bool _isOfType(dynamic value, dynamic expected) {
+    if (expected is bool Function(dynamic)) return expected(value);
     if (expected is Type) {
       if (expected == num) return value is num;
       if (expected == int) return value is int;
@@ -406,8 +472,8 @@ class SchemaValidator {
       if (expected == bool) return value is bool;
       if (expected == List) return value is List;
       if (expected == Map) return value is Map;
-      // Allow subclasses for custom types:
-      return value.runtimeType == expected || value.runtimeType.toString() == expected.toString();
+      // For subtype checks, supply a typed predicate instead.
+      return value.runtimeType == expected;
     } else if (expected is Iterable<Type>) {
       // Accept any of the listed types.
       for (final t in expected) {
@@ -415,13 +481,34 @@ class SchemaValidator {
       }
       return false;
     }
-    return true; // if unspecified or unsupported, don't fail type
+    throw ArgumentError.value(
+      expected,
+      'type',
+      'Use a Type, Iterable<Type>, or bool predicate',
+    );
   }
 
   bool _isParsableDate(String s) {
     try {
       DateTime.parse(s);
-      return true;
+      final date = RegExp(
+        r'^(\d{4})-(\d{2})-(\d{2})(?:[Tt ](\d{2})(?::?(\d{2}))?(?::?(\d{2}))?)?',
+      ).firstMatch(s);
+      if (date == null) return false;
+      for (final bound in const [(4, 23), (5, 59), (6, 59)]) {
+        final component = date[bound.$1];
+        if (component != null && int.parse(component) > bound.$2) {
+          return false;
+        }
+      }
+      final calendar = DateTime(
+        int.parse(date[1]!),
+        int.parse(date[2]!),
+        int.parse(date[3]!),
+      );
+      return calendar.year == int.parse(date[1]!) &&
+          calendar.month == int.parse(date[2]!) &&
+          calendar.day == int.parse(date[3]!);
     } catch (_) {
       return false;
     }
@@ -455,11 +542,42 @@ class SchemaValidator {
   static final RegExp _phoneE164Regex = RegExp(r'^\+?[1-9]\d{6,14}$');
 
   static final RegExp _uuidRegex = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  );
 
-  static final RegExp _ipv4Regex =
-  RegExp(r'^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$');
+  static final RegExp _ipv4Regex = RegExp(
+    r'^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$',
+  );
 
-  // very permissive IPv6 (covers most cases)
-  static final RegExp _ipv6Regex = RegExp(r'^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$');
+  // IPv6 syntax, including compressed addresses and final embedded IPv4.
+  // Zone IDs are deliberately outside this schema rule.
+  bool _isIpv6(String value) {
+    if (value.isEmpty || value.contains('%')) return false;
+    final compressed = value.contains('::');
+    if (compressed && value.indexOf('::') != value.lastIndexOf('::')) {
+      return false;
+    }
+    var source = value;
+    var ipv4Groups = 0;
+    if (source.contains('.')) {
+      final separator = source.lastIndexOf(':');
+      if (separator < 0 ||
+          !_ipv4Regex.hasMatch(source.substring(separator + 1))) {
+        return false;
+      }
+      source = '${source.substring(0, separator + 1)}ffff';
+      ipv4Groups = 1;
+    }
+    final halves = source.split('::');
+    final groups = <String>[];
+    for (final half in halves) {
+      if (half.isEmpty && compressed) continue;
+      groups.addAll(half.split(':'));
+    }
+    if (groups.any((group) => !RegExp(r'^[a-fA-F0-9]{1,4}$').hasMatch(group))) {
+      return false;
+    }
+    final count = groups.length + ipv4Groups;
+    return compressed ? count < 8 : count == 8;
+  }
 }

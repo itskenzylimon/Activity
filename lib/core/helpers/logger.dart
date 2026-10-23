@@ -5,12 +5,39 @@ import 'package:flutter/foundation.dart' show kReleaseMode, debugPrint, kIsWeb;
 enum LogLevel { error, warn, info, success, normal }
 
 /// Central logger with color + formatting controls.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#helpers).
+/// Browser consoles omit ANSI colors; release logging defaults to disabled.
+///
+/// ### Configure development messages
+///
+/// <!-- activity-snippet: logger-development-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final logger = Logger(printInRelease: false, enableColors: false);
+///   logger.info('Ready'); // No user records or credentials in diagnostics.
+/// }
+/// ```
+///
+/// ### Silence optional diagnostics
+///
+/// <!-- activity-snippet: logger-development-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final logger = Logger(enabled: false);
+///   logger.warn('This optional diagnostic is disabled.');
+/// }
+/// ```
 class Logger {
   Logger({
     this.enabled = true,
     this.includeTimestamp = true,
     this.enableColors = true,
-    this.printInRelease = true,
+    this.printInRelease = false,
     this.nameWidth = 14,
   });
 
@@ -56,12 +83,12 @@ class Logger {
   }
 
   void log(
-      LogLevel level,
-      String message, {
-        String name = '',
-        Object? error,
-        StackTrace? stackTrace,
-      }) {
+    LogLevel level,
+    String message, {
+    String name = '',
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
     if (!enabled) return;
     if (kReleaseMode && !printInRelease) return;
 
@@ -84,8 +111,18 @@ class Logger {
   }
 
   // Convenience wrappers
-  void error(String text, {String name = '📕 error', Object? error, StackTrace? stackTrace}) =>
-      log(LogLevel.error, text, name: name, error: error, stackTrace: stackTrace);
+  void error(
+    String text, {
+    String name = '📕 error',
+    Object? error,
+    StackTrace? stackTrace,
+  }) => log(
+    LogLevel.error,
+    text,
+    name: name,
+    error: error,
+    stackTrace: stackTrace,
+  );
 
   void success(String text, {String name = '📗 success'}) =>
       log(LogLevel.success, text, name: name);
@@ -126,8 +163,17 @@ class Logger {
 /// Keep your existing API.
 /// ---------------------------
 
-void printError(dynamic text, {String name = '📕: error', Object? error, StackTrace? stackTrace}) =>
-    Logger.instance.error(text.toString(), name: name, error: error, stackTrace: stackTrace);
+void printError(
+  dynamic text, {
+  String name = '📕: error',
+  Object? error,
+  StackTrace? stackTrace,
+}) => Logger.instance.error(
+  text.toString(),
+  name: name,
+  error: error,
+  stackTrace: stackTrace,
+);
 
 void printSuccess(dynamic text, {String name = '📙: success'}) =>
     Logger.instance.success(text.toString(), name: name);

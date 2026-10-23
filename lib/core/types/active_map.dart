@@ -1,15 +1,71 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// An [ActiveMap] with similar characteristics as a an
-/// ordinary dart List object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// Observable keyed data and immutable shallow snapshots.
 ///
-/// Has similar characteristics as int and The value cannot be null
-
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#collections) · browser route `/#/collections`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Set and initialize entries
+///
+/// <!-- activity-snippet: class-activemap-k-v-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveMap<String, int>({'saved': 1});
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.setEntry('saved', 2);
+///     controller.value.putIfAbsent('pending', () => 3);
+///     assert(controller.value['pending'] == 3);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Transform a snapshot
+///
+/// <!-- activity-snippet: class-activemap-k-v-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveMap<String, int>({'saved': 1});
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     final labels = controller.value.mapEntries(
+///       (key, value) => MapEntry(key, '$value item(s)'),
+///     );
+///     assert(labels['saved'] == '1 item(s)');
+///     assert(controller.value.snapshotValue['saved'] == 1);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
 class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   ActiveMap(super.value, {super.typeName}) {
     _originalValue = Map<K, V>.from(value);
   }
+
+  @override
+  Map<K, V> snapshot(Map<K, V> value) => Map<K, V>.from(value);
+
+  @override
+  Map<K, V> eventSnapshot(Map<K, V> value) => Map<K, V>.unmodifiable(value);
 
   ///Factory constructor for initializing an [ActiveMap] to an empty [Map].
   ///
@@ -64,11 +120,14 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   ///
   /// If a key of [other] is already in this map, its value is overwritten.
   void addAll(Map<K, V> other, {bool notifyActivities = true}) {
+    other = Map<K, V>.unmodifiable(other);
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.addAll(other);
 
     if (notifyActivities) {
       activeController.notifyActivities([
-        ActiveStateChanged.addActiveMap(other, typeName: typeName)
+        ActiveStateChanged.addActiveMap(other, typeName: typeName),
       ]);
     }
   }
@@ -78,12 +137,17 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// If the key of [entry] is already in this map,
   /// the corresponding value is overwritten.
   void addEntry(MapEntry<K, V> entry, {bool notifyActivities = true}) {
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.addEntries([entry]);
 
     if (notifyActivities) {
       activeController.notifyActivities([
-        ActiveStateChanged.entryActiveMap(entry.key, entry.value,
-            typeName: typeName)
+        ActiveStateChanged.entryActiveMap(
+          entry.key,
+          entry.value,
+          typeName: typeName,
+        ),
       ]);
     }
   }
@@ -106,14 +170,18 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// // {1: Mercury, 2: Venus, 3: Earth, 4: Mars, 5: Jupiter, 6: Saturn,
   /// //  7: Uranus, 8: Neptune}
   /// ```
-  void addEntries(Iterable<MapEntry<K, V>> entries,
-      {bool notifyActivities = true}) {
+  void addEntries(
+    Iterable<MapEntry<K, V>> entries, {
+    bool notifyActivities = true,
+  }) {
+    entries = List<MapEntry<K, V>>.unmodifiable(entries);
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.addEntries(entries);
 
     if (notifyActivities) {
       activeController.notifyActivities([
-        ActiveStateChanged.entriesActiveMap(entries,
-            typeName: typeName)
+        ActiveStateChanged.entriesActiveMap(entries, typeName: typeName),
       ]);
     }
   }
@@ -123,11 +191,13 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// If the [key] is already in this map,
   /// the corresponding value is overwritten.
   void add(K key, V value, {bool notifyActivities = true}) {
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.addEntries([MapEntry<K, V>(key, value)]);
 
     if (notifyActivities) {
       activeController.notifyActivities([
-        ActiveStateChanged.entryActiveMap(key, value, typeName: typeName)
+        ActiveStateChanged.entryActiveMap(key, value, typeName: typeName),
       ]);
     }
   }
@@ -156,9 +226,15 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// largestPlanets.update(8, (value) => 'New', ifAbsent: () => 'Mercury');
   /// print(largestPlanets); // {1: Jupiter, 2: Saturn, 3: Neptune, 8: Mercury}
   /// ```
-  V update(K key, V Function(V value) update,
-      {V Function()? ifAbsent, bool notifyActivities = true}) {
+  V update(
+    K key,
+    V Function(V value) update, {
+    V Function()? ifAbsent,
+    bool notifyActivities = true,
+  }) {
     final originalValue = _value[key];
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     final updatedValue = _value.update(key, update, ifAbsent: ifAbsent);
 
     if (notifyActivities) {
@@ -168,11 +244,10 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
           originalValue,
           updatedValue,
           typeName: typeName,
-        )
+        ),
       ]);
     }
-    print("???????");
-    print(updatedValue);
+
     return updatedValue;
   }
 
@@ -185,19 +260,25 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// terrestrial.updateAll((key, value) => value.toUpperCase());
   /// print(terrestrial); // {1: MERCURY, 2: VENUS, 3: EARTH}
   /// ```
-  void updateAll(V Function(K key, V value) update,
-      {bool notifyActivities = true}) {
+  void updateAll(
+    V Function(K key, V value) update, {
+    bool notifyActivities = true,
+  }) {
     final stateChangedEvents = <ActiveStateChanged<V>>[];
 
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.updateAll((key, value) {
       final oldValue = value;
       final updatedValue = update(key, value);
-      stateChangedEvents.add(ActiveStateChanged.updateActiveMap(
-        key,
-        oldValue,
-        updatedValue,
-        typeName: typeName,
-      ));
+      stateChangedEvents.add(
+        ActiveStateChanged.updateActiveMap(
+          key,
+          oldValue,
+          updatedValue,
+          typeName: typeName,
+        ),
+      );
       return updatedValue;
     });
 
@@ -219,6 +300,8 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// print(terrestrial); // {1: Mercury, 3: Earth}
   /// ```
   V? remove(K key, {bool notifyActivities = true}) {
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     final removedValue = _value.remove(key);
 
     if (notifyActivities) {
@@ -227,7 +310,7 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
           key,
           removedValue,
           typeName: typeName,
-        )
+        ),
       ]);
     }
 
@@ -240,19 +323,21 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// terrestrial.removeWhere((key, value) => value.startsWith('E'));
   /// print(terrestrial); // {1: Mercury, 2: Venus}
   /// ```
-  void removeWhere(bool Function(K key, V value) test,
-      {bool notifyActivities = true}) {
+  void removeWhere(
+    bool Function(K key, V value) test, {
+    bool notifyActivities = true,
+  }) {
     final stateChangedEvents = <ActiveStateChanged<V>>[];
 
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.removeWhere((key, value) {
       final shouldRemove = test(key, value);
 
       if (shouldRemove) {
-        stateChangedEvents.add(ActiveStateChanged.removedActiveMap(
-          key,
-          value,
-          typeName: typeName,
-        ));
+        stateChangedEvents.add(
+          ActiveStateChanged.removedActiveMap(key, value, typeName: typeName),
+        );
       }
 
       return shouldRemove;
@@ -271,9 +356,14 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   /// planets.clear(); // {}
   /// ```
   void clear({bool notifyActivities = true}) {
-    final stateChangedEvent =
-        ActiveStateChanged(<K, V>{}, _value, typeName: typeName);
+    final stateChangedEvent = ActiveStateChanged(
+      <K, V>{},
+      Map<K, V>.unmodifiable(_value),
+      typeName: typeName,
+    );
 
+    ensureCanMutate();
+    if (notifyActivities) activeController;
     _value.clear();
 
     if (notifyActivities) {
@@ -307,8 +397,7 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
 
   /// Returns a new map where all entries of this map are transformed by
   /// the given [convert] function.
-  Map<K2, V2> map<K2, V2>(
-          MapEntry<K2, V2> Function(dynamic, dynamic) convert) =>
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> Function(K, V) convert) =>
       _value.map(convert);
 
   /// Applies [action] to each key/value pair of the map.
@@ -326,8 +415,7 @@ class ActiveMap<K, V> extends ActiveType<Map<K, V>> {
   ///   // 17.15: Neptune
   /// });
   /// ```
-  void forEach(void Function(dynamic, dynamic) action) =>
-      _value.forEach(action);
+  void forEach(void Function(K, V) action) => _value.forEach(action);
 
   V? operator [](K key) {
     return _value[key];

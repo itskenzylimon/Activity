@@ -1,9 +1,7 @@
 import 'package:activity/core/src/state.dart';
 
-
 /// [ActiveStateHelper]
 extension ActiveStateHelper<T> on List<ActiveStateChanged<T>> {
-
   /// [hasTypeName]
   /// Checks if a [typeName] is found.
   bool hasTypeName(String typeName) {
@@ -33,6 +31,6 @@ extension ActiveStateHelper<T> on List<ActiveStateChanged<T>> {
   /// [ActiveStateChanged.typeName] that matches typeName
 
   T? oldActiveTypeValue(String typeName) {
-    return firstActiveType(typeName)?.newValue;
+    return firstActiveType(typeName)?.oldValue;
   }
 }

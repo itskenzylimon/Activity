@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:activity/activity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -18,74 +19,129 @@ class Activator<T extends ActiveController> extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant Activator oldWidget) {
-    return oldWidget._trackID != _trackID;
+    return oldWidget._trackID != _trackID ||
+        !identical(oldWidget.activeController(), activeController());
   }
 }
 
-/// [Activity] :
-/// Brings shared state to your application.
+/// Expose an existing shared controller to descendant consumers.
 ///
-/// [activeController] : controller needed for state rebuilds when an [ActiveType]
-/// [child] : is the widget intended to be rendered.
-/// [onActivityStateChanged] : this function is called whenever an [ActiveType] is
-/// updated on the state. Gets [Activity] inherited widget needs to be updated.
-/// The _trackId needs to be updated uniquely to allow UI rebuilds to happen,
-/// if you update with the same value a UI rebuild wont happen
-/// [developerMode] : this is a flag that is responsible in debug print
+/// Create the controller outside build. Descendants borrow it; the owner disposes it. Replacing the controller rebinds scope subscriptions. Widget examples require Flutter, including Flutter web, rather than a plain Dart console.
 ///
-///### Example Using Timestamp
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#start) · browser route `/#/start`.
+/// These examples use the current checkout; published 1.x APIs can differ.
 ///
-///```dart
+/// ### Share a controller through a scope
 ///
-///      Activity(
-///         BaseController(),
-///         onActivityStateChanged: ()=>
-///             DateTime.now().microsecondsSinceEpoch.toString(),
-///         child: TaskView(
-///           activeController: BaseController(),
-///         ),
-///       ),
+/// <!-- activity-snippet: class-activity-t-1 -->
+/// ```dart
+/// import 'dart:async';
+/// import 'package:activity/activity.dart';
+/// import 'package:flutter/material.dart';
 ///
-///```
-///
-///
-///```dart
-/// class MyApp extends StatelessWidget {
-///   const MyApp({super.key});
-///  @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       title: 'Activity Task App',
-///       theme: ThemeData(primarySwatch: Colors.blue),
-///       home: Activity(
-///         BaseController(),
-///         onActivityStateChanged: ()=>
-///             DateTime.now().microsecondsSinceEpoch.toString(),
-///         child: TaskView(
-///           activeController: BaseController(),
-///         ),
-///       ),
-///     );
-///   }
+/// class CounterController extends ActiveController {
+///   final count = ActiveInt(0);
+///   @override
+///   Iterable<ActiveType> get activities => [count];
 /// }
 ///
-///```
+/// void main() => runApp(const MaterialApp(home: CounterOwner()));
+///
+/// class CounterOwner extends StatefulWidget {
+///   const CounterOwner({super.key});
+///   @override
+///   State<CounterOwner> createState() => _CounterOwnerState();
+/// }
+///
+/// class _CounterOwnerState extends State<CounterOwner> {
+///   final controller = CounterController();
+///   @override
+///   void dispose() {
+///     unawaited(controller.dispose());
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) => Scaffold(
+///     body: Activity<CounterController>(
+///       controller,
+///       child: Builder(
+///         builder: (context) {
+///           final shared = Activity.getActivity<CounterController>(context);
+///           return TextButton(
+///             onPressed: shared.count.increment,
+///             child: Text('Count ${shared.count.value}'),
+///           );
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+///
+/// ### Combine a scope and selective view
+///
+/// <!-- activity-snippet: class-activity-t-2 -->
+/// ```dart
+/// import 'dart:async';
+/// import 'package:activity/activity.dart';
+/// import 'package:flutter/material.dart';
+///
+/// class CounterController extends ActiveController {
+///   final count = ActiveInt(0);
+///   @override
+///   Iterable<ActiveType> get activities => [count];
+/// }
+///
+/// void main() => runApp(const MaterialApp(home: CounterOwner()));
+///
+/// class CounterOwner extends StatefulWidget {
+///   const CounterOwner({super.key});
+///   @override
+///   State<CounterOwner> createState() => _CounterOwnerState();
+/// }
+///
+/// class _CounterOwnerState extends State<CounterOwner> {
+///   final controller = CounterController();
+///   @override
+///   void dispose() {
+///     unawaited(controller.dispose());
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) => Scaffold(
+///     body: Activity<CounterController>(
+///       controller,
+///       child: ActivitySelector<CounterController, int>(
+///         controller: controller,
+///         select: (c) => c.count.value,
+///         builder:
+///             (_, count, child) => TextButton(
+///               onPressed: controller.count.increment,
+///               child: Text('Count $count'),
+///             ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
 class Activity<T extends ActiveController> extends StatefulWidget {
   final T activeController;
   final Widget child;
-  final String Function() onActivityStateChanged;
+  final String Function()? onActivityStateChanged;
   final bool developerMode;
 
   const Activity(
     this.activeController, {
     Key? key,
     required this.child,
-    required this.onActivityStateChanged,
+    this.onActivityStateChanged,
     this.developerMode = false,
   }) : super(key: key);
 
   @override
-  State<Activity> createState() => _ActivityState<T>();
+  State<Activity<T>> createState() => _ActivityState<T>();
 
   ///Gets the instance of the [Activator] that matches the generic type argument [T].
   ///
@@ -101,8 +157,8 @@ class Activity<T extends ActiveController> extends StatefulWidget {
   static Activator<T> of<T extends ActiveController>(BuildContext context) {
     final Activator<T>? result =
         context.dependOnInheritedWidgetOfExactType<Activator<T>>();
-    assert(result != null, 'No Activity found in context');
-    return result!;
+    if (result == null) throw StateError('No Activity<$T> found in context');
+    return result;
   }
 
   /// Gets the current Controller based on the [Activator] and context.
@@ -116,13 +172,19 @@ class Activity<T extends ActiveController> extends StatefulWidget {
   }
 }
 
-class _ActivityState<T extends ActiveController> extends State<Activity> {
+class _ActivityState<T extends ActiveController> extends State<Activity<T>> {
+  StreamSubscription? _subscription;
+  int _revision = 0;
   String? _applicationStateId;
 
   @override
   void initState() {
-    /// listen to the controller state changes
-    widget.activeController.addOnStateChangedListener((events) {
+    super.initState();
+    _subscribe();
+  }
+
+  void _subscribe() {
+    _subscription = widget.activeController.addOnStateChangedListener((events) {
       if (widget.developerMode && kDebugMode) {
         for (var event in events) {
           printInfo(event);
@@ -130,21 +192,39 @@ class _ActivityState<T extends ActiveController> extends State<Activity> {
       }
       if (mounted) {
         setState(() {
-          _applicationStateId = widget.onActivityStateChanged();
+          _applicationStateId =
+              widget.onActivityStateChanged?.call() ?? "${++_revision}";
         });
       }
     });
-    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant Activity<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.activeController, widget.activeController)) {
+      unawaited(oldWidget.activeController.cancelSubscription(_subscription));
+      _subscribe();
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(widget.activeController.cancelSubscription(_subscription));
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = widget.activeController;
     return Activator<T>(
       _applicationStateId,
-      activeController: <E extends ActiveController>() => widget.activeController as E,
-      child: Builder(builder: (context) {
-        return widget.child;
-      }),
+      activeController: () => controller,
+      child: Builder(
+        builder: (context) {
+          return widget.child;
+        },
+      ),
     );
   }
 }

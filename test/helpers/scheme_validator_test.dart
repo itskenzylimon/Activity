@@ -51,7 +51,7 @@ void main() {
 
     test('validates pattern rule', () {
       final validator = SchemaValidator({
-        'code': {'type': String, 'pattern': r'^ABC\\d+\$'},
+        'code': {'type': String, 'pattern': r'^ABC\d+$'},
       });
 
       final bad = validator.validate({'code': 'XYZ123'});
@@ -95,11 +95,7 @@ void main() {
 
     test('validates date rules', () {
       final validator = SchemaValidator({
-        'start': {
-          'date': true,
-          'before': '2030-01-01',
-          'after': '2020-01-01',
-        },
+        'start': {'date': true, 'before': '2030-01-01', 'after': '2020-01-01'},
       });
 
       final badFormat = validator.validate({'start': 'not-a-date'});
@@ -123,16 +119,22 @@ void main() {
       final empty = validator.validate({'tags': []});
       expect(empty.valid, isFalse);
 
-      final tooMany = validator.validate({'tags': [1, 2, 3, 4]});
+      final tooMany = validator.validate({
+        'tags': [1, 2, 3, 4],
+      });
       expect(tooMany.valid, isFalse);
 
-      final ok = validator.validate({'tags': [1, 2]});
+      final ok = validator.validate({
+        'tags': [1, 2],
+      });
       expect(ok.valid, isTrue);
     });
 
     test('validates includes rule', () {
       final validator = SchemaValidator({
-        'role': {'in': ['admin', 'user']},
+        'role': {
+          'in': ['admin', 'user'],
+        },
       });
 
       final bad = validator.validate({'role': 'guest'});
@@ -146,8 +148,8 @@ void main() {
       final validator = SchemaValidator({
         'username': {
           'type': String,
-          'custom': (value, data) =>
-          value == 'admin' ? 'username is reserved' : null
+          'custom':
+              (value, data) => value == 'admin' ? 'username is reserved' : null,
         },
       });
 
@@ -197,7 +199,7 @@ void main() {
     });
 
     test('SchemaResponse toString shows readable output', () {
-      final response = SchemaResponse(
+      const response = SchemaResponse(
         valid: false,
         data: {'x': 1},
         schema: {},

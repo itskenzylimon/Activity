@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -42,3 +44,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Temporary browser test SQLite fixtures (tool/test_web.dart).
+/test/.web-assets/
+
+# Local browser/compiler output and developer overrides.
+coverage/
+.env
+.env.*
+pubspec_overrides.yaml
+web/*.js.deps
+web/*.js.map

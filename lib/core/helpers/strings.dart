@@ -1,3 +1,34 @@
+/// String transformations useful for search, display labels and identifiers.
+///
+/// Helpers transform strings; they are not HTML sanitizers, escaping or security validators.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#helpers) · browser route `/#/helpers`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Normalize a search term
+///
+/// <!-- activity-snippet: extension-superstring-on-string-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   final query = '  Hello   Activity  '.collapseWhitespace;
+///   assert(query == 'Hello Activity');
+///   assert(query.snakeCase == 'hello_activity');
+/// }
+/// ```
+///
+/// ### Extract and shorten display text
+///
+/// <!-- activity-snippet: extension-superstring-on-string-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// void main() {
+///   assert('task[id:42]'.between('[', ']') == 'id:42');
+///   assert('A long description'.truncate(8).length == 8);
+/// }
+/// ```
 extension SuperString on String {
   // ---------------------------------------------------------------------------
   // Case checks

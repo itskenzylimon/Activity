@@ -1,84 +1,65 @@
 import 'package:flutter/material.dart';
 
-///[static] class that is responsible for holding navigation abstract widget functions
+/// Typed imperative navigation, interoperable with Flutter's Navigator.
 class Nav {
-  ///[static] function for navigating to a given route
-   ///final args = getArguments(); -> to get arguments from previous screen
-   ///arguments are of type Objects so any arguments of any type are accepted
-  ///this represents push  with context, page -> class name of the
- /// page you want to navigate to and arguments as parameters
-  static to(BuildContext context, Widget Function() page, [final Object? arguments]) =>
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => page(),
-          settings: RouteSettings(
-            arguments: arguments ?? {},
-          ),
-        ),
-      );
-  //Push with a named route
-  static pushNamed(BuildContext context, String routeName, [final Object? arguments]) =>
-      Navigator.pushNamed(
-        context,
-       routeName,
-        arguments: arguments ?? {},
-      );
+  static Future<T?> to<T>(
+    BuildContext context,
+    Widget Function() page, [
+    Object? arguments,
+  ]) => Navigator.push<T>(
+    context,
+    MaterialPageRoute<T>(
+      builder: (_) => page(),
+      settings: RouteSettings(arguments: arguments),
+    ),
+  );
 
-  ///create predicate route
-  static Route<dynamic> predicateRoute(BuildContext context, predicate) {
-    return MaterialPageRoute(builder: (context) {
-      return predicate();
-    });
-  }
+  static Future<T?> pushNamed<T>(
+    BuildContext context,
+    String routeName, [
+    Object? arguments,
+  ]) => Navigator.pushNamed<T>(context, routeName, arguments: arguments);
 
-  ///[static] pops routes until given route
-   ///final args = getArguments(); -> to get arguments from previous screen
- ///arguments are of type Objects so any arguments of any type are accepted
- ///this represents pushAndRemoveUntil  with context, page -> class name of the
- /// page you want to navigate to and arguments as parameters
-  static pushUntil(BuildContext context, Widget Function() page, Widget Function() predicate,
-          [final Object? arguments]) =>
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page(),
-            settings: RouteSettings(
-              arguments: arguments ?? {},
-            ),
-          ), (Route<dynamic> route) {
-        Route<dynamic> myRoute = predicateRoute(context, predicate());
-        if (route == myRoute) {
-          return true;
-        }
-        return false;
-      });
+  static Future<T?> pushUntil<T>(
+    BuildContext context,
+    Widget Function() page,
+    RoutePredicate predicate, [
+    Object? arguments,
+  ]) => Navigator.pushAndRemoveUntil<T>(
+    context,
+    MaterialPageRoute<T>(
+      builder: (_) => page(),
+      settings: RouteSettings(arguments: arguments),
+    ),
+    predicate,
+  );
 
-  ///[static] function for replacing current route with the provided route
-   ///final args = getArguments(); -> to get arguments from previous screen
- ///arguments are of type Objects so any arguments of any type are accepted
- ///this represents pushReplacement  with context, page -> class name of the
- /// page you want to navigate to and arguments as parameters
-  static offAll(BuildContext context, Widget Function() page, [final Object? arguments]) =>
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => page(),
-          // Pass the arguments as part of the RouteSettings. The
-          // DetailScreen reads the arguments from these settings.
-          settings: RouteSettings(
-            arguments: arguments ?? {},
-          ),
-        ),
-      );
+  /// Clears the complete previous stack.
+  static Future<T?> offAll<T>(
+    BuildContext context,
+    Widget Function() page, [
+    Object? arguments,
+  ]) => pushUntil<T>(context, page, (_) => false, arguments);
 
-  ///[static] function for navigating off apage
-  ///final args = getArguments(); -> to get arguments from previous screen
-    ///arguments are of type Objects so any arguments of any type are accepted
-    ///this represents pop off a screen or dialog with context and back params as arguments
-  static off(BuildContext context, [final Object? backParams]) =>
-      Navigator.pop(context, backParams);
+  static Future<T?> replace<T, TO>(
+    BuildContext context,
+    Widget Function() page, {
+    Object? arguments,
+    TO? result,
+  }) => Navigator.pushReplacement<T, TO>(
+    context,
+    MaterialPageRoute<T>(
+      builder: (_) => page(),
+      settings: RouteSettings(arguments: arguments),
+    ),
+    result: result,
+  );
 
-  ///[arguments] function to get arguments from previous screnn
-  static getArguments(BuildContext context) => ModalRoute.of(context)!.settings.arguments;
+  static void off<T>(BuildContext context, [T? backParams]) =>
+      Navigator.pop<T>(context, backParams);
+  static Future<bool> maybePop<T>(BuildContext context, [T? result]) =>
+      Navigator.maybePop<T>(context, result);
+  static Object? getArguments(BuildContext context) =>
+      ModalRoute.of(context)?.settings.arguments;
+  static T? argumentsOf<T>(BuildContext context) => getArguments(context) as T?;
 }

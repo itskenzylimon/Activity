@@ -1,21 +1,63 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// [ActiveBool]
-/// A strongly-typed reactive boolean property that is **non-nullable**.
+/// A non-nullable observable boolean.
 ///
-/// It notifies its [ActiveController] when updated,
-/// causing reactive widgets to rebuild.
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
 ///
-/// ### Example:
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Toggle a flag
+///
+/// <!-- activity-snippet: class-activebool-extends-1 -->
 /// ```dart
-/// final isVisible = ActiveBool(false);
-/// isVisible.setTrue();  // Sets to true and notifies listeners
-/// if (isVisible.isFalse) { ... }
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveBool(false);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.toggle();
+///     assert(controller.value.value);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Explicit state changes
+///
+/// <!-- activity-snippet: class-activebool-extends-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveBool(false);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.setTrue();
+///     controller.value.setFalse();
+///     assert(controller.value.isFalse);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
 /// ```
 class ActiveBool extends ActiveType<bool> {
-  ActiveBool(super.value, {super.typeName}) {
-    assert(value != null, '[ActiveBool] must be initialized with non-null value');
-  }
+  ActiveBool(super.value, {super.typeName});
+
+  void toggle({bool notifyChange = true}) =>
+      set(!value, notifyChange: notifyChange);
 
   /// Returns true if the current value is true.
   bool get isTrue => value;
@@ -32,18 +74,59 @@ class ActiveBool extends ActiveType<bool> {
       set(false, notifyChange: notifyChange);
 }
 
-/// [ActiveNullableBool]
-/// A reactive boolean property that **can be null**.
+/// Optional reactive values; constructors use named `value:` arguments.
 ///
-/// Behaves similarly to Dart's `bool?` and supports null safety,
-/// while maintaining the reactivity of [ActiveType].
+/// Check for null before calling operations requiring a value. The owner disposes the controller, not each wrapper.
 ///
-/// ### Example:
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Initialize absent data
+///
+/// <!-- activity-snippet: class-activenullablebool-extends-1 -->
 /// ```dart
-/// final isLoading = ActiveNullableBool();
-/// isLoading.setTrue();
-/// if (isLoading.isFalse) { ... }
-/// isLoading.setNull();
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveNullableBool();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     assert(controller.value.isNull);
+///     controller.value.setIfNull(() => true);
+///     assert(controller.value.value == true);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Clear and restore absence
+///
+/// <!-- activity-snippet: class-activenullablebool-extends-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveNullableBool();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value(true);
+///     controller.value.reset();
+///     assert(controller.value.value == null);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
 /// ```
 class ActiveNullableBool extends ActiveType<bool?> {
   ActiveNullableBool({bool? value, super.typeName}) : super(value);
@@ -55,6 +138,7 @@ class ActiveNullableBool extends ActiveType<bool?> {
   bool get isFalse => value == false;
 
   /// Returns true if the current value is null.
+  @override
   bool get isNull => value == null;
 
   /// Updates the value to true.

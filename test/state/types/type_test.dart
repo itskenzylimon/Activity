@@ -2,8 +2,6 @@ import 'package:activity/activity.dart';
 import 'package:activity/core/src/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: depend_on_referenced_packages
-import 'package:matcher/src/equals_matcher.dart' as match;
 
 class TypeTestController extends ActiveController {
   final ActiveType<String?> country = ActiveType(null);
@@ -14,10 +12,8 @@ class TypeTestController extends ActiveController {
 }
 
 class TypeTestView extends ActiveView<TypeTestController> {
-  const TypeTestView({
-    Key? key,
-    required TypeTestController activeController,
-  }) : super(key: key, activeController: activeController);
+  const TypeTestView({Key? key, required TypeTestController activeController})
+    : super(key: key, activeController: activeController);
 
   @override
   ActiveState<TypeTestView, TypeTestController> createActivity() {
@@ -67,13 +63,13 @@ void main() {
     test('Create ActiveType - passed value equals property value', () {
       const expectedValue = 10;
       final population = ActiveType<int>(expectedValue);
-      expect(population.value, match.equals(expectedValue));
+      expect(population.value, equals(expectedValue));
     });
 
     test('Create ActiveType - set optional typeName', () {
       const expectedValue = 'population';
       final population = ActiveType<int>(10, typeName: expectedValue);
-      expect(population.typeName, match.equals(expectedValue));
+      expect(population.typeName, equals(expectedValue));
     });
   });
 
@@ -100,13 +96,14 @@ void main() {
     });
 
     test(
-        'equals - other is ActiveType with different value - are not equal',
-            () {
-          final languages = ActiveType<int>(30);
-          final newLanguages = ActiveType<int>(5);
+      'equals - other is ActiveType with different value - are not equal',
+      () {
+        final languages = ActiveType<int>(30);
+        final newLanguages = ActiveType<int>(5);
 
-          expect(languages.equals(newLanguages), isFalse);
-        });
+        expect(languages.equals(newLanguages), isFalse);
+      },
+    );
 
     test('equals - other is ActiveType with same value - are equal', () {
       final languages = ActiveType<int>(99);
@@ -115,51 +112,55 @@ void main() {
       expect(languages.equals(newLanguages), isTrue);
     });
 
-    test('equality - other is ActiveType with same value - are equal', () {
+    test('equality - distinct wrappers with same value retain identity', () {
       final languages = ActiveType<int>(64);
       final newLanguages = ActiveType<int>(64);
 
-      expect(languages == newLanguages, isTrue);
+      expect(languages == newLanguages, isFalse);
     });
 
     test(
-        'equality - other is ActiveType with different value - are not equal',
-            () {
-          final languages = ActiveType<int>(46);
-          final newLanguages = ActiveType<int>(64);
+      'equality - other is ActiveType with different value - are not equal',
+      () {
+        final languages = ActiveType<int>(46);
+        final newLanguages = ActiveType<int>(64);
 
-          expect(languages == newLanguages, isFalse);
-        });
-
-    test(
-        'equality - other is same as ActiveType generic type argument with same value - are equal',
-            () {
-          final languages = ActiveType<int>(3);
-          const int newLanguages = 3;
-
-          // ignore: unrelated_type_equality_checks
-          expect(languages == newLanguages, isTrue);
-        });
+        expect(languages == newLanguages, isFalse);
+      },
+    );
 
     test(
-        'equality - other is same as ActiveType generic type argument with different value - are not equal',
-            () {
-          final languages = ActiveType<int>(10);
-          const int newLanguages = 5;
+      'equality - other is same as ActiveType generic type argument with same value - are equal',
+      () {
+        final languages = ActiveType<int>(3);
+        const int newLanguages = 3;
 
-          // ignore: unrelated_type_equality_checks
-          expect(languages == newLanguages, isFalse);
-        });
+        // ignore: unrelated_type_equality_checks
+        expect(languages == newLanguages, isFalse);
+      },
+    );
 
     test(
-        'equality - other is not ActiveType or generic type argument - are not equal',
-            () {
-          final languages = ActiveType<int>(45);
-          const String newLanguages = '40';
+      'equality - other is same as ActiveType generic type argument with different value - are not equal',
+      () {
+        final languages = ActiveType<int>(10);
+        const int newLanguages = 5;
 
-          // ignore: unrelated_type_equality_checks
-          expect(languages == newLanguages, isFalse);
-        });
+        // ignore: unrelated_type_equality_checks
+        expect(languages == newLanguages, isFalse);
+      },
+    );
+
+    test(
+      'equality - other is not ActiveType or generic type argument - are not equal',
+      () {
+        final languages = ActiveType<int>(45);
+        const String newLanguages = '40';
+
+        // ignore: unrelated_type_equality_checks
+        expect(languages == newLanguages, isFalse);
+      },
+    );
 
     test('isNull - value is null - returns true', () {
       final nullName = ActiveType<String?>(null);
@@ -182,71 +183,79 @@ void main() {
     });
 
     test(
-        'set - property not assigned to activeController - throws ActiveTypeNotAssignedException',
-            () {
-          final property = ActiveType<String?>(null);
+      'set - property not assigned to activeController - throws ActiveTypeNotAssignedException',
+      () {
+        final property = ActiveType<String?>(null);
 
-          expect(() => property('John Doe'),
-              throwsA(isA<ActiveTypeNotAssignedException>()));
-        });
+        expect(
+          () => property('John Doe'),
+          throwsA(isA<ActiveTypeNotAssignedException>()),
+        );
+      },
+    );
   });
 
   group('ActiveType Original Value Test Cases', () {
     test(
-        'setOriginalToCurrent - update original value - reset sets value to updated original ',
-            () {
-          const String expectedValue = 'John Doe';
-          final country = ActiveType<String?>(expectedValue, typeName: 'country');
-          country.setActiveController(activeController);
+      'setOriginalToCurrent - update original value - reset sets value to updated original ',
+      () {
+        const String expectedValue = 'John Doe';
+        final country = ActiveType<String?>(expectedValue, typeName: 'country');
+        country.setActiveController(activeController);
 
-          expect(country.value, match.equals(expectedValue));
+        expect(country.value, equals(expectedValue));
 
-          country('Jane Doe');
+        country('Jane Doe');
 
-          expect(country.value, match.equals('Jane Doe'));
+        expect(country.value, equals('Jane Doe'));
 
-          country.reset();
+        country.reset();
 
-          expect(country.value, match.equals(expectedValue));
-        });
-
-    test(
-        'setOriginalToCurrent - update original value - reset sets value to original null value',
-            () {
-          const String expectedValue = 'John Doe';
-          final country = ActiveType<String?>(null, typeName: 'country');
-          country.setActiveController(activeController);
-          country(expectedValue);
-
-          expect(country.value, match.equals(expectedValue));
-
-          country.reset();
-
-          expect(country.isNull, isTrue);
-        });
+        expect(country.value, equals(expectedValue));
+      },
+    );
 
     test(
-        'setAsOriginal - argument is false - original not set to current value',
-            () {
-          const String expected = 'John Doe';
-          final country = ActiveType<String?>(expected);
-          country.setActiveController(activeController);
+      'setOriginalToCurrent - update original value - reset sets value to original null value',
+      () {
+        const String expectedValue = 'John Doe';
+        final country = ActiveType<String?>(null, typeName: 'country');
+        country.setActiveController(activeController);
+        country(expectedValue);
 
-          country('Jane Doe', setAsOriginal: false);
+        expect(country.value, equals(expectedValue));
 
-          expect(country.originalValue, match.equals(expected));
-        });
+        country.reset();
 
-    test('setAsOriginal - argument is true - original is set to current value',
-            () {
-          const String expected = 'Jane Doe';
-          final country = ActiveType<String?>('John Doe');
-          country.setActiveController(activeController);
+        expect(country.isNull, isTrue);
+      },
+    );
 
-          country(expected, setAsOriginal: true);
+    test(
+      'setAsOriginal - argument is false - original not set to current value',
+      () {
+        const String expected = 'John Doe';
+        final country = ActiveType<String?>(expected);
+        country.setActiveController(activeController);
 
-          expect(country.originalValue, match.equals(expected));
-        });
+        country('Jane Doe', setAsOriginal: false);
+
+        expect(country.originalValue, equals(expected));
+      },
+    );
+
+    test(
+      'setAsOriginal - argument is true - original is set to current value',
+      () {
+        const String expected = 'Jane Doe';
+        final country = ActiveType<String?>('John Doe');
+        country.setActiveController(activeController);
+
+        country(expected, setAsOriginal: true);
+
+        expect(country.originalValue, equals(expected));
+      },
+    );
   });
 
   group('ActiveType Reset Test Cases', () {
@@ -268,23 +277,24 @@ void main() {
       expect(find.text("1"), findsOneWidget);
     });
 
-    testWidgets('reset - notifyChange is false - UI Does Not Update',
-            (tester) async {
-          await tester.pumpWidget(testWidget);
+    testWidgets('reset - notifyChange is false - UI Does Not Update', (
+      tester,
+    ) async {
+      await tester.pumpWidget(testWidget);
 
-          expect(find.text("1"), findsOneWidget);
+      expect(find.text("1"), findsOneWidget);
 
-          activeController.population(1000000);
+      activeController.population(1000000);
 
-          await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-          expect(find.text("1000000"), findsOneWidget);
+      expect(find.text("1000000"), findsOneWidget);
 
-          activeController.population.reset(notifyChange: false);
+      activeController.population.reset(notifyChange: false);
 
-          await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-          expect(find.text("1000000"), findsOneWidget);
-        });
+      expect(find.text("1000000"), findsOneWidget);
+    });
   });
 }

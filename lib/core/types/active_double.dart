@@ -1,17 +1,57 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// An [ActiveDouble] with similar characteristics as a an
-/// ordinary dart double object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// Observable decimal values and transformations.
 ///
-/// Has similar characteristics as double and The value cannot be null
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
 ///
-/// Example
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Update progress
+///
+/// <!-- activity-snippet: class-activedouble-extends-1 -->
 /// ```dart
+/// import 'package:activity/activity.dart';
 ///
-/// final amount = ActiveDouble(310.0);
+/// class SampleController extends ActiveController {
+///   final value = ActiveDouble(0.25);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
 ///
-/// print('${amount.add(0.10)}'); //prints 310.10
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.increment(0.5);
+///     assert(controller.value.value == 0.75);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Bound progress
+///
+/// <!-- activity-snippet: class-activedouble-extends-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveDouble(0.25);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value(1.5);
+///     controller.value.clampTo(0, 1);
+///     assert(controller.value.value == 1);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
 /// ```
 class ActiveDouble extends ActiveType<double> {
   ActiveDouble(super.value, {super.typeName});
@@ -27,7 +67,6 @@ class ActiveDouble extends ActiveType<double> {
   factory ActiveDouble.setToZero({String? typeName}) {
     return ActiveDouble(0, typeName: typeName);
   }
-
 
   /// A number is negative if it's smaller than zero, or if it is the double
   /// -0.0. This precludes a NaN value like double.nan from being negative.
@@ -146,44 +185,63 @@ class ActiveDouble extends ActiveType<double> {
   }
 }
 
-/// An [ActiveType] with similar characteristics of dart [double] objects
+/// Optional reactive values; constructors use named `value:` arguments.
 ///
-/// The underlying value *can* be null.
+/// Check for null before calling operations requiring a value. The owner disposes the controller, not each wrapper.
 ///
-/// If the underlying value of this is null and an arithmetic operator is called on this,
-/// it will throw a [ActiveTypeNullException].
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
 ///
-/// You can easily check for null by accessing the [isNull] or [isNotNull] properties.
+/// ### Initialize absent data
 ///
-/// When the value of this changes, it will send a [ActiveStateChanged] event by default. This includes
-/// automatically triggering a UI rebuild.
-///
-/// Example
+/// <!-- activity-snippet: class-activitynullabledoubleproperty-extends-1 -->
 /// ```dart
-/// final percentage = ActivityNullableDoubleProperty(10.0);
+/// import 'package:activity/activity.dart';
 ///
-/// if (percentage.isNull)
-/// {
-///    print("I'm Null");
+/// class SampleController extends ActiveController {
+///   final value = ActivityNullableDoubleProperty();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     assert(controller.value.isNull);
+///     controller.value.setIfNull(() => 4.5);
+///     assert(controller.value.value == 4.5);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
 /// }
 /// ```
 ///
-/// Other Usages Examples
+/// ### Clear and restore absence
+///
+/// <!-- activity-snippet: class-activitynullabledoubleproperty-extends-2 -->
 /// ```dart
+/// import 'package:activity/activity.dart';
 ///
-/// final percentage = ActivityNullableDoubleProperty();
+/// class SampleController extends ActiveController {
+///   final value = ActivityNullableDoubleProperty();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
 ///
-/// print('${percentage.add(5.2)}'); //throws ActivityNullValueException because no value has been set yet.
-///
-/// percentage(10.0)
-///
-/// print('${percentage.subtract(0.5)}'); //prints 9.5
-///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value(4.5);
+///     controller.value.reset();
+///     assert(controller.value.value == null);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
 /// ```
-///
 class ActivityNullableDoubleProperty extends ActiveType<double?> {
   ActivityNullableDoubleProperty({double? value, super.typeName})
-      : super(value);
+    : super(value);
 
   factory ActivityNullableDoubleProperty.zero({String? typeName}) {
     return ActivityNullableDoubleProperty(value: 0, typeName: typeName);
@@ -209,7 +267,7 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   /// Throws an [UnsupportedError] if this number is not finite
   /// (NaN or an infinity).
   /// ```dart
-  /// final number = ActivityNullableDoubleProperty(3.25);
+  /// final number = ActivityNullableDoubleProperty(value: 3.25);
   /// print(number.round()); // 3
   ///
   /// number(3.5);
@@ -235,7 +293,7 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   /// This means that for a value `d` in the range `-0.5 < d < 0.0`,
   /// the result is `-0.0`.
   /// ```dart
-  /// final number = ActivityNullableDoubleProperty(3.25);
+  /// final number = ActivityNullableDoubleProperty(value: 3.25);
   /// print(number.roundToDouble()); // 3.0
   ///
   /// number(3.5);
@@ -251,12 +309,15 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   /// This does not set the value for this [ActivityNullableDoubleProperty].
   ///
   /// The result is an [double], as described by [double.+].
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   double add<E extends num>(E other) {
     return isNotNull
         ? _value! + other
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Subtracts [other] from this number.
@@ -264,12 +325,15 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   /// This does not set the value for this [ActivityNullableDoubleProperty].
   ///
   /// The result is an [double], as described by [double.-],
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   double subtract<E extends num>(E other) {
     return isNotNull
         ? _value! - other
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Divides this number by [other].
@@ -278,12 +342,15 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   ///
   /// The result is an [double], as described by [double./],
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   double divide<E extends num>(E other) {
     return isNotNull
         ? _value! / other
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Euclidean modulo of this number by [other].
@@ -304,18 +371,21 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   ///
   /// The result is an [double], as described by [double.%]
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   ///
   /// Example:
   /// ```dart
-  /// final number = ActivityNullableDoubleProperty(5);
+  /// final number = ActivityNullableDoubleProperty(value: 5);
   /// print(number % 3); // 2.0
   /// ```
   double mod<E extends num>(E other) {
     return isNotNull
         ? _value! % other
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Multiplies this number by [other].
@@ -323,11 +393,14 @@ class ActivityNullableDoubleProperty extends ActiveType<double?> {
   /// This does not set the value for this [ActivityNullableDoubleProperty].
   ///
   /// The result is an [double], as described by [double.*],
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   double multiply<E extends num>(E other) {
     return isNotNull
         ? _value! * other
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 }

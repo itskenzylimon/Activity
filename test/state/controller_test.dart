@@ -1,6 +1,5 @@
 import 'package:activity/activity.dart';
 import 'package:activity/core/src/errors.dart';
-import 'package:activity/core/src/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:async';
 
@@ -69,7 +68,7 @@ void main() {
       const taskKey = 'loadUser';
 
       final result = await testController.activeAsync<String>(() async {
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
         expect(testController.isTaskRunning(isRunningKey: taskKey), isTrue);
         return 'User Loaded';
       }, isRunningKey: taskKey);
@@ -110,17 +109,23 @@ void main() {
       await subscription.cancel();
     });
 
-    test('resetActivities disposes resources and prevents further use', () async {
-      await testController.resetActivities();
+    test(
+      'resetActivities disposes resources and prevents further use',
+      () async {
+        await testController.resetActivities();
 
-      expect(() => testController.name('Alice'),
-          throwsA(isA<StateError>()));
+        expect(() => testController.name('Alice'), throwsA(isA<StateError>()));
 
-      expect(() => testController.setRunning(isRunningKey: 'x'),
-          throwsA(isA<StateError>()));
+        expect(
+          () => testController.setRunning(isRunningKey: 'x'),
+          throwsA(isA<StateError>()),
+        );
 
-      expect(() => testController.addOnStateChangedListener((_) {}),
-          throwsA(isA<StateError>()));
-    });
+        expect(
+          () => testController.addOnStateChangedListener((_) {}),
+          throwsA(isA<StateError>()),
+        );
+      },
+    );
   });
 }

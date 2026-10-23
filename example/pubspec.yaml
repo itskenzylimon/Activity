@@ -1,20 +1,31 @@
 name: example
-description: Example App based on Activity.
+description: An interactive Material gallery of Activity state, navigation and localization examples.
 
 publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.2
+  sdk: ^3.9.0
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   activity:
     path: ../
+  # Workspace QuickeyDB 3.0.0; not a published-version claim.
+  quickeydb:
+    path: ../../quickeydb
+  url_launcher: ^6.3.1
+  flutter_svg: ^2.2.2
+  # Flutter adaptive controls may request the Cupertino icon font.
+  cupertino_icons: ^1.0.8
 
 dev_dependencies:
+  web: ^1.1.1
+  sqflite_common_ffi_web: ">=0.3.0 <2.0.0"
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
@@ -24,4 +35,11 @@ flutter:
   uses-material-design: true
 
   assets:
-     - assets/index.html
+    - assets/branding/
+    - assets/i18n/
+    - assets/sample.env
+    # Bundle the actual compiled source, rather than hand-maintained copies.
+    - lib/main.dart
+    - lib/gallery/
+    - lib/gallery/pages/
+    - lib/gallery/recipes/

@@ -1,8 +1,6 @@
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: depend_on_referenced_packages
-import 'package:matcher/src/equals_matcher.dart' as match;
 
 class ListTestController extends ActiveController {
   final countries = ActiveList<String>.empty();
@@ -12,10 +10,8 @@ class ListTestController extends ActiveController {
 }
 
 class ListTestView extends ActiveView<ListTestController> {
-  const ListTestView({
-    Key? key,
-    required ListTestController activeController,
-  }) : super(key: key, activeController: activeController);
+  const ListTestView({Key? key, required ListTestController activeController})
+    : super(key: key, activeController: activeController);
 
   @override
   ActiveState<ListTestView, ListTestController> createActivity() {
@@ -23,7 +19,8 @@ class ListTestView extends ActiveView<ListTestController> {
   }
 }
 
-class _ListTestWidgetState extends ActiveState<ListTestView, ListTestController> {
+class _ListTestWidgetState
+    extends ActiveState<ListTestView, ListTestController> {
   _ListTestWidgetState(super.activeController);
 
   @override
@@ -35,7 +32,8 @@ class _ListTestWidgetState extends ActiveState<ListTestView, ListTestController>
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: activeController.countries.value.map((e) => Text(e)).toList(),
+              children:
+                  activeController.countries.value.map((e) => Text(e)).toList(),
             );
           },
         ),
@@ -53,7 +51,9 @@ void main() {
       listTestView = ListTestView(activeController: activeController);
     });
 
-    testWidgets('[single entry] new item added to list - widget updates', (tester) async {
+    testWidgets('[single entry] new item added to list - widget updates', (
+      tester,
+    ) async {
       String kenya = 'Kenya';
 
       await tester.pumpWidget(listTestView);
@@ -67,7 +67,9 @@ void main() {
       expect(find.text(kenya), findsOneWidget);
     });
 
-    testWidgets('[multiple entries] multiple items added - widget updates', (tester) async {
+    testWidgets('[multiple entries] multiple items added - widget updates', (
+      tester,
+    ) async {
       String kenya = 'Kenya';
       String england = 'England';
 
@@ -84,7 +86,9 @@ void main() {
       expect(find.text(england), findsOneWidget);
     });
 
-    testWidgets('[remove an entry] add an item - widget updates', (tester) async {
+    testWidgets('[remove an entry] add an item - widget updates', (
+      tester,
+    ) async {
       String kenya = 'Kenya';
       activeController.countries.add(kenya);
 
@@ -118,7 +122,9 @@ void main() {
       expect(find.text(england), findsNothing);
     });
 
-    testWidgets('[clear] - remove all items in countries - widget updates', (tester) async {
+    testWidgets('[clear] - remove all items in countries - widget updates', (
+      tester,
+    ) async {
       String kenya = 'Kenya';
       String england = 'England';
 
@@ -144,16 +150,19 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('[contains] - when countries does not contain item - returns true', () {
-      String kenya = 'Kenya';
-      String england = 'England';
+    test(
+      '[contains] - when countries does not contain item - returns true',
+      () {
+        String kenya = 'Kenya';
+        String england = 'England';
 
-      activeController.countries.add(kenya);
+        activeController.countries.add(kenya);
 
-      final result = activeController.countries.contains(england);
+        final result = activeController.countries.contains(england);
 
-      expect(result, isFalse);
-    });
+        expect(result, isFalse);
+      },
+    );
 
     test('[indexOf] - countries contains item - returns correct index', () {
       String kenya = 'Kenya';
@@ -163,7 +172,7 @@ void main() {
 
       final result = activeController.countries.indexOf(kenya);
 
-      expect(result, match.equals(expectedIndex));
+      expect(result, equals(expectedIndex));
     });
 
     test('[countries[]] - pass valid index value - returns correct value', () {
@@ -173,21 +182,25 @@ void main() {
 
       final result = activeController.countries[0];
 
-      expect(result, match.equals(kenya));
+      expect(result, equals(kenya));
     });
 
     test(
-        'map - generate different type in map function - returns correct values',
-            () {
-          String kenya = 'Kenya';
-          String england = 'England';
+      'map - generate different type in map function - returns correct values',
+      () {
+        String kenya = 'Kenya';
+        String england = 'England';
 
-          activeController.countries.addAll([kenya, england]);
+        activeController.countries.addAll([kenya, england]);
 
-          final results = activeController.countries.map((country) => country.length).toList();
+        final results =
+            activeController.countries
+                .map((country) => country.length)
+                .toList();
 
-          expect(results, const TypeMatcher<List<int>>());
-        });
+        expect(results, const TypeMatcher<List<int>>());
+      },
+    );
 
     test('[isEmpty] - checks if countries list is empty - returns true', () {
       final emptyList = ActiveList<String>.empty();
@@ -214,32 +227,34 @@ void main() {
     });
 
     test(
-        '[reset] function test - starting list is empty - add item - should be empty after reset',
-            () {
-          final genders = ActiveList<String>.empty();
-          genders.setActiveController(activeController);
-          genders.add('Female');
-          genders.reset();
-          expect(genders.isEmpty, isTrue);
-        });
+      '[reset] function test - starting list is empty - add item - should be empty after reset',
+      () {
+        final genders = ActiveList<String>.empty();
+        genders.setActiveController(activeController);
+        genders.add('Female');
+        genders.reset();
+        expect(genders.isEmpty, isTrue);
+      },
+    );
 
     test(
-        '[reset] function testing - starting list has data - remove item - only original data after reset',
-            () {
-          const String country = 'Kenya';
-          final data = ActiveList<String>([country]);
-          data.setActiveController(activeController);
+      '[reset] function testing - starting list has data - remove item - only original data after reset',
+      () {
+        const String country = 'Kenya';
+        final data = ActiveList<String>([country]);
+        data.setActiveController(activeController);
 
-          expect(data.contains(country), isTrue);
+        expect(data.contains(country), isTrue);
 
-          data.clear();
+        data.clear();
 
-          expect(data.contains(country), isFalse);
+        expect(data.contains(country), isFalse);
 
-          data.reset();
+        data.reset();
 
-          expect(data.contains(country), isTrue);
-        });
+        expect(data.contains(country), isTrue);
+      },
+    );
 
     test('[elementAt] - list is not empty - returns correct object', () {
       const String expected = 'Kenya';
@@ -248,119 +263,99 @@ void main() {
 
       final result = list.elementAt(index);
 
-      expect(result, match.equals(expected));
+      expect(result, equals(expected));
     });
 
     test(
       '[where] - list is not empty - returns items in list matching predicate',
-          () {
+      () {
         const expectedLength = 3;
         final expectedItems = [3, 4, 5];
         final numbers = ActiveList([1, 2, ...expectedItems]);
         final result = numbers.where((x) => x > 2);
 
-        expect(result.length, match.equals(expectedLength));
-        expect(result, match.equals(expectedItems));
+        expect(result.length, equals(expectedLength));
+        expect(result, equals(expectedItems));
       },
     );
 
-    test(
-      '[firstWhere] - returns first matching item',
-          () {
-        const expected = 3;
-        final numbers = ActiveList([1, 2, 3]);
-        final result = numbers.firstWhere((element) => element == expected);
+    test('[firstWhere] - returns first matching item', () {
+      const expected = 3;
+      final numbers = ActiveList([1, 2, 3]);
+      final result = numbers.firstWhere((element) => element == expected);
 
-        expect(result, match.equals(expected));
-      },
-    );
+      expect(result, equals(expected));
+    });
 
-    test(
-      '[firstWhere] - no match found - returns result from or Else',
-          () {
-        const expected = -1;
-        final numbers = ActiveList([1, 2, 3]);
-        final result = numbers.firstWhere(
-              (element) => element == expected,
-          orElse: () => expected,
-        );
+    test('[firstWhere] - no match found - returns result from or Else', () {
+      const expected = -1;
+      final numbers = ActiveList([1, 2, 3]);
+      final result = numbers.firstWhere(
+        (element) => element == expected,
+        orElse: () => expected,
+      );
 
-        expect(result, match.equals(expected));
-      },
-    );
+      expect(result, equals(expected));
+    });
 
-    test(
-      '[firstWhereOrNull] - match found - returns first matching item',
-          () {
-        const expected = 3;
-        final numbers = ActiveList([1, 2, 3]);
-        final result =
-        numbers.firstWhereOrNull((element) => element == expected);
+    test('[firstWhereOrNull] - match found - returns first matching item', () {
+      const expected = 3;
+      final numbers = ActiveList([1, 2, 3]);
+      final result = numbers.firstWhereOrNull((element) => element == expected);
 
-        expect(result, match.equals(expected));
-      },
-    );
+      expect(result, equals(expected));
+    });
 
-    test(
-      '[firstWhereOrNull] - no match found - returns null',
-          () {
-        const expected = -1;
-        final numbers = ActiveList([1, 2, 3]);
-        final result =
-        numbers.firstWhereOrNull((element) => element == expected);
+    test('[firstWhereOrNull] - no match found - returns null', () {
+      const expected = -1;
+      final numbers = ActiveList([1, 2, 3]);
+      final result = numbers.firstWhereOrNull((element) => element == expected);
 
-        expect(result, isNull);
-      },
-    );
+      expect(result, isNull);
+    });
 
-    test(
-      '[indexWhere] - match found - returns correct index',
-          () {
-        const expected = 2;
-        final numbers = ActiveList([1, 2, 3]);
-        final result = numbers.indexWhere((element) => element == 3);
+    test('[indexWhere] - match found - returns correct index', () {
+      const expected = 2;
+      final numbers = ActiveList([1, 2, 3]);
+      final result = numbers.indexWhere((element) => element == 3);
 
-        expect(result, match.equals(expected));
-      },
-    );
+      expect(result, equals(expected));
+    });
 
-    test(
-      '[indexWhere] - no match found - returns -1',
-          () {
-        const expected = -1;
-        final numbers = ActiveList([1, 2, 3]);
-        final result = numbers.indexWhere((element) => element == expected);
+    test('[indexWhere] - no match found - returns -1', () {
+      const expected = -1;
+      final numbers = ActiveList([1, 2, 3]);
+      final result = numbers.indexWhere((element) => element == expected);
 
-        expect(result, match.equals(expected));
-      },
-    );
+      expect(result, equals(expected));
+    });
 
     test('[reversed] -  - returns reversed list', () {
       final expected = [3, 2, 1];
       final numbers = ActiveList([1, 2, 3]);
       final reversed = numbers.reversed;
-      expect(reversed, match.equals(expected));
+      expect(reversed, equals(expected));
     });
 
     test('[first] - list is not empty - returns first item', () {
       const expected = 1;
       final numbers = ActiveList([1, 2, 3]);
       final first = numbers.first;
-      expect(first, match.equals(expected));
+      expect(first, equals(expected));
     });
 
     test('[last] - list is not empty - returns last item', () {
       const expected = 3;
       final numbers = ActiveList([1, 2, 3]);
       final last = numbers.last;
-      expect(last, match.equals(expected));
+      expect(last, equals(expected));
     });
 
     test('[single] - list contains one item - returns item', () {
       const expected = 1;
       final numbers = ActiveList([expected]);
       final single = numbers.single;
-      expect(single, match.equals(expected));
+      expect(single, equals(expected));
     });
 
     test('[insert] - returns correct item at new index', () {
