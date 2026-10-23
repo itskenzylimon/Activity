@@ -1,0 +1,6 @@
+{
+  "welcome": "مرحباً {name}",
+  "tasks": "{count, plural, zero{لا توجد مهام} one{مهمة واحدة} two{مهمتان} few{# مهام} many{# مهمة} other{# مهمة}}",
+  "guests": "{count, plural, offset:1 =0{لا أحد} =1{أنت فقط} other{أنت و # ضيوف}}",
+  "summary": "{gender, select, female{لديها {count} مهام} male{لديه {count} مهام} other{لديهم {count} مهام}}"
+}

@@ -1,0 +1,6 @@
+{
+  "welcome": "Bonjour {name}",
+  "tasks": "{count, plural, one{# tâche} other{# tâches}}",
+  "guests": "{count, plural, offset:1 =0{Personne} =1{Vous seul} one{Vous et # invité} other{Vous et # invités}}",
+  "summary": "{gender, select, female{{count, plural, one{Elle a # tâche} other{Elle a # tâches}}} other{{count, plural, one{Il y a # tâche} other{Il y a # tâches}}}}"
+}

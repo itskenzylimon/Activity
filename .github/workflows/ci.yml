@@ -1,0 +1,45 @@
+name: Activity checks
+on:
+  push:
+  pull_request:
+jobs:
+  host:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get --no-example
+      - run: flutter analyze lib test tool
+      - run: flutter test
+      - run: dart run tool/check_doc_examples.dart --include-pub-example
+  minimum-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          cache: true
+      - run: flutter pub get --no-example
+      - run: flutter analyze lib test tool
+      - run: flutter test
+      - run: dart run tool/check_doc_examples.dart --include-pub-example
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get --no-example
+      - run: flutter test --platform chrome test/events test/helpers test/navigation test/localization test/state/regressions_test.dart
+      - run: dart run tool/check_doc_examples.dart --chrome --include-pub-example
+      # Gallery validation requires the matching unpublished QuickeyDB checkout.
+      # Run the separate manual gallery workflow with its reviewed commit/ref.

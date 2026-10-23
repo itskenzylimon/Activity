@@ -165,7 +165,6 @@ app.*.map.json
 **/.symlinks/
 **/ephemeral/
 **/DerivedData/
-**/.env
 **/.env.*
 **/*.db
 **/*.db-journal
@@ -184,5 +183,3 @@ app.*.map.json
 **/web/*.js.map
 **/test/.web-assets/
 **/test/.api_snippets/
-
-/activity-data.act

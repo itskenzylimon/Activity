@@ -1,0 +1,6 @@
+{
+  "welcome": "Habari {name}",
+  "tasks": "{count, plural, =0{Hakuna kazi} one{Kazi #} other{Kazi #}}",
+  "guests": "{count, plural, offset:1 =0{Hakuna aliyealikwa} =1{Wewe pekee} one{Wewe na mgeni #} other{Wewe na wageni #}}",
+  "summary": "{gender, select, female{Ana kazi {count}} male{Ana kazi {count}} other{Wana kazi {count}}}"
+}

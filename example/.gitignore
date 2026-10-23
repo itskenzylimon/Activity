@@ -50,7 +50,6 @@ app.*.map.json
 
 # Local browser/compiler output and developer overrides.
 coverage/
-.env
 .env.*
 pubspec_overrides.yaml
 web/*.js.deps
