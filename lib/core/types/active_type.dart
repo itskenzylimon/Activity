@@ -1,9 +1,6 @@
-import 'dart:io';
-
-import 'package:activity/core/helpers/logger.dart';
-import 'package:activity/core/memory/memory.dart';
 import 'package:activity/core/src/exceptions.dart';
 import 'package:activity/core/src/controller.dart';
+import '../src/state.dart';
 
 part 'active_bool.dart';
 part 'active_int.dart';
@@ -13,254 +10,345 @@ part 'active_map.dart';
 part 'active_list.dart';
 part 'active_datetime.dart';
 
+/// Base interface defining readable value access for Active types.
 abstract class ActiveTypeValue<T> {
   T? get value;
 }
 
-
-/// An [ActiveType] can take the nature of any any object type. When an update is
-/// done an [ActiveStateChanged] event is triggered which in-turn makes a UI rebuild of that widget.
-/// [UseCases]
+/// Typed reactive state, snapshots and explicit value comparisons.
 ///
-///*Using [set]*:
-///```dart
-/////initialize the property value to zero.
-///final age = createProperty<int>(0);
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
 ///
-/////update the property value to five.
-///age.set(5);
-///```
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
 ///
-///-----------------------------------------
+/// ### Set and reset
 ///
-///*Calling the property*:
-///```dart
-/////initialize the property value to zero.
-///final age = createProperty<int>(0);
+/// <!-- activity-snippet: class-activetype-t-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
 ///
-/////update the property value to five.
-///age(5);
-///```
+/// class SampleController extends ActiveController {
+///   final value = ActiveType<String>('draft');
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value('saved');
+///     assert(controller.value.value == 'saved');
+///     controller.value.reset();
+///     assert(controller.value.value == 'draft');
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Transform and compare
+///
+/// <!-- activity-snippet: class-activetype-t-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveType<String>('draft');
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.updateValue((text) => text.toUpperCase());
+///     assert(controller.value.equals('DRAFT'));
+///     assert(!controller.value.setIfChanged('DRAFT'));
+///     // Wrapper == is identity equality; equals compares the stored value.
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
 class ActiveType<T> implements ActiveTypeValue<T> {
+  /// Optional name identifier for this type.
   String? typeName;
 
-  Memory memory = Memory(filename: '${Directory.current.path}/activity-data.act');
-
+  /// Stores the original value before any changes.
   late T _originalValue;
-  T get originalValue => _originalValue;
+  T get originalValue => snapshot(_originalValue);
 
-  late T _mockValue;
-  T get mockValue => _mockValue;
+  /// Stores a mock or temporary value (optional, for testing or preview purposes).
+  T? _mockValue;
+  bool _hasMockValue = false;
+  T get mockValue => _hasMockValue ? _mockValue as T : _value;
+  set mockValue(T value) {
+    _mockValue = value;
+    _hasMockValue = true;
+  }
 
+  /// Override for shallow collection copies or custom model snapshots.
+  T snapshot(T value) => value;
+
+  /// Read-only shallow payload for events.
+  T eventSnapshot(T value) => snapshot(value);
+  bool accepts(Object? value) => value is T;
+
+  T updateValue(T Function(T value) transform, {bool notifyChange = true}) {
+    ensureCanMutate();
+    return set(transform(snapshot(value)), notifyChange: notifyChange);
+  }
+
+  R select<R>(R Function(T value) selector) => selector(value);
+
+  bool setIfChanged(T next, {bool notifyChange = true}) {
+    if (value == next) return false;
+    set(next, notifyChange: notifyChange);
+    return true;
+  }
+
+  ActiveUpdate<T> changeTo(T next) => ActiveUpdate(this, next);
+
+  /// The current value.
   T _value;
 
   @override
   T get value => _value;
 
-  /// Returns true if the value of [this] is null.
-  ///
+  /// Returns `true` if the value is `null`.
   bool get isNull => _value == null;
 
-  /// Returns true if the value of [this] is not null.
+  /// Returns `true` if the value is **not** `null`.
   bool get isNotNull => !isNull;
 
+  /// The controller managing this active type.
   ActiveController? _activeController;
 
-  /// Returns the instance of the [ActiveController] this
-  /// property is associated with.
-  ///
+  /// Returns the assigned [ActiveController] or throws an exception
+  /// if this ActiveType is not linked to any controller.
   ActiveController get activeController {
     if (_activeController == null) {
       throw ActiveTypeNotAssignedException(
-          StackTrace.current, typeName, runtimeType);
-    } else {
-      return _activeController!;
+        StackTrace.current,
+        typeName,
+        runtimeType,
+      );
     }
+    return _activeController!;
   }
 
+  /// Creates a new instance of [ActiveType] with the given [value].
   ActiveType(this._value, {this.typeName}) {
-    _originalValue = _value;
+    _originalValue = snapshot(_value);
   }
 
-  ///Links this ActiveType instance with an [ActiveController].
-  ///
+  /// Links this ActiveType instance to an [ActiveController].
   void setActiveController(ActiveController activeController) {
     _activeController = activeController;
   }
 
-  /// Updates the underlying [value] for this ActiveType.
+  /// Function-call syntax for setting a new value.
   ///
-  /// If [notifyChange] is true, a UI update will be triggered after the change occurs. Otherwise,
-  /// only the value will be set.
-  ///
-  /// If [setAsOriginal] is true, updating the value will also set the [originalValue] to the
-  /// current value. See also [setOriginalValueToCurrent] and [reset]
-  ///
+  /// Example:
+  /// ```dart
+  /// final age = ActiveType<int>(10);
+  /// age(25); // same as age.set(25)
+  /// ```
   void call(T value, {bool notifyChange = true, bool setAsOriginal = false}) {
     set(value, notifyChange: notifyChange, setAsOriginal: setAsOriginal);
   }
 
-  ///Updates the original value to what the current value of this property is.
+  /// Updates the original value to the current value.
   ///
-  ///If this function is called, the [reset] function will then use the updated
-  ///original value to set the current value
-  ///
-  ///## Example
-  ///```dart
-  ///final user = createNullProperty<User>();
-  ///
-  ///user(await userService.loadUser());
-  ///
-  ///user.reset(); //user value would be reset to null
-  ///
-  ///user(await userService.loadUser());
-  ///
-  ///user.setOriginalValueToCurrent();
-  ///
-  ///user(null);
-  ///
-  ///user.reset(); //user value would be reset to the user returned from the userService
-  ///
-  ///```
-  void setOriginalValueToCurrent(String typeName) async {
-    var data = await memory.readMemory(typeName);
-    printError(data);
-    if (data != null) {
-       _originalValue = data;
-      set(data, setAsOriginal: true);
-    } else {
-      _originalValue = _value;
-    }
+  /// Example:
+  /// ```dart
+  /// user.setOriginalValueToCurrent();
+  /// ```
+  void setOriginalValueToCurrent([String? typeName]) {
+    _originalValue = snapshot(_value);
   }
-  
-  void setToOriginal(dynamic value, String typeName) async {
-    memory.insertMemory(typeName, value);
 
-    var data = await memory.readMemory(typeName);
-    if (data != null) {
-      _originalValue = data;
-    } else {
-      _originalValue = _value;
+  /// Forces the original value to a specific one.
+  ///
+  /// Useful for programmatically overriding what is considered the “original state”.
+  void setToOriginal(T value) {
+    _originalValue = snapshot(value);
+  }
+
+  /// Updates the internal [value].
+  ///
+  /// If [notifyChange] is true, it will trigger UI rebuilds
+  /// through the controller's [ActiveController.notifyActivities].
+  ///
+  /// Optionally mark this new value as the new [originalValue].
+  void ensureCanMutate() {
+    if (_activeController?.isDisposed ?? false) {
+      throw StateError('The owning ActiveController has been disposed.');
     }
   }
 
-  ///Updates the property value. Notifies any listeners to the change
-  ///
-  ///Returns the updated value
   T set(T value, {bool notifyChange = true, bool setAsOriginal = false}) {
-
-    final oldValue = _value;
+    ensureCanMutate();
+    if (notifyChange && _value != value) activeController;
+    final changed = _value != value;
+    final oldValue = eventSnapshot(_value);
     _value = value;
-    if (notifyChange && oldValue != value) {
+
+    if (notifyChange && changed) {
       activeController.notifyActivities([
-        ActiveStateChanged(value, oldValue, typeName: typeName)
+        ActiveStateChanged(eventSnapshot(value), oldValue, typeName: typeName),
       ]);
-     
     }
 
     if (setAsOriginal) {
-      _originalValue = _value;
+      _originalValue = snapshot(value);
     }
 
     return _value;
   }
 
-  ///Resets the [value] to the [originalValue].
+  /// Resets the value back to the original state.
   ///
-  ///If [T] is a  class with properties, changing the properties directly on the object
-  ///instead of updating this ActiveType with a new instance of [T] with the updated values will
-  ///prevent [reset] from performing as expected. Tracking the original value is done by reference
-  ///internally.
+  /// If [notifyChange] is true, triggers state rebuilds.
   ///
-  ///## Usage
-  ///
-  ///```dart
-  ///final age = ActiveType<int>(10); //age.value is 10
-  ///
-  ///age(20); //age.value is 20
-  ///age(25); //age.value is 25
-  ///
-  ///age.reset(); //age.value is back to 10. Triggers UI rebuild or...
-  ///
-  ///age.reset(notifyChange: false); //age.value is back to 10 but UI does not rebuild
-  ///```
+  /// Example:
+  /// ```dart
+  /// final age = ActiveType<int>(20);
+  /// age(30, notifyChange: false);
+  /// age.reset(notifyChange: false); // Back to 20, without an owner.
+  /// // For UI updates, register age in a controller and leave notifications on.
+  /// ```
   void reset({bool notifyChange = true}) {
-    final currentValue = _value;
-    _value = _originalValue;
+    ensureCanMutate();
+    if (notifyChange) activeController;
+    final currentValue = eventSnapshot(_value);
+    _value = snapshot(_originalValue);
 
     if (notifyChange) {
       activeController.notifyActivities([
         ActiveStateChanged(
-          _originalValue,
+          eventSnapshot(_value),
           currentValue,
           typeName: typeName,
-        )
+        ),
       ]);
     }
+  }
+
+  /// Compares the current value to another [ActiveType] or raw object.
+  ///
+  /// Example:
+  /// ```dart
+  /// age.equals(10);
+  /// otherAge.equals(age);
+  /// ```
+  bool equals(dynamic other) {
+    return other is ActiveType ? other.value == value : other == value;
   }
 
   @override
   String toString() => _value?.toString() ?? '';
 
-  ///Checks if [other] is equal to the [value] of this ActiveType
-  ///
-  ///### Usage
-  ///
-  ///```dart
-  ///final age = ActiveType<int>(10);
-  ///
-  ///age.equals(10); //returns true
-  ///
-  ///
-  ///final ageTwo = ActiveType<int>(10);
-  ///
-  ///age.equals(ageTwo); //returns true
-  ///```
-  bool equals(dynamic other) {
-    if (other is ActiveType) {
-      return other.value == value;
-    } else {
-      return other == value;
-    }
-  }
+  @override
+  bool operator ==(Object other) => identical(this, other);
 
   @override
-  bool operator ==(dynamic other) => equals(other);
-
-  @override
-  int get hashCode => _value.hashCode;
+  int get hashCode => identityHashCode(this);
 }
 
-/// ## createActiveType
-/// Short hand helper function to Create a non nullable value
-/// An [ActiveType] can take the nature of any any object type. When an update is
-/// done an [ActiveStateChanged] event is triggered which in-turn makes a UI rebuild of that widget.
+/// Creates a non-nullable [ActiveType] with an initial value.
 ///
-///## Example
-///
-///```dart
-///late final ActiveType<String> name;
-///
-///name = createProperty('Bob');
-///```
+/// Example:
+/// ```dart
+/// final name = createActiveType('Alice');
+/// ```
 ActiveType<T> createActiveType<T>(T value, {String? typeName}) {
   return ActiveType<T>(value, typeName: typeName);
 }
 
-
-/// [createActiveNullableType]
-/// Create a nullable value
-/// An [ActiveType] can take the nature of any any object type. When an update is
-/// done an [ActiveStateChanged] event is triggered which in-turn makes a UI rebuild of that widget.
+/// Creates a nullable [ActiveType] with no initial value.
 ///
-///## Example
-///
-///```dart
-///late final ActiveType<String?> name;
-///
-///name = createNullProperty();
-///
-///```
+/// Example:
+/// ```dart
+/// final name = createActiveNullableType<String>();
+/// ```
 ActiveType<T?> createActiveNullableType<T>({String? typeName}) {
   return createActiveType(null, typeName: typeName);
+}
+
+/// A typed assignment for a controller batch.
+///
+/// Use controller.activate for preflight checks and one event list. Batches do not roll back arbitrary user-defined setter side effects.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#models) · browser route `/#/models`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Commit related values together
+///
+/// <!-- activity-snippet: class-activeupdate-t-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class DraftController extends ActiveController {
+///   final count = ActiveInt(0);
+///   final title = ActiveString('draft');
+///   @override
+///   Iterable<ActiveType> get activities => [count, title];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = DraftController();
+///   try {
+///     controller.activate([
+///       controller.count.changeTo(2),
+///       controller.title.changeTo('saved'),
+///     ]);
+///     assert(controller.count.value == 2 && controller.title.value == 'saved');
+///   } finally {
+///     await controller.dispose();
+///   }
+/// }
+/// ```
+///
+/// ### Restore a coherent draft
+///
+/// <!-- activity-snippet: class-activeupdate-t-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class DraftController extends ActiveController {
+///   final count = ActiveInt(0);
+///   final title = ActiveString('draft');
+///   @override
+///   Iterable<ActiveType> get activities => [count, title];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = DraftController();
+///   try {
+///     controller.activate([
+///       controller.count.changeTo(5),
+///       controller.title.changeTo('edited'),
+///     ]);
+///     controller.resetAllActiveTypes();
+///     assert(controller.count.value == 0 && controller.title.value == 'draft');
+///   } finally {
+///     await controller.dispose();
+///   }
+/// }
+/// ```
+class ActiveUpdate<T> {
+  final ActiveType<T> target;
+  final T next;
+  const ActiveUpdate(this.target, this.next);
+  ActiveStateChanged commit() {
+    final old = target.eventSnapshot(target.value);
+    target.set(next, notifyChange: false);
+    return ActiveStateChanged(
+      target.eventSnapshot(next),
+      old,
+      typeName: target.typeName,
+    );
+  }
 }

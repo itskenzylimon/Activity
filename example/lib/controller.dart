@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +8,6 @@ import 'model.dart';
 class MainController extends ActiveController {
   GlobalKey globalKey = GlobalKey<FormState>();
 
-  /// Initialise area
-  /*Memory memory = Memory(
-      //filename: '${Directory.current.path}activity-data.act'
-  );*/
-  Memory memory = Memory.instance();
-
   /// Assign Active values
   /// You can ideally check
   /// ActiveString extend the normal String Type with activity helper functions
@@ -23,7 +16,7 @@ class MainController extends ActiveController {
   /// Active int extend the normal int Type with activity helper functions
   ActiveInt appBarSize = ActiveInt(45);
   ActiveInt pageNumber = ActiveInt(1);
-  ActiveInt pageSize = ActiveInt(2);
+  ActiveInt pageSize = ActiveInt(5);
 
   /// Active bool extend the normal int Type with activity helper functions
   ActiveBool dataLoaded = ActiveBool(false);
@@ -383,68 +376,6 @@ class MainController extends ActiveController {
 
   ActiveMap<String, Map<String, dynamic>> formResults = ActiveMap({});
 
-   void createMemory() async {
-   printSuccess(await memory.upsertMemory('hello', 'Asia'));
-   printInfo(await memory.readMemory('hello',value: true));
-   printInfo("readMemorySync==");
-   printInfo(memory.readMemorySync('hello',value: true));
-
-   await memory.setBool("boolKey", true);
-   printInfo("boolKey==${memory.getBool('boolKey')}");
-
-   await memory.setString("stringKey", "string");
-   printInfo("stringKey==${memory.getString('stringKey')}");
-
-   await memory.setInt("intKey", 9);
-   printInfo("intKey==${memory.getInt('intKey')}");
-
-   await memory.setDouble("dbKey", 9.5);
-   printInfo("dbKey==${memory.getDouble('dbKey')}");
-
-  }
-
-  testWebSocket(){
-   /* WebSocket d = WebSocket();
-    d.open("wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self");
-    d.onMessage((data) {
-      printInfo("d.onMessage==${data.toString()}");
-      if(data!="UUUIIII") {
-        d.send("UUUIIII");
-      }
-    });*/
-    /// initialise an ActiveSocket instance
-    ActiveSocket activeSocket = WebSocket();
-
-// create an activeSocket connection to a wss/ws endpoint
-    activeSocket.open('ws://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
-
-// onSuccess callback to alert you when a successfull connection is made
-    activeSocket.onSuccess(() {
-      printInfo("onSuccess");
-    });
-
-// onFailure callback to alert you when a failed connection is made
-    activeSocket.onFailure(() {
-      printInfo("onFailure");
-    });
-
-// onMessage callback to alert you on new messages and pass data from server
-    activeSocket.onMessage((data) {
-      printInfo('onMessage @@@');
-      printInfo(data);
-      if(data != 'Hello Activity'){
-        activeSocket.send('Hello Activity');
-      }  printInfo('onMessage');
-    });
-
-// send function is used to send data to the channel you are connected to.
-    activeSocket.send('Hello world....');
-
-// onClose callback used to alert you when a connection is closed.
-    activeSocket.onClose(() {
-      printInfo('onClose');
-    });
-  }
 
   /*updateMemory() async {
     printSuccess(await memory.upsertMemory('hello', 'Asia'));

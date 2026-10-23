@@ -19,9 +19,6 @@ class TaskController extends MainController {
   
 
   getMemoryData() async {
-    // print(memory.isDataEmpty);
-    memory.upsertMemory('tasks', tasks);
-
     // print(testBool);
     testBool.set(true);
     // print(testBool);
@@ -108,6 +105,7 @@ class TaskController extends MainController {
     // tasks.set(newTasks);
 
     task.value.body = taskBody.text;
+    task.value.name = taskName.text;
     task.value.level = int.parse(taskLevel.text);
     task.value.body = taskBody.text;
     task.value.user = User(

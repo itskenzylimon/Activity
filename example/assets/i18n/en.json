@@ -1,0 +1,7 @@
+{
+  "welcome": "Hello {name}",
+  "tasks": "{count, plural, =0{No tasks} one{# task} other{# tasks}}",
+  "guests": "{count, plural, offset:1 =0{Nobody is invited} =1{Just you} one{You and # guest} other{You and # guests}}",
+  "summary": "{gender, select, female{{count, plural, one{She has # task} other{She has # tasks}}} male{{count, plural, one{He has # task} other{He has # tasks}}} other{{count, plural, one{They have # task} other{They have # tasks}}}}",
+  "fallbackNote": "This message is intentionally available only in English: fallback works."
+}

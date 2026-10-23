@@ -1,126 +1,250 @@
+import 'dart:async';
 import 'package:activity/activity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// --------------------------------------------
+/// Base Abstract View (for consistency only)
+/// --------------------------------------------
+abstract class ActiveViewBase extends StatefulWidget {
+  const ActiveViewBase({super.key});
+}
 
-/// [ActiveView]
+/// A stateful consumer bound to an existing typed controller.
 ///
-/// The starting class for widgets that need to be active when state changes
+/// Flutter owns State disposal; the application owns controller disposal. A view cancels its own subscription and must not dispose a shared controller. Use ActivitySelector when only a small derived value should rebuild.
 ///
-/// [ActiveView] Requires a class that extends [ActiveController] to be passed
-/// to the [activeController]. [ActiveController] is responsible for
-/// notifying when UI needs to be updated.
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#views) · browser route `/#/views`.
+/// These examples use the current checkout; published 1.x APIs can differ.
 ///
-///### [CaseStudy]
+/// ### Bind a whole view
 ///
-///```dart
-///class MainView extends ActiveView<MainController> {
+/// <!-- activity-snippet: abstract-class-activeview-t-extends-1 -->
+/// ```dart
+/// import 'dart:async';
+/// import 'package:activity/activity.dart';
+/// import 'package:flutter/material.dart';
 ///
-///    const MainView({super.key, required super.activeController});
+/// class CounterController extends ActiveController {
+///   final count = ActiveInt(0);
+///   @override
+///   Iterable<ActiveType> get activities => [count];
+/// }
 ///
-///    @override
-///    ActiveState<ActiveView<ActiveController>, MainController> createActivity() => _MyWidgetState(activeController);
+/// void main() => runApp(const MaterialApp(home: CounterOwner()));
 ///
-///}
-///```
-abstract class ActiveView<T extends ActiveController> extends StatefulWidget {
+/// class CounterOwner extends StatefulWidget {
+///   const CounterOwner({super.key});
+///   @override
+///   State<CounterOwner> createState() => _CounterOwnerState();
+/// }
+///
+/// class _CounterOwnerState extends State<CounterOwner> {
+///   final controller = CounterController();
+///   @override
+///   void dispose() {
+///     unawaited(controller.dispose());
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) =>
+///       Scaffold(body: CounterView(activeController: controller));
+/// }
+///
+/// class CounterView extends ActiveView<CounterController> {
+///   const CounterView({super.key, required super.activeController});
+///   @override
+///   ActiveState<ActiveView<CounterController>, CounterController>
+///   createActivity() => _CounterViewState(activeController);
+/// }
+///
+/// class _CounterViewState extends ActiveState<CounterView, CounterController> {
+///   _CounterViewState(super.activeController);
+///   @override
+///   Widget build(BuildContext context) => TextButton(
+///     onPressed: activeController.count.increment,
+///     child: Text('Count ${activeController.count.value}'),
+///   );
+/// }
+/// ```
+///
+/// ### Share the same owner with a scope
+///
+/// <!-- activity-snippet: abstract-class-activeview-t-extends-2 -->
+/// ```dart
+/// import 'dart:async';
+/// import 'package:activity/activity.dart';
+/// import 'package:flutter/material.dart';
+///
+/// class CounterController extends ActiveController {
+///   final count = ActiveInt(0);
+///   @override
+///   Iterable<ActiveType> get activities => [count];
+/// }
+///
+/// void main() => runApp(const MaterialApp(home: CounterOwner()));
+///
+/// class CounterOwner extends StatefulWidget {
+///   const CounterOwner({super.key});
+///   @override
+///   State<CounterOwner> createState() => _CounterOwnerState();
+/// }
+///
+/// class _CounterOwnerState extends State<CounterOwner> {
+///   final controller = CounterController();
+///   @override
+///   void dispose() {
+///     unawaited(controller.dispose());
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) => Scaffold(
+///     body: Activity<CounterController>(
+///       controller,
+///       child: CounterView(activeController: controller),
+///     ),
+///   );
+/// }
+///
+/// class CounterView extends ActiveView<CounterController> {
+///   const CounterView({super.key, required super.activeController});
+///   @override
+///   ActiveState<ActiveView<CounterController>, CounterController>
+///   createActivity() => _CounterViewState(activeController);
+/// }
+///
+/// class _CounterViewState extends ActiveState<CounterView, CounterController> {
+///   _CounterViewState(super.activeController);
+///   @override
+///   Widget build(BuildContext context) => TextButton(
+///     onPressed: activeController.count.increment,
+///     child: Text('Count ${activeController.count.value}'),
+///   );
+/// }
+/// ```
+abstract class ActiveView<T extends ActiveController> extends ActiveViewBase {
   final T activeController;
   final bool developerMode;
+
   const ActiveView({
     Key? key,
     required this.activeController,
     this.developerMode = false,
   }) : super(key: key);
 
-  ///Create an instance of [ActiveState] for the UI.
-  ///
-  ///**NOTE**
-  ///[createActivity] overrides the [createState] function. Overriding this
-  ///function and the [createState] function can have unintended side affects.
-  ActiveState<ActiveView, T> createActivity();
-
-  /// [createActivity]
-  /// handles the creation of the UI state.
-  ///**NOTE**
-  /// Avoid overriding this function. Overriding this function can have
-  /// unintended exceptions.
-
   @override
-  State<StatefulWidget> createState() {
-    // ignore: no_logic_in_create_state
-    return createActivity();
-  }
+  // The factory is a supported public extension point.
+  // ignore: no_logic_in_create_state
+  ActiveState<ActiveView<T>, T> createState() => createActivity();
+
+  /// Return your strongly typed [ActiveState] instance.
+  ActiveState<ActiveView<T>, T> createActivity();
 }
 
-/// [ActiveState]
-/// Base class for your [ActiveView] State class. Will automatically trigger a
-/// rebuild when objects change in [ActiveController] [ActiveType]
+/// --------------------------------------------
+/// Legacy ActiveView (no generic relation)
+/// --------------------------------------------
 ///
-///### Usage
-///
-///```dart
-///class _CounterPageState extends ActiveState<CounterPage, CounterViewModel> {
-///  _CounterPageState(super.activeController);
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Scaffold(
-///      appBar: AppBar(
-///        title: Text(activeController.title),
-///      ),
-///      body: Center(
-///        child: Column(
-///          mainAxisAlignment: MainAxisAlignment.center,
-///          children: <Widget>[
-///            const Text(
-///              'You have pushed the button this many times:',
-///            ),
-///            Text(
-///              '${activeController.count}',
-///            ),
-///          ],
-///        ),
-///      ),
-///      floatingActionButton: FloatingActionButton(
-///        onPressed: activeController.incrementCounter,
-///        tooltip: 'Increment',
-///        child: const Icon(Icons.add),
-///      ),
-///    );
-///  }
-///}
-///```
-abstract class ActiveState<T extends ActiveView, E extends ActiveController>
-    extends State<T> {
-  late final E activeController;
+/// Use this for older code where you can't refactor views to match
+/// `ActiveView<T>` and `ActiveState<ActiveView<T>, T>` constraints.
+abstract class ActiveViewLegacy<T extends ActiveController>
+    extends ActiveViewBase {
+  final T activeController;
+  final bool developerMode;
 
-  /// [isRunning]
-  /// Used to determine if the [activeController] is actively running
+  const ActiveViewLegacy({
+    Key? key,
+    required this.activeController,
+    this.developerMode = false,
+  }) : super(key: key);
+
+  @override
+  // ignore: no_logic_in_create_state
+  ActiveState<ActiveViewLegacy<T>, T> createState() => createActivity();
+
+  /// Return your loosely-typed legacy [ActiveState] instance.
+  ActiveState<ActiveViewLegacy<T>, T> createActivity();
+}
+
+/// --------------------------------------------
+/// Shared ActiveState<T, E>
+/// --------------------------------------------
+///
+/// Works with both modern and legacy views via generic constraints.
+abstract class ActiveState<T extends ActiveViewBase, E extends ActiveController>
+    extends State<T> {
+  /// The controller attached to this state.
+  E activeController;
+
+  /// Listener for state change events.
+  StreamSubscription? _stateSubscription;
+
+  /// Indicates whether controller is running async operations.
   bool get isRunning => activeController.actively;
 
-  ActiveState(this.activeController) {
-    activeController.addOnStateChangedListener((events) {
-      if (widget.developerMode && kDebugMode) {
-        // ignore: avoid_print
-        events.forEach(print);
+  /// Constructor to inject the controller.
+  ActiveState(this.activeController);
+
+  @override
+  void initState() {
+    super.initState();
+
+    _subscribe();
+  }
+
+  void _subscribe() {
+    _stateSubscription = activeController.addOnStateChangedListener((events) {
+      if (!mounted) return;
+
+      // Print debug logs if developerMode is enabled
+      final devMode =
+          (widget is ActiveView && (widget as ActiveView).developerMode) ||
+          (widget is ActiveViewLegacy &&
+              (widget as ActiveViewLegacy).developerMode);
+
+      if (devMode && kDebugMode) {
+        for (final event in events) {
+          debugPrint('[Activity] ${event.toString()}');
+        }
       }
-      if (mounted) {
-        setState(() {});
-      }
+
+      setState(() {});
     });
   }
 
-  /// [ifRunning]
-  /// Shows [busyIndicator] when [activeController] is Running a long task
+  @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final current = widget;
+    final E next =
+        (current is ActiveView
+                ? current.activeController
+                : current is ActiveViewLegacy
+                ? current.activeController
+                : activeController)
+            as E;
+    if (!identical(next, activeController)) {
+      unawaited(activeController.cancelSubscription(_stateSubscription));
+      activeController = next;
+      _subscribe();
+    }
+  }
 
+  /// Conditionally render a busy indicator or fallback widget.
   Widget ifRunning(Widget busyIndicator, {required Widget otherwise}) {
     return isRunning ? busyIndicator : otherwise;
   }
 
-  /// [resetActivities]
-  /// Reset States. It is what it is
+  /// Restore original values without disposing this view or its shared controller.
   void resetActivities() {
-    activeController.resetActivities();
+    activeController.resetAllActiveTypes();
+  }
+
+  @override
+  void dispose() {
+    unawaited(activeController.cancelSubscription(_stateSubscription));
     super.dispose();
   }
 }

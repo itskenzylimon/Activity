@@ -1,8 +1,6 @@
 import 'package:activity/activity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: depend_on_referenced_packages
-import 'package:matcher/src/equals_matcher.dart' as match;
 
 class IntTestController extends ActiveController {
   final count = ActiveInt(100, typeName: 'count');
@@ -12,13 +10,11 @@ class IntTestController extends ActiveController {
 }
 
 class IntTestView extends ActiveView<IntTestController> {
-  const IntTestView({
-    Key? key,
-    required IntTestController activeController,
-  }) : super(key: key, activeController: activeController);
+  const IntTestView({Key? key, required IntTestController activeController})
+    : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, IntTestController> createActivity() {
+  ActiveState<IntTestView, IntTestController> createActivity() {
     return _IntTestViewState(activeController);
   }
 }
@@ -33,11 +29,7 @@ class _IntTestViewState extends ActiveState<IntTestView, IntTestController> {
         body: Builder(
           builder: (innerContext) {
             return Center(
-              child: Column(
-                children: [
-                  Text('${activeController.count}'),
-                ],
-              ),
+              child: Column(children: [Text('${activeController.count}')]),
             );
           },
         ),
@@ -87,10 +79,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(expectedValue.toString()), findsOneWidget);
-      expect(result, match.equals(expectedValue));
+      expect(result, equals(expectedValue));
     });
 
-    testWidgets('[subtract] function on count - widget updates', (tester) async {
+    testWidgets('[subtract] function on count - widget updates', (
+      tester,
+    ) async {
       const int expectedValue = 10;
       const int startingValue = 50;
       const int subtrahend = 40;
@@ -108,10 +102,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(expectedValue.toString()), findsOneWidget);
-      expect(result, match.equals(expectedValue));
+      expect(result, equals(expectedValue));
     });
 
-    testWidgets('[multiply] function on count - widget updates', (tester) async {
+    testWidgets('[multiply] function on count - widget updates', (
+      tester,
+    ) async {
       const int expectedValue = 8;
       const int startingValue = 2;
       const int multiplier = 4;
@@ -129,7 +125,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(expectedValue.toString()), findsOneWidget);
-      expect(result, match.equals(expectedValue));
+      expect(result, equals(expectedValue));
     });
 
     testWidgets('[divide] function on count - widget updates', (tester) async {
@@ -150,7 +146,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(expectedValue.toString()), findsOneWidget);
-      expect(result, match.equals(expectedValue));
+      expect(result, equals(expectedValue));
     });
 
     test('[isOdd] function test - count is odd - returns true', () {
@@ -183,26 +179,29 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('[isNegative] function test - count is not negative - returns true', () {
-      activeController.count(90);
-      final result = activeController.count.isNegative;
-      expect(result, isFalse);
-    });
+    test(
+      '[isNegative] function test - count is not negative - returns true',
+      () {
+        activeController.count(90);
+        final result = activeController.count.isNegative;
+        expect(result, isFalse);
+      },
+    );
 
     test('[increment] function test - returns increment value', () {
       const int expected = 100;
       activeController.count(99);
       final result = activeController.count.increment();
-      expect(result, match.equals(expected));
-      expect(activeController.count.value, match.equals(expected));
+      expect(result, equals(expected));
+      expect(activeController.count.value, equals(expected));
     });
 
     test('[decrement] function test - returns decremented value', () {
       const int expected = 99;
       activeController.count(100);
       final result = activeController.count.decrement();
-      expect(result, match.equals(expected));
-      expect(activeController.count.value, match.equals(expected));
+      expect(result, equals(expected));
+      expect(activeController.count.value, equals(expected));
     });
 
     test('[add] function test - type is int - returns correct int value', () {
@@ -210,55 +209,70 @@ void main() {
       final number = ActiveInt(99);
       final result = number.add(1);
 
-      expect(result, match.equals(expected));
+      expect(result, equals(expected));
     });
 
-    test('[add] function test - type is double - returns correct double value', () {
-      const expected = 100.5;
-      final number = ActiveInt(99);
-      final result = number.add(1.5);
+    test(
+      '[add] function test - type is double - returns correct double value',
+      () {
+        const expected = 100.5;
+        final number = ActiveInt(99);
+        final result = number.add(1.5);
 
-      expect(result, match.equals(expected));
-    });
+        expect(result, equals(expected));
+      },
+    );
 
-    test('[subtract] function test - type is int - returns correct int value', () {
-      const expected = 99;
-      final number = ActiveInt(100);
-      final result = number.subtract(1);
+    test(
+      '[subtract] function test - type is int - returns correct int value',
+      () {
+        const expected = 99;
+        final number = ActiveInt(100);
+        final result = number.subtract(1);
 
-      expect(result, match.equals(expected));
-    });
+        expect(result, equals(expected));
+      },
+    );
 
-    test('[subtract] function test - other is double - returns correct double value', () {
-      const expected = 45.9;
-      final number = ActiveInt(50);
-      final result = number.subtract(4.1);
+    test(
+      '[subtract] function test - other is double - returns correct double value',
+      () {
+        const expected = 45.9;
+        final number = ActiveInt(50);
+        final result = number.subtract(4.1);
 
-      expect(result, match.equals(expected));
-    });
+        expect(result, equals(expected));
+      },
+    );
 
-    test('[multiply] function test - type is int - returns correct int value', () {
-      const expected = 200;
-      final number = ActiveInt(2);
-      final result = number.multiply(100);
+    test(
+      '[multiply] function test - type is int - returns correct int value',
+      () {
+        const expected = 200;
+        final number = ActiveInt(2);
+        final result = number.multiply(100);
 
-      expect(result, match.equals(expected));
-    });
+        expect(result, equals(expected));
+      },
+    );
 
-    test('[multiply] function test - type is double - returns correct double value', () {
-      const expected = 25.0;
-      final number = ActiveInt(50);
-      final result = number.multiply(0.5);
+    test(
+      '[multiply] function test - type is double - returns correct double value',
+      () {
+        const expected = 25.0;
+        final number = ActiveInt(50);
+        final result = number.multiply(0.5);
 
-      expect(result, match.equals(expected));
-    });
+        expect(result, equals(expected));
+      },
+    );
 
     test('[divide] function test - returns correct double value', () {
       const expected = 50;
       final number = ActiveInt(100);
       final result = number.divide(2);
 
-      expect(result, match.equals(expected));
+      expect(result, equals(expected));
     });
 
     test('[mod] function test - type is int - returns correct int value', () {
@@ -266,15 +280,18 @@ void main() {
       final number = ActiveInt(5);
       final result = number.mod(3);
 
-      expect(result, match.equals(expected));
+      expect(result, equals(expected));
     });
 
-    test('[mod] function test - type is double - returns correct double value', () {
-      const expected = 1.5;
-      final number = ActiveInt(5);
-      final result = number.mod(3.5);
+    test(
+      '[mod] function test - type is double - returns correct double value',
+      () {
+        const expected = 1.5;
+        final number = ActiveInt(5);
+        final result = number.mod(3.5);
 
-      expect(result, match.equals(expected));
-    });
+        expect(result, equals(expected));
+      },
+    );
   });
 }

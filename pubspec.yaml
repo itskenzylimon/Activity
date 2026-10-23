@@ -1,17 +1,31 @@
 name: activity
-description: A simple multiplatform State Manager that allows the full power of MVC with ZERO Packages.
-version: 1.5.3+5
-homepage: https://github.com/itskenzylimon/Activity/blob/main/README.md
+description: Flutter controllers, reactive values, nested routing, restoration, async guards and ICU localization.
+version: 2.0.0
+homepage: https://github.com/itskenzylimon/Activity
 repository: https://github.com/itskenzylimon/Activity
+issue_tracker: https://github.com/itskenzylimon/Activity/issues
+screenshots:
+  - description: Activity gallery with SVG branding and reactive state examples.
+    path: example/gallery-overview.jpg
+  - description: Copyable API code alongside live reactive results.
+    path: example/gallery-examples.jpg
+  - description: Responsive feature examples on a phone-sized viewport.
+    path: example/gallery-mobile.jpg
+topics:
+  - state-management
+  - reactive
+  - routing
+  - localization
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
+  sdk: ^3.7.2
+  flutter: ">=3.29.0"
 
 dependencies:
+  # Flutter 3.29 pins intl 0.19; newer SDKs pin 0.20.
+  intl: ">=0.19.0 <0.21.0"
   flutter:
     sdk: flutter
-  # this package is used to get the current platform true path
-  path_provider: ^2.0.15
 
 dev_dependencies:
   flutter_test:

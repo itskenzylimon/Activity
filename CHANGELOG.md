@@ -1,29 +1,33 @@
-## 1.0.0+1
+## 2.0.0
 
-* First release! 🎉
+- Expand native routing/feature cookbooks and transition gallery examples; add contract coverage and recursive generated-file ignores.
+- **Breaking:** use identity equality for reactive wrappers; revise disposal, batch and Navigator contracts. Remove legacy HTTP, WebSocket and storage APIs. See the README migration guide.
+- Add typed updates, selectors, immutable snapshots and numeric/text/collection helpers.
+- Add nested/shell routes, typed results, async guards and restoration.
+- Add configurable localization with ICU plural/select, interpolation and locale fallback.
+- Fix lifecycle races, overlapping tasks, collection resets, validation, event replay and UUID generation.
+- Add the blue SVG gallery, 57 checked API examples and a standalone pub.dev counter example.
 
-## 1.5.0+2
+Requires Dart 3.7.2 / Flutter 3.29+. Runtime dependency: intl.
 
-* Documentation covers a lot on Activity now.
+## 1.5.3+5
 
-* Version 1.5.0+2 ready.
+- Fix native request return types and request error handling.
+- Add structured response data and UUID generation.
 
-* Added full support for Websocket and HTTP request on all platforms.
+## 1.5.2+4
 
-* Schema validation with custom error messages.
+- Fix request methods and pub.dev warnings.
 
 ## 1.5.1+3
 
-* Fixed HTTP request uri problem.
-* Fixed Schema validation on phone types.
+- Fix request URI handling and phone validation.
 
-## 1.5.2+4
-* Pub dev warnings fix
-* Post, Put and Delete Http Requests Minor bug fix
+## 1.5.0+2
 
-## 1.5.3+5
-* Fixed return types on io devices
-* Added a structured ActiveResponse data, endpoint, errors
-* Now errors will be returned in ActiveResponse data
-* Http put error management, post error management and delete requests error management updated.
-* Simple uuid generator.
+- Add cross-platform HTTP/WebSocket APIs and custom validation messages.
+- Expand documentation.
+
+## 1.0.0+1
+
+- Initial release.

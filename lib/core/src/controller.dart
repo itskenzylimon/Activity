@@ -1,20 +1,69 @@
 import 'dart:async';
 import 'package:activity/activity.dart';
-import 'package:activity/core/types/active_type.dart';
-
 import 'errors.dart';
 
-/// ActiveController
-/// [ActiveController] is an abstraction of the [ActiveView] bounded.
-/// ActiveController handles current state of active types in [ActiveView].
+/// An application or feature owner for state, subscriptions and asynchronous work.
 ///
-/// Business Logic should exist here and data is easily accessed from the
-/// [ActiveView] through the assigned activeController.
+/// Disposal is terminal and idempotent. activeAsync tracks work; it does not cancel I/O. Check isDisposed after awaits before applying results; use generation tokens for stale responses (see the recipes gallery).
 ///
-/// When an update occurs on an active type, the events are automatically
-/// emitted, The [ActiveState] bound to the [ActiveController] will update
-/// itself everytime an [ActiveType] value is updated and initiate a build.
-
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#async) · browser route `/#/async`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Track an asynchronous operation
+///
+/// <!-- activity-snippet: abstract-class-activecontroller-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveString('idle');
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     await controller.activeAsync(() async {
+///       assert(controller.isTaskRunning(isRunningKey: 'load'));
+///       controller.value('ready');
+///     }, isRunningKey: 'load');
+///     assert(!controller.actively);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Recover without discarding state
+///
+/// <!-- activity-snippet: abstract-class-activecontroller-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveString('draft');
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     try {
+///       await controller.activeAsync<void>(
+///         () async => throw StateError('offline'),
+///         isRunningKey: 'save',
+///       );
+///     } on StateError {
+///       assert(controller.value.value == 'draft'); // Retain the draft for retry.
+///     }
+///     assert(!controller.actively);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
 abstract class ActiveController {
   final StreamController<List<ActiveStateChanged>> _stateController =
       StreamController.broadcast();
@@ -22,14 +71,15 @@ abstract class ActiveController {
       StreamController.broadcast();
 
   final List<StreamSubscription> _subscriptions = [];
+  final Map<String, int> _runningCounts = {};
+  Future<void>? _disposeFuture;
+  bool get isDisposed => _disposed;
 
   bool _actively = false;
+  bool _disposed = false;
 
   bool get actively => _actively;
-
-  final List<dynamic> _isRunningKeys = [];
-
-  List<dynamic> get activeTasks => _isRunningKeys;
+  List<String> get activeTasks => List.unmodifiable(_runningCounts.keys);
 
   ActiveController() {
     for (var element in activities) {
@@ -37,399 +87,232 @@ abstract class ActiveController {
     }
   }
 
-  ///Contains list of [ActiveType] values in [ActiveController].
-  ///
-  ///Every [ActiveType] are added here to allow automatic rebuild.
-
+  /// List of all [ActiveType] instances managed by this controller.
   Iterable<ActiveType> get activities;
 
-  ///Event handler for [ActiveType] when values get updated
-  ///
-  ///If a listener references a [BuildContext] inside a [Widget], override the
-  /// [Widget] dispose method and cancel the subscription.
-
-  StreamSubscription addOnStateChangedListener(
-      Function(List<ActiveStateChanged> events) onStateChanged) {
-    final newSubscription = _stateController.stream.listen(onStateChanged);
-    _subscriptions.add(newSubscription);
-    return newSubscription;
+  /// Adds a listener to state changes.
+  StreamSubscription<List<ActiveStateChanged>> addOnStateChangedListener(
+    void Function(List<ActiveStateChanged> events) onStateChanged,
+  ) {
+    _checkDisposed();
+    final sub = _stateController.stream.listen(onStateChanged);
+    _subscriptions.add(sub);
+    return sub;
   }
 
-  ///Cancels events subscription.
+  /// Cancels a specific subscription.
   Future<void> cancelSubscription(StreamSubscription? subscription) async {
-    await subscription?.cancel();
     _subscriptions.remove(subscription);
+    await subscription?.cancel();
   }
 
-  ///Event handler when there is a [onActiveError].
-  StreamSubscription onActiveErrorListener(Function(ErrorEvent event) onError) {
-    final newSubscription = _errorController.stream.listen(onError);
-    _subscriptions.add(newSubscription);
-    return newSubscription;
+  /// Adds a listener to error events.
+  StreamSubscription<ErrorEvent> onActiveErrorListener(
+    void Function(ErrorEvent event) onError,
+  ) {
+    _checkDisposed();
+    final sub = _errorController.stream.listen(onError);
+    _subscriptions.add(sub);
+    return sub;
   }
 
-  ///Initiates [ActiveState] when UI needs updating.
-  ///
-  /// This process is handled by the package when an [ActiveType] is updated,
-  /// and is not really required to be called when updating [ActiveType].
-
+  /// Notifies listeners of state changes.
   void notifyActivities(List<ActiveStateChanged> events) {
-    if (_stateController.isClosed) {
-      return;
+    _checkDisposed();
+    if (!_stateController.isClosed) {
+      _stateController.add(List.unmodifiable(events));
     }
-    _stateController.add(events);
   }
 
-  /// [activateTypes] allows multiple [ActiveType] to be updated at once and it
-  /// will only trigger a single state change.
-  ///
-  /// [activeTypeList] is a [List<Map<ActiveType, dynamic>>], where keys are the
-  /// properties you want to set, and the values are the new changes. Each map
-  /// in the list must contain exactly one key/value pair.
-  ///
-  ///## Example
-  ///
-  ///```dart
-  ///late final ActiveType<String> taskName;
-  ///late final ActiveType<int> taskScore;
-  ///
-  ///activateTypes([
-  ///   {taskName: 'Write Test Cases'},
-  ///   {taskScore: 5.5},
-  ///]);
-  ///```
-
+  /// Updates multiple [ActiveType]s with a single notification.
   void activateTypes(List<Map<ActiveType, dynamic>> activeTypeList) {
-    final List<ActiveStateChanged> changes = [];
-    for (var activeTypeMap in activeTypeList) {
-      assert(activeTypeMap.keys.length == 1,
-          'activeTypeMap item should contain one key/value pair.');
+    _checkDisposed();
+    final changes = <ActiveStateChanged>[];
+
+    for (final entry in activeTypeList) {
+      if (entry.length != 1 || !entry.keys.first.accepts(entry.values.first)) {
+        throw ArgumentError(
+          "Each update must contain one correctly typed value.",
+        );
+      }
+      entry.keys.first.ensureCanMutate();
+    }
+    for (final activeTypeMap in activeTypeList) {
+      if (activeTypeMap.length != 1) {
+        throw ArgumentError(
+          'Each map in activeTypeList must contain exactly one key-value pair.',
+        );
+      }
+
       final activeType = activeTypeMap.keys.first;
-
-      final oldValue = activeType.value;
       final newValue = activeTypeMap.values.first;
+      final oldValue = activeType.eventSnapshot(activeType.value);
 
-      changes.add(ActiveStateChanged(newValue, oldValue,
-          typeName: activeType.typeName));
+      changes.add(
+        ActiveStateChanged(
+          activeType.eventSnapshot(newValue),
+          oldValue,
+          typeName: activeType.typeName,
+        ),
+      );
 
       activeType(newValue, notifyChange: false);
     }
-    notifyActivities(changes);
+
+    if (changes.isNotEmpty) notifyActivities(changes);
   }
 
-  ///Alerts [ActiveState] that an error has occurred. all listeners registered
-  /// by the[onActiveErrorListener] function will be executed
-
-  void onActiveError(ErrorEvent event) {
-    if (_errorController.isClosed) {
-      return;
+  /// Commits typed assignments with one notification.
+  void activate(Iterable<ActiveUpdate> updates) {
+    _checkDisposed();
+    final pending = updates.toList();
+    for (final update in pending) {
+      update.target.ensureCanMutate();
+      if (!update.target.accepts(update.next)) {
+        throw ArgumentError('Update value does not match its target type');
+      }
     }
-    _errorController.add(event);
+    final events = [for (final update in pending) update.commit()];
+    if (events.isNotEmpty) notifyActivities(events);
   }
 
-  /// Updates the current [ActiveController] status.
-  ///
-  /// You can use this in [ActiveState] by calling [ActiveState.ifRunning] function
-  /// to show maybe a loading indicator.
-  ///
-  /// You can also access the current state using [actively] value
-  /// in [ActiveController].
-  ///
-  /// [isRunning] is a bool value rep Activity running status
-  /// [isRunningKey] is a String value rep Activity running key, this value
-  /// could be used to find the active [ActiveController].
-  ///
-  /// [activeAsync] functions automatically updates [actively] value.
+  /// Register a value created after controller construction.
+  void register(ActiveType value) {
+    _checkDisposed();
+    value.setActiveController(this);
+  }
 
-  void setRunningStatus(
-      {required bool isRunning, required String isRunningKey}) {
+  /// Emits an error event to listeners.
+  void onActiveError(ErrorEvent event) {
+    _checkDisposed();
+    if (!_errorController.isClosed) {
+      _errorController.add(event);
+    }
+  }
+
+  /// Updates the running state and notifies listeners.
+  void setRunningStatus({
+    required bool isRunning,
+    required String isRunningKey,
+  }) {
+    _checkDisposed();
+
+    if (!isRunning && !_runningCounts.containsKey(isRunningKey)) return;
+    final wasRunning = _actively;
     if (isRunning) {
       _addIsRunningKey(isRunningKey);
-      _actively = _isRunningKeys.isNotEmpty || isRunning;
-      notifyActivities([ActiveStateChanged(isRunning, !isRunning, typeName: 'State Updated')]);
     } else {
       _removeIsRunningKey(isRunningKey);
     }
+
+    _actively = _runningCounts.isNotEmpty;
+    notifyActivities([
+      ActiveStateChanged(_actively, wasRunning, typeName: 'State Updated'),
+    ]);
   }
 
-  /// Updates the current [ActiveController] status to true.
-  /// You can specify the [ActiveController] by passing the [isRunningKey]
-
-  /// Updates the current [ActiveController] status to true.
-  ///
-  /// You can use this in [ActiveState] by calling [ActiveState.ifRunning] function
-  /// to show maybe a loading indicator.
-  ///
-  /// You can also access the current state using [actively] value
-  /// in [ActiveController].
-  ///
-  /// [isRunningKey] is a String value rep Activity running status, this value
-  /// could be used to find the active [ActiveController].
-  ///
-  /// [activeAsync] functions automatically updates [actively] value.
-
+  /// Marks the controller as currently running a task.
   void setRunning({required String isRunningKey}) {
     setRunningStatus(isRunning: true, isRunningKey: isRunningKey);
   }
 
-  /// Updates the current [ActiveController] status to false.
-  /// You can specify the [ActiveController] by passing the [isRunningKey]
-
-  /// Updates the current [ActiveController] status to true.
-  ///
-  /// You can use this in [ActiveState] by calling [ActiveState.ifRunning] function
-  /// to show maybe a loading indicator.
-  ///
-  /// You can also access the current state using [actively] value
-  /// in [ActiveController].
-  ///
-  /// [isRunningKey] is a String value rep Activity running status, this value
-  /// could be used to find the active [ActiveController].
-  ///
-  /// [activeAsync] functions automatically updates [actively] value.
-
-  void setIdle({dynamic isRunningKey}) {
+  /// Marks the controller as idle (not running the task).
+  void setIdle({required String isRunningKey}) {
     setRunningStatus(isRunning: false, isRunningKey: isRunningKey);
   }
 
-  /// Use this function when you have a long running task asynchronously. it
-  /// handles setting [actively] status from true to false once done.
-  ///
-  /// [isRunningKey] is a String value rep Activity running status, this value
-  /// could be used to find the active [ActiveController].
-  ///
-  ///Example:
-  ///```dart
-  ///Future<void> loadTasks() async {
-  ///    final tasks = await activeAsync<Tasks>(
-  ///      () async => await taskService.getAllActiveTasks(),
-  ///      isRunningKey: 'loadTasks'
-  ///    );
-  ///}
-  ///```
+  /// Runs an async task and updates running status before and after.
+  Future<T> activeAsync<T>(
+    Future<T> Function() task, {
+    required String isRunningKey,
+  }) async {
+    _checkDisposed();
 
-  Future<T> activeAsync<T>(Future<T> Function() task,
-      {dynamic isRunningKey}) async {
     setRunningStatus(isRunning: true, isRunningKey: isRunningKey);
     try {
-      final doTask = await task();
-      return doTask;
+      return await task();
     } finally {
-      setRunningStatus(isRunning: false, isRunningKey: isRunningKey);
+      if (!_disposed) {
+        setRunningStatus(isRunning: false, isRunningKey: isRunningKey);
+      }
     }
   }
 
-  /// Use this when you intend to check if [actively] is true
-  ///
-  /// Pass the [isRunningKey] if you intend to specify the [ActiveController].
-
+  /// Checks if a task is currently running.
   bool isTaskRunning({String? isRunningKey}) {
-    if(isRunningKey == null){
-      return _isRunningKeys.isNotEmpty;
-    }
-   return _isRunningKeys.contains(isRunningKey);
+    _checkDisposed();
+    return isRunningKey == null
+        ? _runningCounts.isNotEmpty
+        : _runningCounts.containsKey(isRunningKey);
   }
-
-  /// Use this when you intend to attach [isRunningKey] to a running [ActiveController].
 
   void _addIsRunningKey(String isRunningKey) {
-    if (!_isRunningKeys.contains(isRunningKey)) {
-      _isRunningKeys.add(isRunningKey);
-    }
+    _runningCounts.update(
+      isRunningKey,
+      (count) => count + 1,
+      ifAbsent: () => 1,
+    );
   }
-
-  /// Use this when you intend to detach [isRunningKey] to a running [ActiveController].
 
   void _removeIsRunningKey(String isRunningKey) {
-    if (_isRunningKeys.contains(isRunningKey)) {
-      _isRunningKeys.remove(isRunningKey);
+    final count = _runningCounts[isRunningKey] ?? 0;
+    if (count <= 1) {
+      _runningCounts.remove(isRunningKey);
+    } else {
+      _runningCounts[isRunningKey] = count - 1;
     }
   }
 
-  /// Factory reset.
-  /// This resets every activeType property defined in [activities] list
-
+  /// Resets all [ActiveType] values to their original state.
   void resetAllActiveTypes() {
+    _checkDisposed();
     final resetTypes = <Map<ActiveType, dynamic>>[];
+
     for (final activity in activities) {
-      resetTypes.add({activity: activity.originalValue});
+      resetTypes.add({activity: activity.snapshot(activity.originalValue)});
     }
+
     activateTypes(resetTypes);
   }
 
-  /// Use this when you want to clear current state & event listeners
-  /// that are connected and are active.
+  /// Cleans up all resources and closes streams.
+  Future<void> resetActivities() => dispose();
 
-  void resetActivities() {
-    for (var sub in _subscriptions) {
-      sub.cancel();
+  /// Terminal, idempotent cleanup. Pending tasks retain their result/error.
+  Future<void> dispose() {
+    if (_disposeFuture != null) return _disposeFuture!;
+    _disposed = true;
+    _runningCounts.clear();
+    _actively = false;
+    return _disposeFuture = _disposeResources();
+  }
+
+  Future<void> _disposeResources() async {
+    _disposed = true;
+
+    for (final sub in List.of(_subscriptions)) {
+      await sub.cancel();
     }
+
     _subscriptions.clear();
-    _errorController.close();
-    _stateController.close();
-  }
-}
+    _runningCounts.clear();
+    _actively = false;
 
-/// Stream Events connected to the State
-/// You can use [ActiveController.addOnStateChangedListener] to get notified of
-/// these events
+    if (!_stateController.isClosed) {
+      await _stateController.close();
+    }
 
-class ActiveStateChanged<T> {
-  final T? oldValue;
-  final T? newValue;
-  final String? typeName;
-  final String? info;
+    if (!_errorController.isClosed) {
+      await _errorController.close();
+    }
 
-  ActiveStateChanged(this.newValue, this.oldValue, {this.typeName, this.info});
-
-  /// [addActiveList]
-  /// Method that describes [ActiveStateChanged] of type [ActiveList] when a
-  /// new value is added to a list
-
-  static ActiveStateChanged addActiveList<V>(V newValue, {String? typeName}) =>
-      ActiveStateChanged(newValue, null,
-          typeName: typeName, info: 'A new value added : $newValue');
-
-  /// [addAllActiveList]
-  /// Method that describes [ActiveStateChanged] of type [ActiveList] when
-  /// new values is added to a list
-
-  static ActiveStateChanged addAllActiveList<V>(Iterable<V> newValues,
-          {String? typeName}) =>
-      ActiveStateChanged(newValues, null,
-          typeName: typeName, info: 'List values added : $newValues');
-
-  /// [removeActiveList]
-  /// Method that describes [ActiveStateChanged] of type [ActiveList] when a
-  /// values is removed from a list
-
-  static ActiveStateChanged removeActiveList<V>(V removedValue,
-          {String? typeName}) =>
-      ActiveStateChanged(null, removedValue,
-          typeName: typeName, info: 'Value removed : $removedValue');
-
-  /// [clearActiveList]
-  /// Method that describes [ActiveStateChanged] of type [ActiveList] when you
-  /// want to clear every value in a list
-  static ActiveStateChanged<Iterable<V>> clearActiveList<V>(
-          Iterable<V> iterable,
-          {String? typeName}) =>
-      ActiveStateChanged(<V>[], iterable,
-          typeName: typeName, info: 'List cleared');
-
-  ///A factory method which creates a single [ActiveStateChanged] object with a description
-  ///describing the value inserted into to the list at the specified index
-  static ActiveStateChanged insertIntoList<V>(int index, V value,
-          {String? typeName}) =>
-      ActiveStateChanged(
-        value,
-        null,
-        typeName: typeName,
-        info: 'Inserted $value into List as index $index',
-      );
-
-  ///A factory method which creates a single [ActiveStateChanged] object with a description
-  ///describing all the values that were inserted into the list at the specified index
-  static ActiveStateChanged insertAllIntoList<V>(int index, Iterable<V> values,
-          {String? typeName}) =>
-      ActiveStateChanged(values, null,
-          typeName: typeName,
-          info: 'Inserted All $values into List as index $index');
-
-  ///A factory method which creates a single [ActiveStateChanged] object with a description
-  ///describing what value was removed from the list
-  static ActiveStateChanged removedFromList<V>(V removedValue,
-          {String? typeName}) =>
-      ActiveStateChanged(null, removedValue,
-          typeName: typeName, info: 'Removed From List: $removedValue');
-
-  /// [addActiveMap]
-  /// Method that describes [ActiveStateChanged] of type [ActiveMap] when you
-  ///describing what new map values were added to another map
-
-  static ActiveStateChanged addActiveMap<K, V>(Map<K, V> addedMap,
-      {String? typeName}) {
-    return ActiveStateChanged(addedMap, null,
-        typeName: typeName, info: 'Added Map To Map : $addedMap');
+    _disposed = true;
   }
 
-  /// [entryActiveMap]
-  /// Method that describes [ActiveStateChanged] of type [ActiveMap] when you
-  /// add a new entry key/value is added to the map
-
-  static ActiveStateChanged entryActiveMap<K, V>(K key, V newValue,
-      {String? typeName}) {
-    final mapEntry = MapEntry(key, newValue);
-    return ActiveStateChanged(mapEntry, null,
-        typeName: typeName, info: 'Added Entry To Map : $mapEntry');
-  }
-
-  /// [entriesActiveMap]
-  /// Method that describes [ActiveStateChanged] of type [ActiveMap] when you
-  /// add entry objects to the map
-
-  static ActiveStateChanged entriesActiveMap<K, V>(
-      Iterable<MapEntry<K, V>> mapEntries,
-      {String? typeName}) {
-    return ActiveStateChanged(mapEntries, null,
-        typeName: typeName, info: 'Added Entries To Map: $mapEntries');
-  }
-
-  /// [updateActiveMap]
-  /// Method that describes [ActiveStateChanged] of type [ActiveMap] when you
-  /// update a key value
-
-  static ActiveStateChanged<V> updateActiveMap<K, V>(
-      K key, V? oldValue, V? newValue,
-      {String? typeName}) {
-    return ActiveStateChanged<V>(newValue, oldValue,
-        typeName: typeName, info: 'Map $key key value updated to : $key');
-  }
-
-  /// [removedActiveMap]
-  /// Method that describes [ActiveStateChanged] of type [ActiveMap] when you
-  /// remove an entry from map
-
-  static ActiveStateChanged<V> removedActiveMap<K, V>(K key, V newValue,
-      {String? typeName}) {
-    final mapEntry = MapEntry(key, newValue);
-    return ActiveStateChanged<V>(null, newValue,
-        typeName: typeName, info: 'Removed From Map: $mapEntry');
-  }
-
-  @override
-  String toString() {
-    return 'Old value : $oldValue, New value : $newValue, Type name : $typeName, Type info : $info';
-  }
-}
-
-extension ActiveStateChangedExtensions<T> on List<ActiveStateChanged<T>> {
-  ///Whether the typeName on any event matches the [typeName] argument
-  bool containsPropertyName(String typeName) {
-    return map((x) => x.typeName).contains(typeName);
-  }
-
-  ///Gets the first event where the [ActiveStateChanged.typeName] matches the
-  ///[typeName] argument
-  ///
-  ///Returns null if no event is found
-  ActiveStateChanged<T>? firstForPropertyName(String typeName) {
-    final events = where((e) => e.typeName == typeName);
-
-    return events.isNotEmpty ? events.first : null;
-  }
-
-  ///Gets the [ActiveStateChanged.newValue] for the first event where the
-  ///[ActiveStateChanged.typeName]
-  ///matches the [typeName] argument
-  T? newValueFor(String typeName) {
-    return firstForPropertyName(typeName)?.newValue;
-  }
-
-  ///Gets the [ActiveStateChanged.oldValue] for the first event where the
-  ///[ActiveStateChanged.typeName]
-  ///matches the [typeName] argument
-  T? oldValueFor(String typeName) {
-    return firstForPropertyName(typeName)?.oldValue;
+  /// Throws if the controller has been disposed.
+  void _checkDisposed() {
+    if (_disposed) {
+      throw StateError('This ActiveController has been disposed.');
+    }
   }
 }

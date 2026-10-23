@@ -1,17 +1,57 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// An [ActiveInt] with similar characteristics as a an
-/// ordinary dart int object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// Observable integers with numeric helpers.
 ///
-/// Has similar characteristics as int and The value cannot be null
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
 ///
-/// Example
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Increment a counter
+///
+/// <!-- activity-snippet: class-activeint-extends-1 -->
 /// ```dart
+/// import 'package:activity/activity.dart';
 ///
-/// final age = ActiveInt(10);
+/// class SampleController extends ActiveController {
+///   final value = ActiveInt(2);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
 ///
-/// print('${age.add(5)}'); //prints 15
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.increment();
+///     assert(controller.value.value == 3);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Clamp and derive
+///
+/// <!-- activity-snippet: class-activeint-extends-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveInt(2);
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.updateValue((n) => n * 10);
+///     controller.value.clampTo(0, 10);
+///     assert(controller.value.select((n) => n.isEven));
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
 /// ```
 class ActiveInt extends ActiveType<int> {
   ActiveInt(super.value, {super.typeName});
@@ -122,39 +162,64 @@ class ActiveInt extends ActiveType<int> {
   }
 }
 
-/// An [ActiveInt] with similar characteristics as a an
-/// ordinary dart int object. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// Optional reactive values; constructors use named `value:` arguments.
 ///
-/// Has similar characteristics as int and The value can be null
+/// Check for null before calling operations requiring a value. The owner disposes the controller, not each wrapper.
 ///
-/// Example
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Initialize absent data
+///
+/// <!-- activity-snippet: class-activenullableint-extends-1 -->
 /// ```dart
-/// final score = ActiveIntNull();
+/// import 'package:activity/activity.dart';
 ///
-/// if (score.isNull)
-/// {
-///   print("Score not found");
+/// class SampleController extends ActiveController {
+///   final value = ActiveNullableInt();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     assert(controller.value.isNull);
+///     controller.value.setIfNull(() => 18);
+///     assert(controller.value.value == 18);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
 /// }
 /// ```
 ///
-/// Other Usages Examples
+/// ### Clear and restore absence
+///
+/// <!-- activity-snippet: class-activenullableint-extends-2 -->
 /// ```dart
+/// import 'package:activity/activity.dart';
 ///
-/// final age = ActiveIntNull();
+/// class SampleController extends ActiveController {
+///   final value = ActiveNullableInt();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
 ///
-/// print('${age.add(5)}'); throws Exception because no value has been assigned.
-///
-/// age(10)
-///
-/// print('${age.subtract(5)}'); //prints 5
-///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value(18);
+///     controller.value.reset();
+///     assert(controller.value.value == null);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
 /// ```
-///
 class ActiveNullableInt extends ActiveType<int?> {
   ActiveNullableInt({int? value, super.typeName}) : super(value);
 
-  /// Factory constructor for initializing an [ActiveIntNull] to zero.
+  /// Factory constructor for initializing an [ActiveNullableInt] to zero.
   ///
   /// See [ActiveType] for [typeName] usages.
   ///
@@ -194,9 +259,9 @@ class ActiveNullableInt extends ActiveType<int?> {
 
   /// Adds [other] to this number.
   ///
-  /// This does not set the value for this [ActiveIntNull].
+  /// This does not set the value for this [ActiveNullableInt].
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   ///
   /// The result is an [int], as described by [int.+],
   /// if both this number and [other] is an integer,
@@ -205,14 +270,17 @@ class ActiveNullableInt extends ActiveType<int?> {
     return isNotNull
         ? (_value! + other) as E
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Subtracts [other] from this number.
   ///
-  /// This does not set the value for this [ActiveIntNull].
+  /// This does not set the value for this [ActiveNullableInt].
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   ///
   /// The result is an [int], as described by [int.-],
   /// if both this number and [other] is an integer,
@@ -221,24 +289,30 @@ class ActiveNullableInt extends ActiveType<int?> {
     return isNotNull
         ? (_value! - other) as E
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Divides this number by [other].
   ///
-  /// This does not set the value for this [ActiveIntNull].
+  /// This does not set the value for this [ActiveNullableInt].
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   double divide<E extends num>(E other) {
     return isNotNull
         ? _value! / other
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Euclidean modulo of this number by [other].
   ///
-  /// This does not set the value for this [ActiveIntNull].
+  /// This does not set the value for this [ActiveNullableInt].
   ///
   /// Returns the remainder of the Euclidean division.
   /// The Euclidean division of two integers `a` and `b`
@@ -256,7 +330,7 @@ class ActiveNullableInt extends ActiveType<int?> {
   /// if both this number and [other] are integers,
   /// otherwise the result is a [double].
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   ///
   /// Example:
   /// ```dart
@@ -267,22 +341,28 @@ class ActiveNullableInt extends ActiveType<int?> {
     return isNotNull
         ? (_value! % other) as E
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 
   /// Multiplies this number by [other].
   ///
-  /// This does not set the value for this [ActiveIntNull].
+  /// This does not set the value for this [ActiveNullableInt].
   ///
   /// The result is an [int], as described by [int.*],
   /// if both this number and [other] are integers,
   /// otherwise the result is a [double].
   ///
-  /// If the underlying value is [null] throws an [ActiveTypeNullException].
+  /// If the underlying value is `null` throws an [ActiveTypeNullException].
   E multiply<E extends num>(E other) {
     return isNotNull
         ? (_value! * other) as E
         : throw ActiveTypeNullException(
-            StackTrace.current, typeName, runtimeType);
+          StackTrace.current,
+          typeName,
+          runtimeType,
+        );
   }
 }

@@ -1,9 +1,11 @@
+/// Reactive state, controllers, routing and localization for Flutter.
+///
+/// Start with [ActiveController] and [ActivitySelector] to rebuild selected state.
 library activity;
 
 export 'core/active.dart';
 export 'core/types/active_type.dart';
 export 'core/types/active_models.dart';
-export 'core/types/active_memory.dart';
 export 'core/src/controller.dart';
 export 'core/src/view.dart';
 
@@ -13,26 +15,20 @@ export 'core/helpers/logger.dart';
 export 'core/helpers/schema_validator.dart';
 export 'core/helpers/env.dart';
 
-export 'core/forms/surveyjs_form.dart';
-
-//Memory
-export 'core/memory/memory.dart';
-
-//Network
-export 'core/networks/active_socket.dart';
-export 'core/networks/active_request.dart';
-export 'core/networks/active_server.dart';
-
 //Localization
 export 'core/localization/localizations.dart';
 
-//Widgets
-export 'widgets/alerts/dialog.dart';
-export 'widgets/customWidgets/fragment.dart';
 //navigation
 export 'core/navigation/active_navigation.dart';
 //Path Provider Helpers Functions
-export 'core/path/path.dart';
 
-///Scrollable positioned list
-export 'widgets/carousel/src/carousel_slider.dart';
+export 'core/events/deamon.dart';
+export 'core/helpers/uuid.dart';
+export 'core/src/state.dart';
+export 'core/src/helper.dart';
+export 'core/navigation/activity_router.dart';
+export 'core/src/builder.dart';
+
+export 'core/types/type_helpers.dart';
+
+export 'core/localization/icu_message.dart';

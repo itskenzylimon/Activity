@@ -1,1320 +1,1165 @@
-<h1 align="center">This is Activity</h1>  
-<h4 align="center">A simple multiplatform State Manager that allows the full power of MVC with  
-ZERO Packages. </h4>
+# Activity
 
-### Badge
+<img src="https://raw.githubusercontent.com/itskenzylimon/Activity/main/assets/activity.svg" width="112" alt="Activity logo">
 
-Are you using this library on your app? You can use a badge to tell others, you can Add the following code to your README.md or to your website to help others find a quick way to start understanding activity.
+**Flutter application state — typed controllers, nested navigation, ICU messages.**
 
-<a title="Made with Activity" href="https://github.com/itskenzylimon/Activity">  
-  <img  
-    src="https://img.shields.io/badge/Activity-State%20Manager-lightgrey"  
-  >  
-</a>
+[Start learning](#new-to-activity) · [Complete example](#setup-and-a-complete-example) ·
+[Nested routes](#nested-routes-and-named-navigation) · [Shells and tabs](#shell-layouts-and-independent-tabs) ·
+[Restoration](#state-restoration-and-browser-urls) · [ICU messages](#icu-pluralization-and-select-messages) ·
+[Runnable app](https://github.com/itskenzylimon/Activity/blob/main/example/README.md) · [Test map](https://github.com/itskenzylimon/Activity/blob/main/test/README.md) · [Compatibility notes](https://github.com/itskenzylimon/Activity/blob/main/CHANGELOG.md) · [Publishing checklist](https://github.com/itskenzylimon/Activity/blob/main/doc/RELEASING.md)
 
-## Platforms
+| Build with | Use it for |
+| --- | --- |
+| Controllers and reactive values | Typed application state, shared logic and asynchronous task tracking |
+| ActiveView, Activity and selectors | Whole-view updates, inherited controller access and targeted rebuilds |
+| Nested routes and shell layouts | Deep links, shared navigation chrome and independent tab histories |
+| Restorable navigation and async guards | Restoring destinations, checking sessions and confirming route exits |
+| Configurable localization and ICU messages | Asset/existing-project translations, language fallback, plural and gender selection |
+| Validation, ENV and typed helpers | Form checks, configuration parsing and observable value transformations |
 
-| Platform | Supported?        |
-| -------- | ----------------- |
-| Web      | ✅ Tried & Tested |
-| MacOS    | ✅ Tried & Tested |
-| Windows  | ✅ Tried & Tested |
-| Linux    | ✅ Tried & Tested |
-| Android  | ✅ Tried & Tested |
-| iOS      | ✅ Tried & Tested |
+> Explore the [Material feature gallery](https://github.com/itskenzylimon/Activity/blob/main/example/README.md): 19 searchable
+> sections with live previews, copyable source, state helpers, events, async work,
+> nested routing, restoration, four ICU locales and a practical to-do/do-not-do
+> checklist. Includes responsive navigation, theme/accent settings and a live console.
 
-1. [Introduction to Activity](#introduction-to-activity)
-2. [Getting Started with Activity](#getting-started-with-activity)
+Activity is a Flutter library for controller-owned state and application plumbing.
+Routing is implemented directly with Flutter's **Router, Navigator and PopScope**:
+nested paths, retained tabs, typed results, asynchronous guards and restoration
+are Activity APIs. **intl** supplies locale cardinal rules and number formatting.
+The declared minimum remains **Dart 3.7.2 / Flutter 3.29.0**. This guide describes
+**2.0.0**; follow the [release checklist](https://github.com/itskenzylimon/Activity/blob/main/doc/RELEASING.md) before uploading it.
+`intl >=0.19.0 <0.21.0` accommodates Flutter's localization SDK pins.
 
-   1. [Add Activity dependency](#1-add-activity-dependency)
-   2. [Create Controller](#2-create-controller)
-   3. [Create View](#2-create-view)
-   4. [Create Main Class](#2-create-main)
-   5. [Simple Example](#5-simple-example)
+Read the [routing cookbook](https://github.com/itskenzylimon/Activity/blob/main/doc/ROUTING.md) for complete setup, deep links,
+transitions, guards and integration boundaries, and the
+[feature recipes](https://github.com/itskenzylimon/Activity/blob/main/doc/FEATURE_RECIPES.md) for controller, async, event and ICU workflows.
 
-3. [Data Types](#data-types)
-   1. [Boolean](#bool)
-   2. [DateTime](#datetime)
-   3. [Double](#double)
-   4. [Int](#int)
-   5. [List](#list)
-   6. [Map](#map)
-   7. [Models](#models)
-   8. [String](#strings)
-   9. [Type any](#type-any)
-4. [Helper functions](#database-migration)
-   1. [String](#helper-string)
-5. [Cool Color Logger](#cool-color-logger)
-6. [Memory](#ActiveMemory)
-7. [ActiveSockets](#)
-8. [ActiveRequests](#)
-9. [Taskan Crud Example](#taskan-crud-example)
-10. [Features Request & Bug Reports](#features-request-&-bug-reports)
-11. [Contributing](#contributing)
-12. [Articles and videos](#articles-and-videos)
+See [Observations.md](https://github.com/itskenzylimon/Activity/blob/main/Observations.md) for implementation status and validation
+limits. Navigation restoration does not persist controller models, and client
+configuration does not provide server-side authorization or secret storage.
 
-## Get Started
+## Feature examples and API comments
 
-Open `pubspec.yaml` and add activity package to your dependencies
+Public feature comments include **2–3 complete Dart examples** with imports,
+controller ownership and disposal, and links to the corresponding
+[gallery walkthroughs](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#feature-walkthroughs). Browse them in
+editor hovers or generated Dartdoc; the [snippet index](https://github.com/itskenzylimon/Activity/blob/main/doc/API_SNIPPETS.md)
+explains browser requirements and how all 57 marked examples are checked.
+
+| Feature | Example walkthrough | API source |
+| --- | --- | --- |
+| Scalars, nullable values and helpers | [Reactive values](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) | [Typed values](https://github.com/itskenzylimon/Activity/blob/main/lib/core/types/active_type.dart) |
+| Lists, maps and immutable models | [Collections](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#collections), [models](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#models) | [List](https://github.com/itskenzylimon/Activity/blob/main/lib/core/types/active_list.dart), [map](https://github.com/itskenzylimon/Activity/blob/main/lib/core/types/active_map.dart) |
+| Scopes, views and selectors | [Rebuild behavior](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#views) | [Selector](https://github.com/itskenzylimon/Activity/blob/main/lib/core/src/builder.dart) |
+| Async work, errors and cleanup | [Tasks and recovery](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#async) | [Controller](https://github.com/itskenzylimon/Activity/blob/main/lib/core/src/controller.dart) |
+| Events and subscriptions | [Events and replay](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#events) | [Deamon](https://github.com/itskenzylimon/Activity/blob/main/lib/core/events/deamon.dart) |
+| Routes and typed results | [Navigation](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#navigation) | [Router](https://github.com/itskenzylimon/Activity/blob/main/lib/core/navigation/activity_router.dart) |
+| Locale loading, interpolation and ICU | [Localization](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#localization) | [Delegate](https://github.com/itskenzylimon/Activity/blob/main/lib/core/localization/localizations.dart), [formatter](https://github.com/itskenzylimon/Activity/blob/main/lib/core/localization/icu_message.dart) |
+| Forms and configuration | [Validation](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#validation), [ENV](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#environment) | [Validator](https://github.com/itskenzylimon/Activity/blob/main/lib/core/helpers/schema_validator.dart), [ENV](https://github.com/itskenzylimon/Activity/blob/main/lib/core/helpers/env.dart) |
+
+[Open the example guide](https://github.com/itskenzylimon/Activity/blob/main/example/README.md) to run these examples and inspect live
+results beside copyable source. The gallery uses the supplied Activity SVG and
+its blue palette.
+
+![Activity gallery with blue branding](https://raw.githubusercontent.com/itskenzylimon/Activity/main/example/gallery-overview.jpg)
+
+![API code with live results](https://raw.githubusercontent.com/itskenzylimon/Activity/main/example/gallery-examples.jpg)
+
+[Try the illustrated feature](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) ·
+[Phone preview](https://github.com/itskenzylimon/Activity/blob/main/example/gallery-mobile.jpg) · [Run the gallery](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#run-it)
+
+## Gallery recipes and integration templates
+
+The [gallery guide](https://github.com/itskenzylimon/Activity/blob/main/example/README.md) maps every section to its compiled source.
+Each example separates **API fragments**, **complete view code**,
+**model/controller code**, and **application setup**. Local result terminals show
+status, structured results, timing and copy controls. The docked developer
+console is opt-in and disabled in release builds.
+
+Start with the [form/search/pagination workbench](https://github.com/itskenzylimon/Activity/blob/main/example/lib/gallery/recipes/workbench.dart)
+and its [controller](https://github.com/itskenzylimon/Activity/blob/main/example/lib/gallery/recipes/workbench_controller.dart):
+validation preserves a draft, filtered/sorted results are derived, asynchronous
+loads support retry, and generation tokens reject stale responses after newer
+work or cancellation. This cancels result application; it does not cancel I/O.
+The existing events, guarded routes, shell layout, localization and restoration
+sections supply the related application patterns.
+
+The [QuickeyDB recipe](https://github.com/itskenzylimon/Activity/blob/main/example/lib/gallery/recipes/database_page.dart) and
+[complete model/DAO/controller](https://github.com/itskenzylimon/Activity/blob/main/example/lib/gallery/recipes/database_controller.dart)
+use real SQLite with explicit conflict handling and atomic rollback. The app owns
+the database and controller, views borrow them, failures retain drafts, and record
+details return a typed `RecordResult`. Database operations drain before closure.
+Its records are plaintext and session-only. QuickeyDB remains an **example-only**
+local dependency; Activity's library dependencies and release version are unchanged.
+
+Latest published Activity checked on **20 October 2026**: **1.5.3+5**;
+QuickeyDB: **1.2.0+8**. This gallery requires the local Activity 2.0.0 and
+QuickeyDB 3.0.0 checkouts. See [upgrade and platform notes](https://github.com/itskenzylimon/Activity/blob/main/doc/GALLERY_MIGRATION.md)
+and the [public API coverage checklist](https://github.com/itskenzylimon/Activity/blob/main/doc/GALLERY_COVERAGE.md) before adapting
+these examples to a published-version application.
+
+## New to Activity?
+
+A **controller** owns application logic. A **reactive value** wraps a Dart value
+and notifies its controller when changed. A **view** listens and rebuilds; a
+**selector** rebuilds only when its selected immutable value changes.
+
+```text
+Controller → registered values → change notifications → view / scope / selector
+                       ↓
+                router refresh → async guards → destination
+```
+
+1. Create final reactive fields and list them in `activities`. Base construction
+   attaches them automatically; initialize them before the constructor body.
+2. Keep one owner for the controller. Pass that instance to a view or an Activity
+   scope; descendants read it with `Activity.getActivity<MyController>(context)`.
+3. Update through `set`, call syntax or typed helpers. Values change immediately;
+   notification delivery and widget rebuilds happen asynchronously.
+4. Use `ActivitySelector` for small subtrees. Select immutable scalars/records,
+   rather than mutating a selected list in place.
+5. Own routers and localization delegates once. Dispose the controller/router
+   when their application owner finishes; widgets cancel their own listeners.
+
+Wrappers use identity equality; compare values explicitly with `.equals(...)` or
+`.value`. Collection snapshots are shallow. Controller task bookkeeping keeps
+busy state correct but does not cancel network requests or persist models.
+
+## Standalone pub.dev example
+
+[activity_example.dart](https://github.com/itskenzylimon/Activity/blob/main/example/activity_example.dart) is a complete counter app
+using only Activity and Flutter. Copy it into an application's `lib/main.dart`;
+use `activity: ^2.0.0` once this release is published. For local verification,
+point the dependency at this checkout. It creates one controller, selects its
+count and disposes the controller from its owner.
+
+The full gallery remains a workspace application. Its QuickeyDB 3.0.0 path
+dependency is **not** a dependency of the Activity library or standalone example;
+clone both sibling repositories to run the database gallery recipe. The gallery's
+workspace-only pubspec is excluded from the uploaded package. In an Activity-only
+repository checkout, run `flutter pub get --no-example` for package checks.
+
+## Run the example in Chrome
+
+Run from the package's `example/` directory:
+
+```sh
+cd plugins/external/Activity/example
+flutter pub get
+flutter run -d chrome
+```
+
+The app uses the same public barrel as consumers. The Flutter
+`flutter_localizations` SDK delegates localize built-in controls alongside
+Activity translations. No translation generation or web setup script is needed.
+
+## Setup and a complete example
+
+Add a local dependency (adjust the path), then run `flutter pub get`:
 
 ```yaml
 dependencies:
-  activity: ^1.5.2+4
+  flutter:
+    sdk: flutter
+  activity:
+    path: ../Activity
 ```
 
-## Example app
+Use a separately verified published version when installing from pub.dev; a
+checkout version alone does not establish release availability.
 
-A simple Crud based app using the Activity dependency.
-
-### controller.dart
+Place this in your application's `lib/main.dart`. The root owns one controller
+and passes the same instance to the view. An `Activity` wrapper is optional when
+the view already uses `ActiveState`.
 
 ```dart
+import 'dart:async';
+
 import 'package:activity/activity.dart';
-
-class BaseController extends ActiveController {
-
-}
-```
-
-### view.dart
-
-```dart
-import 'package:activity/activity.dart';
-
-class TaskView extends ActiveView<BaseController> {
-   const TaskView({super.key, required super.activeController});
-
-   @override
-   ActiveState<ActiveView<ActiveController>, BaseController> createActivity() =>
-           _TaskViewState(activeController);
-}
-
-class _TaskViewState extends ActiveState<TaskView, BaseController> {
-   _TaskViewState(super.activeController);
-
-   @override
-   Widget build(BuildContext context) {
-
-   }
-
-}
-```
-
-### main.dart
-
-```dart
-
-void main() async {
-   WidgetsFlutterBinding.ensureInitialized();
-   runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-   const MyApp({super.key});
-   @override
-   Widget build(BuildContext context) {
-      return MaterialApp(
-         title: 'Activity Task App',
-         theme: ThemeData(primarySwatch: Colors.blue),
-         home: Activity(
-            BaseController(),
-            onActivityStateChanged: ()=>
-                    DateTime.now().microsecondsSinceEpoch.toString(),
-            child: TaskView(
-               activeController: BaseController(),
-            ),
-         ),
-      );
-   }
-}
-
-```
-
-Activity allows developers to easily implement MVC architecture on there app, it doesn't get any  
-harder than what you see, UI will rebuild the specified Widget automatically without stress giving  
-you more time for implementation rather than spending countless hours working on your states.
-
-## Global State Management
-
-With Activity you can easily manage global states that affect the app across the apps cycle, states  
-like settings configuration, user sessions and user / app data.
-
-Create a MainController, you can place it at the root of the app
-
-### controller.dart
-
-```dart
-import 'package:activity/activity.dart';
-
-class MainController extends Controller {
-
-  /// This override is needed
-   @override
-   List<ActiveType> get activities {
-      return [];
-   }
-
-}
-```
-
-Change the `CupertinoApp` or `MaterialApp` to an `Activity` widget. you can optionally pass a  
-unique identifier to track state id. NOTE: If you don't pass a unique identifier, Activity will  
-use the current timestamp as the unique identifier.
-
-### main.dart
-
-```dart
-
-import 'package:example/controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:activity/activity.dart';
 
-import 'model.dart';
+void main() => runApp(const CounterApp());
 
-void main() async {
-   WidgetsFlutterBinding.ensureInitialized();
-   runApp(const MyApp());
+class CounterController extends ActiveController {
+  final count = ActiveInt(0, typeName: 'count');
+
+  @override
+  Iterable<ActiveType> get activities => [count];
+
+  void increment() => count.set(count.value + 1);
 }
 
-class MyApp extends StatelessWidget {
-   const MyApp({super.key});
+class CounterApp extends StatefulWidget {
+  const CounterApp({super.key});
 
-   @override
-   Widget build(BuildContext context) {
-      return MaterialApp(
-         title: 'Activity Task App',
-         theme: ThemeData(primarySwatch: Colors.blue),
-         home: Activity(
-            BaseController(),
-            onActivityStateChanged: () =>
-                    DateTime
-                            .now()
-                            .microsecondsSinceEpoch
-                            .toString(),
-            child: TaskView(
-               activeController: BaseController(),
-            ),
-         ),
-      );
-   }
+  @override
+  State<CounterApp> createState() => _CounterAppState();
 }
 
-class TaskView extends ActiveView<BaseController> {
-   const TaskView({super.key, required super.activeController});
+class _CounterAppState extends State<CounterApp> {
+  final controller = CounterController();
 
-   @override
-   ActiveState<ActiveView<ActiveController>, BaseController> createActivity() =>
-           _TaskViewState(activeController);
-}
-
-class _TaskViewState extends ActiveState<TaskView, BaseController> {
-   _TaskViewState(super.activeController);
-
-   @override
-   void initState() {
-      // TODO: implement initState
-      super.initState();
-      activeController.initCalculations();
-   }
-
-   // @override
-   // void didChangeDependencies() {
-   //   Activity.getActivity<BaseController>(context).totalTaskLevels();
-   //   super.didChangeDependencies();
-   // }
-
-   @override
-   Widget build(BuildContext context) {
-      return MaterialApp(
-         debugShowCheckedModeBanner: true,
-         title: 'This is Activity',
-         theme: ThemeData(
-            primarySwatch: activeController.tasksLevel.value > 100 ? Colors.red : Colors.blue,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-         ),
-         home: Scaffold(
-            appBar: AppBar(
-               title: const Text('Activity App'),
-            ),
-            body: SafeArea(
-                    child: Column(
-                       children: [
-                          ifRunning(
-                                  const CircularProgressIndicator(),
-                                  otherwise: Expanded(
-                                          child: Align(
-                                             alignment: Alignment.topCenter,
-                                             child: ListView.builder(
-                                                itemCount: activeController.tasks.length,
-                                                itemBuilder: (context, i) {
-                                                   ActiveModel<Task> taskModel =
-                                                   activeController.tasks[i];
-                                                   return ListTile();
-                                                },
-                                             ),
-                                          ))
-                          )
-                       ],
-                    )),
-         ),
-      );
-   }
-}
-
-```
-
-Activity under the hood relies on Streams to track and update state in their respective widgets,
-
-Apart from State Management, Activity can benefit a developer in many ways including
-
-- Requires simplified development and code maintainability is easy .
-- Apps built with Activity have incredibly less code lines.
-- You have a wide variety of data types that extend to Activity, just by defining them you don't really need to follow up on UI state.
-- You get to write better logic and fast implementation in a Dart, Most developers find it time-consuming tracking UI changes.
-- Lastly but not the least, Activity allows developers to practice better  
-  MVC architecture.
-
-### How to use Activity effectively
-
-- Create a Controller class that extends `ActiveController`
-- Create a View class that extends `ActiveView` / `ActiveState`
-
----
-
-- to get the controller instance, use `Activity.getActivity<Controller>(context)`
-- use `ifRunning` to check if the controller is running
-- use `activeAsync` to run a function **asynchronously** in the background. after the function is done, it
-  will automatically handle setting **actively** status from true to false once done.
-  > This can be helpful when you want to run **asynchronously** function in the background, and you don't want to manually set the **status**
-  > to false when done or if you have a loading indicator that depends on the status of the controller.
-
-```dart
-
-/// loadTasks is your function that returns a Future<void>
-/// inside this function you can call your service to fetch data from the server or the database.
-/// We call activeAsync and pass a function with a isRunningKey key to make it easier to find the controller.
-/// The function will run in the background and once done, it will automatically set the status to false and return
-/// dynamic value from the function.
-Future<void> loadTasks() async {
-    final tasks = await activeAsync<Tasks>(
-      () async => await taskService.getAllActiveTasks(),
-      /// [isRunningKey] is a String value rep Activity running status, this value
-      /// could be used to find the active [ActiveController].
-      isRunningKey: 'loadTasks'
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: CounterPage(activeController: controller),
     );
+  }
+
+  @override
+  void dispose() {
+    unawaited(controller.resetActivities());
+    super.dispose();
+  }
 }
 
-```
-
-- use `activateTypes` to activate controller types at the same time
-
-```dart
-
-  /// [activateTypes] allows multiple [ActiveType] to be updated at once and it
-  /// will only trigger a single state change.
-  ///
-  /// [activeTypeList] is a [List<Map<ActiveType, dynamic>>], where keys are the
-  /// properties you want to set, and the values are the new changes. Each map
-  /// in the list must contain exactly one key/value pair.
-  ///
-  ///## Example
-  ///
-  late final ActiveType<String> taskName;
-  late final ActiveType<int> taskScore;
-
-  activateTypes([
-     {taskName: 'Write Test Cases'},
-     {taskScore: 5.5},
-  ]);
-
-```
-
-- use `resetAllActiveTypes` to reset all active types to their default values
-
-```dart
-  /// [resetAllActiveTypes] will reset all [ActiveType] to their default values
-  /// and trigger a single state change.
-  ///
-  ///## Example
-  ///
-  late final ActiveType<String> taskName;
-  late final ActiveType<int> taskScore;
-
-  resetAllActiveTypes();
-
-```
-
-- use `Fragment` to create a reactive widget that can be used in multiple places
-
-```dart
-  ///## Example Fragment
-  ///
-
-Fragment fragment = Fragment(
-   activeController: TaskController(),
-   viewContext: (BuildContext context) {
-      /// access the TaskController() using Activity.getActivity
-      TaskController activeController = Activity.getActivity<TaskController>(context);
-      return Scaffold(
-         appBar: AppBar(
-            title: const Text('Activity Task App'),
-         ),
-         body: Center(
-            child: Column(
-               mainAxisAlignment: MainAxisAlignment.center,
-               children: <Widget>[
-                  const Text(
-                     'You have pushed the button this many times:',
-                  ),
-                  GestureDetector(
-                     child: const Text(
-                        "close dialog",
-                     ),
-                     onTap: () {
-                        Navigator.pop(context);
-                     },
-                  ),
-               ],
-            ),
-         ),
-      );
-   },
-);
-
-/// Fragment can be used in multiple places like this
-```
-
-- use `ADialog` to create a reactive dialog that can be used in multiple places
-
-```dart
-  ///## Example Dialog
-
-ADialog aDialog = ADialog(
-   backgroundColor: Colors.red,
-   margin: const EdgeInsets.all(100),
-   activeController: activeController,
-   viewContext: (BuildContext context) {
-      return Scaffold(
-         appBar: AppBar(
-            title: const Text('Activity Task App'),
-         ),
-         body: Center(
-            child: Column(
-               mainAxisAlignment: MainAxisAlignment.center,
-               children: <Widget>[
-                  const Text(
-                     'You have pushed the button this many times:',
-                  ),
-                  GestureDetector(
-                     child: const Text(
-                        "close dialog",
-                     ),
-                     onTap: () {
-                        Navigator.pop(context);
-                     },
-                  ),
-               ],
-            ),
-         ),
-      );
-   },
-);
-
-```
-
-## Data Types
-
-**Activity** will allow you to update your declared variables anywhere on the app code and rebuild the UI for the affected widgets Only.
-
-Active Data Types have a _typeName_ and can be any key you assign the type to. It can really help when you want to update a value based on the assigned key _typeName_
-
-_setToOriginal_ is function that extends any type of Active Type, it is meant to be used when you want to persist a value over
-the applications lyfecycle. you can still update the current value but the original value will persist through out and you can easily access the original values. Under the hood it relies on Memory to persist data.
-
-_setOriginalValueToCurrent_ this function function update the original value set by _setToOriginal_ to the current value, it will perform updates on the UI.
-
-#### ActiveBool
-
-- ActiveBool : extends the dart bool data type, meaning you can enjoy the benefits of the built in bool functions.
-
-```dart
-
-/// Boolean
-/// The [typeName] can be any key you assign the type to.
-/// It can really help when you want to update a value based on the
-/// assigned [typeName]
-/// [ActiveBool] extends the dart bool, meaning you can enjoy the benefits
-/// of the built in bool functions
-/// [Activity] will allow you to update anywhere on the app code and rebuild UI
-/// for the affected widgets Only
-///
-ActiveBool activeBool = ActiveBool(false, typeName: 'keyFlag');
-
-/// [isTrue] flag checks if ActiveBool is true
-activeBool.isTrue;
-
-/// You can easily [reset] ActiveBool back to original value
-/// [notifyChange] flag allows you choose if you want the change
-/// to be updated on the affected widgets.
-activeBool.reset(notifyChange: true);
-
-/// You can do updates to a field using [set] func, this will do the update
-/// and do the ui rebuild on the affected widgets.
-/// passing [notifyChange] as false will not do a UI rebuild
-/// passing [setAsOriginal] as true will set the new value as
-/// the original value.
-activeBool.set(true, notifyChange: false, setAsOriginal: true);
-
-/// [setTrue] will set [ActiveBool] value to true
-activeBool.setTrue();
-
-/// [setFalse] will set [ActiveBool] value to false
-activeBool.setFalse();
-
-/// [value] will give you the current value
-activeBool.value;
-
-```
-
-#### ActiveDateTime
-
-- ActiveDateTime : extends the DateTime data type, meaning you can enjoy the benefits of the built in DateTime functions.
-
-```dart
-/// DateTime
-/// The [typeName] can be any key you assign the type to.
-/// It can really help when you want to update a value based on the
-/// assigned [typeName]
-/// [ActiveDateTime] extends the dart bool, meaning you can enjoy the benefits
-/// of the built in DateTime functions
-/// [Activity] will allow you to update anywhere on the app code and rebuild UI
-/// for the affected widgets Only
-ActiveDateTime activeDateTime = ActiveDateTime(DateTime.now(), typeName: 'dateOfBirth');
-
-/// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-activeDateTime.setOriginalValueToCurrent();
-activeDateTime.reset(notifyChange: true);
-
-/// You can do updates to a field using [set] func, this will do the update
-/// and do the ui rebuild on the affected widgets.
-/// passing [notifyChange] as false will not do a UI rebuild
-/// passing [setAsOriginal] as true will set the new value as
-/// the original value.
-activeDateTime.set(DateTime.now().subtract(const Duration(days: 10)),
- notifyChange: false, setAsOriginal: true);
-
-/// [value] will give you the current value
-activeDateTime.value;
-```
-
-#### ActiveDouble
-
-- ActiveDouble : extends the dart Double data type, meaning you can enjoy the benefits of the built in Double functions.
-
-```dart
-/// Double
-/// The [typeName] can be any key you assign the type to.
-/// It can really help when you want to update a value based on the
-/// assigned [typeName]
-/// [ActiveDateTime] extends the dart bool, meaning you can enjoy the benefits
-/// of the built in DateTime functions
-/// [Activity] will allow you to update anywhere on the app code and rebuild UI
-/// for the affected widgets Only
-ActiveDouble activeDouble = ActiveDouble(1.5, typeName: 'rate'); // 1.5
-
-/// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-activeDouble.setOriginalValueToCurrent();
-activeDouble.reset(notifyChange: true);
-
-/// checks if the value is negative and returns a bool type
-activeDouble.isNegative;
-
-/// this converts a double to an int value
-activeDouble.toInt;
-
-/// this will add 0.5 to the current value and does the needed updates activeDouble.add(0.5); // 2.0
-
-/// this will subtract 1.0 to the current value and does the needed updates activeDouble.subtract(1.0); // 1.0
-
-/// this will divide 1.0 by 0.5 to the current value and does the needed updates activeDouble.divide(0.5); // 2.0
-
-/// this will multiply the value with 4 to the current value and does the needed updates
-activeDouble.multiply(4); // 8.0
-
-/// You can do updates to a field using [set] func, this will do the update
-/// and do the ui rebuild on the affected widgets.
-/// passing [notifyChange] as false will not do a UI rebuild
-/// passing [setAsOriginal] as true will set the new value as
-/// the original value.
-activeDouble.set(99.99,
-  notifyChange: false, setAsOriginal: true);
-
-/// [value] will give you the current value
-activeDouble.value;
-
-```
-
-#### ActiveInt
-
-- ActiveInt : extends the dart Int data type, meaning you can enjoy the benefits of the built in Int functions.
-
-```dart
-/// INT
-/// The [typeName] can be any key you assign the type to.
-/// It can really help when you want to update a value based on the
-/// assigned [typeName]
-/// [ActiveDateTime] extends the dart int, meaning you can enjoy the benefits
-/// of the built in int functions
-/// [Activity] will allow you to update anywhere on the app code and rebuild UI
-/// for the affected widgets Only
-ActiveInt activeInt = ActiveInt(100, typeName: 'score'); // 1.5
-
-/// You can easily [setOriginalValueToCurrent] ActiveInt back to original value
-activeInt.setOriginalValueToCurrent();
-activeInt.reset(notifyChange: true);
-
-/// checks if the value is negative and returns a bool type
-activeInt.isNegative;
-
-/// checks if the value is positive and returns a bool type
-activeInt.isEven;
-
-/// increments the value by 1
-activeInt.increment();
-
-/// increments the value by 1
-activeInt.increment();
-
-/// this converts an int to double value
-activeInt.toDouble();
-
-/// this converts an int to a string value
-activeInt.toString();
-
-/// this will add 0.5 to the current value and does the needed updates
-activeInt.add(15); // 115
-
-/// this will subtract 10 to the current value and does the needed updates
-activeInt.subtract(10); // 95
-
-/// this will divide 1.0 by 0.5 to the current value and does the needed updates
-activeInt.divide(5); // 21
-
-/// this will multiply the value with 4 to the current value and does the needed updates
-activeInt.multiply(4); // 84
-
-/// You can do updates to a field using [set] func, this will do the update
-/// and do the ui rebuild on the affected widgets.
-/// passing [notifyChange] as false will not do a UI rebuild
-/// passing [setAsOriginal] as true will set the new value as
-/// the original value.
-activeInt.set(50,
-  notifyChange: false, setAsOriginal: true);
-
-/// [value] will give you the current value
-activeInt.value;
-```
-
-#### ActiveList
-
-- ActiveList : extends the dart bool data type, meaning you can enjoy the benefits of the built in List functions.
-
-```dart
-/// List
-/// The [typeName] can be any key you assign the type to.
-/// It can really help when you want to update a value based on the
-/// assigned [typeName]
-/// [ActiveList] extends the dart bool, meaning you can enjoy the benefits
-/// of the built in List functions
-/// [Activity] will allow you to update anywhere on the app code and rebuild UI
-/// for the affected widgets Only
-ActiveList activeList = ActiveList([1,2,3], typeName: 'score'); // 1.5
-
-/// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-activeList.setOriginalValueToCurrent();
-activeList.reset(notifyChange: true);
-
-/// You can do updates to a field using [set] func, this will do the update
-/// and do the ui rebuild on the affected widgets.
-/// passing [notifyChange] as false will not do a UI rebuild
-/// passing [setAsOriginal] as true will set the new value as
-/// the original value.
-activeList.set([0,9,8],
-  notifyChange: false, setAsOriginal: true);
-
-/// [value] will give you the current value
-activeList.value;
-```
-
-#### ActiveMap
-
-- ActiveMap : extends the dart bool data type, meaning you can enjoy the benefits of the built in Map functions.
-
-```dart
-/// Map
-/// The [typeName] can be any key you assign the type to.
-/// It can really help when you want to update a value based on the
-/// assigned [typeName]
-/// [ActiveMap] extends the dart bool, meaning you can enjoy the benefits
-/// of the built in Map functions
-/// [Activity] will allow you to update anywhere on the app code and rebuild UI
-/// for the affected widgets Only
-ActiveMap activeMap = ActiveMap({'key': 123}, typeName: 'score'); // 1.5
-
-/// You can easily [setOriginalValueToCurrent] ActiveDateTime back to original value
-activeMap.setOriginalValueToCurrent();
-activeMap.reset(notifyChange: true);
-
-/// You can do updates to a field using [set] func, this will do the update
-/// and do the ui rebuild on the affected widgets.
-/// passing [notifyChange] as false will not do a UI rebuild
-/// passing [setAsOriginal] as true will set the new value as
-/// the original value.
-activeMap.set({'key': 100},
-  notifyChange: false, setAsOriginal: true);
-
-/// [value] will give you the current value
-activeMap.value;
-```
-
-#### ActiveModel
-
-- ActiveModel : This is a user specified Model class, you can save a Model and have it reactive across the app cycle while enjoying the benefits that come with Model class.
-
-```dart
-
-Its a work in progress, should work as ActiveType for now, but more
-features will be added soon. To make more data types reactive. and built
-in functions to sync data.
-
-Docs coming soon
-```
-
-#### ActiveString
-
-- ActiveString : extends the dart String data type, meaning you can enjoy the benefits of the built in String functions.
-
-```dart
-
-/// ActiveString extend the normal String Type with activity helper functions
-  ActiveString appTitle = ActiveString('First Title');
-
-/// [Contains] Whether the string value contains a match of [other].
-  appTitle.contains('First');
-
-/// [isEmpty] Whether the string value is empty.
-  appTitle.isEmpty;
-
-/// [isNotEmpty] Whether the string value is not empty.
-  appTitle.isNotEmpty;
-
-/// [length] The length of the string value.
-  appTitle.length;
-
-/// To get the value of the string
-  appTitle.value;
-
-/// To set the value of the string
-  appTitle.set('New Title');
-
-```
-
-#### ActiveType
-
-- ActiveType : This is a Type Any data data type, It supports any kind of data be it a Color, Widget, Map, Styles...
-
-```dart
-/// ActiveType is a Type any with activity helper functions
-  ActiveType appBackgroundColor = ActiveType(Colors.white);
-
-  /// ActiveType is a Type any with activity helper functions
-  ActiveType appBackgroundColor = ActiveType(Colors.white);
-
-  ActiveType dateTime = ActiveType(DateTime.now());
-
-```
-
-## ActiveMemory
-
-Active memory is meant to make data management of [activeTypes] fast and easy. You can easily get any type of datatype (Int, Strings, Booleans, Doubles, Map, Models and T Any kind of data) from within any state of the app.
-
-### Instantiation
-
-```dart
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Memory.instance(filename:"ttt.act").initMemory();
-  runApp(const MyApp());
+class CounterPage extends ActiveView<CounterController> {
+  const CounterPage({super.key, required super.activeController});
+
+  @override
+  ActiveState<CounterPage, CounterController> createActivity() =>
+      _CounterPageState(activeController);
+}
+
+class _CounterPageState extends ActiveState<CounterPage, CounterController> {
+  _CounterPageState(super.activeController);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Activity counter')),
+      body: Center(child: Text('${activeController.count.value}')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: activeController.increment,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
 ```
 
-To reference an instance of Memory, use one of the following methods
+`createActivity()` is the view extension point; do not override `createState()`
+as well. `ActiveViewLegacy<T>` also exists for older view hierarchies. Prefer
+`ActiveView<T>` for new code.
+
+## Sharing a controller with Activity
+
+Use `Activity<T>` to expose an existing controller to descendants. The callback
+`onActivityStateChanged` is optional; by default an internal revision counter
+invalidates dependents for each notification. A custom callback must return a
+different string for each notification.
+
+This alternative root uses `CounterController` from the counter example:
 
 ```dart
-///No need to pass [filename:"memory.txt"] since the filename created when initMemory() was called will not be overwritten
-///Note: this will retrieve the current initialization of the Memory object
-///It is not assured you will get the most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
-///To get most current data, either use the instantiation below or retrieve data using async function await memory.readMemory('key')
-Memory memory = Memory.instance();
-///Note: this will retrieve the current initialization of the Memory object as well as refetch data stored in memmory: use
-///this if you want to access most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
-var memory = await Memory.instance().initMemory();
-```
+class SharedCounterRoot extends StatefulWidget {
+  const SharedCounterRoot({super.key});
 
-### Methods
-
-Storage and retrieval methods are demonstrated in the code snippet below:
-
-```dart
-
-/// initialise Memory instance
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  ///initialize memory
-  await Memory.instance(filename:"memory.txt").initMemory();
-  runApp(const MyApp());
+  @override
+  State<SharedCounterRoot> createState() => _SharedCounterRootState();
 }
 
-///To retrieve an instance of Memory in another dart file, use one of the following ways:
-///No need to pass [filename:"memory.txt"] since the filename created when initMemory() was called will not be overwritten
-///Note: this will retrieve the current initialization of the Memory object
-///It is not assured you will get the most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
-///To get most current data, either use the instantiation below or retrieve data using async function await memory.readMemory('key')
-Memory memory = Memory.instance();
-///Note: this will retrieve the current initialization of the Memory object as well as refetch data stored in memmory: use
-///this if you want to access most current data using synchronous functions getString(), getBool(), getInt() and getDouble()
-var memory = await Memory.instance().initMemory();
+class _SharedCounterRootState extends State<SharedCounterRoot> {
+  final controller = CounterController();
+  int revision = 0;
 
-/// you can easily check if any data is saved on memory
-memory.isDataEmpty
+  @override
+  Widget build(BuildContext context) {
+    return Activity<CounterController>(
+      controller,
+      onActivityStateChanged: () => '${++revision}',
+      child: const MaterialApp(home: SharedCounterPage()),
+    );
+  }
 
-///Storing data
-///Note: [Duration] is used to set length of time of validity of the data stored.
-///String
-///Future<bool> setString(String key, String value, {Duration? duration})
-bool isStringSaved = await memory.setString('key', 'value');
-///Bool
-///Future<bool> setBool(String key, bool value, {Duration? duration})
-bool isBoolSaved = await memory.setBool('key', true);
-///Double
-///Future<bool> setDouble(String key, Double value, {Duration? duration})
-bool isDoubleSaved = await memory.setDouble('key', 3.2);
-///Int
-///Future<bool> setInt(String key, Int value, {Duration? duration})
-bool? isIntSaved = await memory.setInt('key',9);
+  @override
+  void dispose() {
+    unawaited(controller.resetActivities());
+    super.dispose();
+  }
+}
 
-///store any type of data
-///Future upsertMemory<T>(String key, T mem, {Duration? duration})
-var savedData = await memory.upsertMemory('key', 'data');
+class SharedCounterPage extends StatelessWidget {
+  const SharedCounterPage({super.key});
 
-
-
-///Reading data
-///synchronous methods : no awaiting
-String? stringVal = memory.getString('key');
-bool? boolVal = memory.getBool('key');
-Double? doubleVal = memory.getDouble('key');
-Int? intVal = memory.getInt('key');
-
-///asynchronous methods : needs awaiting : can be used to retrieve any data type
-var data = await memory.readMemory('key');
-
-```
-
-```dart
-Memory memory = Memory.instance();
-memory.readMemories(); // Returns a a list of all memories stored
-memory.readMemory('key'); // Returns the value of the key with its declared type
-memory.readMemory('key',{bool value = false}); // Returns a key value map of the retrieved memory entry with it's createdAt and updatedAt dateTimes e.g:-
-//{value: Asia, createdAt: 2023-06-14T14:00:37.920852, updatedAt: 2023-06-14T14:07:14.506855}
-
-memory.insertMemory('key', value, {Duration? duration, bool persist = true}); // Creates an entry with the assigned value and key
-memory.upsertMemory('key', value, {Duration? duration}); // Creates an entry and if the value exist it performs an upsert
-memory.deleteMemory('key'); // Remove an entry from ActiveMemory
-memory.resetMemory(); // This resets all the entries on ActiveMemory
-memory.hasMemory(); // Checks if a key exists in ActiveMemory
-
-```
-
-## ActiveNavigation
-
-Active Navigation is an abstraction on top of the flutter's Navigation API's to reduce boilerplate
-
-```dart
-
-/// Call the Nav class when depending on Activity
-Nav.to(context,()=> View());
-
-```
-
-```dart
-//Navigates to the next view in this case page View()
-  Nav.to(context,()=> View());
-
-///You can also pass arguments to the next page
-    Nav.to(context,()=> View(),"Hello from First view");//takes arguments as Objects so you can pass any data type
-
-//To get arguments passed on the second creen use this api
- Sreing argument =   Nav.getArguments();
- print(argument);//"Hello from First view"
-
-//Pop off from a view
-Nav.off(context);
-//pop off all pages on the navigation stack to the page provided
-Nav.offAll(context,()=> FirstView());
-
-// Corresponding alternative for pushUntill api :
-Nav.pushUntil(context,()=> FirstView(),()=> AnotherView());
-
-```
-
-## ActiveSockets
-
-Activity allows you to connect with your severs using websocket easily, you can have full controll over the connection. ActiveSockets allows for easy integration between android/ios, windows/linux/macos and web.
-
-```dart
-
-/// You can have as many WebSocket instance as you wish and
-/// they wont let you down.
-
-/// initialise an ActiveSocket instance
-ActiveSocket activeSocket = WebSocket();
-
-// create an activeSocket connection to a wss/ws endpoint
-activeSocket.open('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self');
-
-// onSuccess callback to alert you when a successfull connection is made
-activeSocket.onSuccess(() {
-  print("onSuccess");
-});
-
-// onFailure callback to alert you when a failed connection is made
-activeSocket.onFailure(() {
-  print("onFailure");
-});
-
-// onMessage callback to alert you on new messages and pass data from server
-activeSocket.onMessage((data) {
-  print('onMessage @@@');
-  print(data);
-  if(data == 'Hello Activity'){
-  activeSocket.send('Hello world....');
- }  print('onMessage');
-});
-
-// send function is used to send data to the channel you are connected to.
-activeSocket.send('Hello world....');
-
-// onClose callback used to alert you when a connection is closed.
-activeSocket.onClose(() {
-  print('onClose');
-});
-```
-
-## ActiveRequests
-
-Activity allows you to connect with your severs using HTTP Request easily, you can have full controll over the connection. ActiveRequests allows for easy integration between android/ios, windows/linux/macos and web.
-
-```dart
-
-/// initialise an ActiveRequest instance
-ActiveRequest activeRequest = ActiveRequest();
-
-/// setup  activeRequest instance with your prefered configuration.
-/// you can setup as many setups as you want for the different use
-/// cases, like authenticationSetup where you want each request to
-/// pass authorization hearders ( Bearer Token ) or have another
-/// setup contain return type specifics, or have different
-/// baseURL. The use cases are as many as you want (i.e)
-
-/// 1. int? idleTimeout = 1;
-/// 2. int? connectionTimeout = 1;
-/// 3. bool? logResponse = false;
-/// 4. bool? withTrustedRoots = false;
-/// 5. Map<String, String>? httpHeaders = {};
-/// 6. String? privateKeyPath = '';
-/// 7. String? schemePath = 'https';
-/// 8. String? baseURL = '';
-/// 9. String? privateKeyPassword = '';
-
-
-/// request
-  activeRequest.setUp = RequestSetUp(
-          idleTimeout: 10,
-          connectionTimeout: 20,
-          logResponse: true,
-          withTrustedRoots: true,
-          httpHeaders: {
-            "Authorization": "Bearer $access_token",
-            "Content-type": "application/json"
-          });
-  /// you can do the complete [getApi], [postApi], [putApi] and
-/// [deleteApi] and still get a successful [activeResponse].
-
-///here is an implementation of [postApi]
-/// set your parameters
-Map<String, String> params = {
-      'client_id': clientID.value,
-      'client_secret': clientSecrete.value,
-      'grant_type': 'authorization_code',
-      'code': code,
-      'redirect_uri': callBackURL.value,
-    };
-
-///make the request
- ActiveResponse response = await activeRequest
-   .postApi(Params(endpoint: 'https://catfact.ninja/fact', queryParameters: params));
-
-///here is an implementation of [putApi]
-/// initialise an ActiveRequest instance then setup
-ActiveRequest activeRequest = ActiveRequest();
-  activeRequest.setUp = RequestSetUp(
-          idleTimeout: 10,
-          connectionTimeout: 20,
-          logResponse: true,
-          withTrustedRoots: true,
-          httpHeaders: {
-            "Authorization": "Bearer $access_token",
-            "Content-type": "application/json"
-          });
- ActiveResponse activeResponse = await activeRequest.putApi(
-  Params(endpoint: 'https://catfact.ninja/fact'),
-
-
-  /// Makes a DELETE request.
-  ///
-  /// The [deleteApi] function performs a DELETE request using the specified [params].
-  /// Set [saveResponse] to `true` if you want to save the response data.
-  ///
-  /// Returns an [ActiveResponse] representing the response data.
-  ///
-  /// Example:
-/// initialise an ActiveRequest instance then setup
-ActiveRequest activeRequest = ActiveRequest();
-  activeRequest.setUp = RequestSetUp(
-          idleTimeout: 10,
-          connectionTimeout: 20,
-          logResponse: true,
-          withTrustedRoots: true,
-          httpHeaders: {
-            "Authorization": "Bearer $access_token",
-            "Content-type": "application/json"
-          });
-
-   ActiveResponse activeResponse = await activeRequest.deleteApi(
-     Params(endpoint: 'https://catfact.ninja/fact'),
-     saveResponse: true,
-   );
-     /// Makes a Get request.
-  ///
-  /// The [getApi] function performs a DELETE request using the specified [params].
-  /// Set [saveResponse] to `true` if you want to save the response data.
-
-  /// initialise an ActiveRequest instance then setup
-ActiveRequest activeRequest = ActiveRequest();
-  activeRequest.setUp = RequestSetUp(
-          idleTimeout: 10,
-          connectionTimeout: 20,
-          logResponse: true,
-          withTrustedRoots: true,
-          httpHeaders: {
-            "Authorization": "Bearer $access_token",
-            "Content-type": "application/json"
-          });
-
-  ActiveResponse activeResponse = await activeRequest.uploadFileApi(
-     Params(endpoint: 'https://catfact.ninja/fact'),
-     saveResponse: true,
-     savedResponseName: 'cat_fact',
-   );
-     /// post a file request.
-/// The [uploadFileApi] function uploads a file using the specified [params], [file],
-  /// and [fileName]. You can provide additional [setUp] parameters for this specific upload request.
-  /// Set [saveResponse] to `true` if you want to save the response data.
-
-  /// initialise an ActiveRequest instance then setup
-ActiveRequest activeRequest = ActiveRequest();
-  activeRequest.setUp = RequestSetUp(
-          idleTimeout: 10,
-          connectionTimeout: 20,
-          logResponse: true,
-          withTrustedRoots: true,
-          httpHeaders: {
-            "Authorization": "Bearer $access_token",
-            "Content-type": "application/json"
-          });
-
-
-    ActiveResponse activeResponse = await activeRequest.uploadFileApi(
-     Params(endpoint: 'https://catfact.ninja/fact'),
-        io.File('path/to/file'),
-       'file.png',
-     saveResponse: true,
-     savedResponseName: 'cat_fact',
-   );
-
-
-```
-
-## Helpers
-
-Helpers are function that performs part of the computation of another function .  
-Activity has helper functions that make programing fun while making your code much easier to read
-
-### String Helper
-
-```dart
-import 'package:super_string/super_string.dart';
-
-void main() {
-
-    /// isUpperCase checks if a string is in uppercase
-  _value = 'ACTIVITY'.isUpperCase; /// => true
-  /// isLowerCase checks if a string is in lowercase
-  _value = 'activity'.isLowerCase; /// => true
-  /// toCamelCase converts a string to camelCase
-  _value = 'I_love activity'.toCamelCase(); /// => 'iLoveActivity'
-  /// containsAll checks if a string contains all the words in a list
-  _value = 'I love activity'.containsAll(['activity','love']); /// => true
-  /// containsAny checks if a string contains any of the words in a list
-  _value = 'I love activity'.containsAny(['hello','activity']); /// => true
-  /// title converts a string to title case
-  _value = 'I loVE ACTIVITY'.title(); /// => I Love Activity
-  /// capitalize converts a string to capitalize case
-  _value = 'activity'.capitalize(); /// => Activity
-
-    /// isAlNum checks if a string is alphanumeric
-  _value = '123Activity'.isAlNum; /// => true
-  /// isAlpha checks if a string is alphabetic
-  _value = 'Activity'.isAlpha; /// => true
-  /// isInteger checks if a string is an integer
-  _value = '111'.isInteger; /// => true
-
-  /// count counts the number of times a word appears in a string
-  _value = 'activity'.count('i'); /// => 2
-  /// iterable converts a string to a list of characters
-  _value = 'Activity'.iterable; /// => ['A','c','t','i','v', 'i', 't', 'y']
-  /// first returns the first character of a string
-  _value = 'Activity'.first; /// => A
-  /// last returns the last character of a string
-  _value = 'Activity'.last; /// => y
-  /// charAt returns the character at a given index
-  _value = 'Activity'.charAt(0); /// => A
-
+  @override
+  Widget build(BuildContext context) {
+    final controller = Activity.getActivity<CounterController>(context);
+    return Scaffold(
+      body: Center(child: Text('${controller.count.value}')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: controller.increment,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
 ```
 
-## Env Helper
+Read the scope from a descendant's `build` or `didChangeDependencies`, using the
+same controller type as the wrapper. `getActivity` establishes an inherited
+widget dependency. Scopes and views rebind their subscriptions when the controller changes under
+the same widget key. One owner must dispose the old controller when it is unused.
 
-Env helper is a helper that allows you to access your environment variables easily.
-its ideal for storing sensitive information like API keys, database credentials, etc.
+## Reactive values and collections
 
-Store the .env file in the root of your project and add it to your .gitignore file.
-data type is automatically detected and converted to the appropriate type.
+| Value | API examples |
+| --- | --- |
+| General value | `ActiveType<T>(value)`, `createActiveType(value)` |
+| Nullable value | `createActiveNullableType<T>()` |
+| Boolean | `ActiveBool(false)`, `ActiveNullableBool()` |
+| Integer | `ActiveInt(0)`, `ActiveNullableInt()` |
+| Double | `ActiveDouble(0.0)`, `ActivityNullableDoubleProperty()` |
+| String | `ActiveString('')`, `ActiveNullableString()` |
+| Date/time | `ActiveDateTime(DateTime.now())` |
+| Collection | `ActiveList<T>([])`, `ActiveMap<K, V>({})` |
 
-Expect a Future Map<String, dynamic> with the following format.
+For example, register these fields in a controller:
 
 ```dart
+class ProfileController extends ActiveController {
+  final name = ActiveString('Kenzy', typeName: 'name');
+  final age = ActiveInt(20, typeName: 'age');
+  final tags = ActiveList<String>([], typeName: 'tags');
+  final scores = ActiveMap<String, int>({}, typeName: 'scores');
 
-import 'package:activity/activity.dart';
+  @override
+  Iterable<ActiveType> get activities => [name, age, tags, scores];
 
-ENVSetup envSetup = ENVSetup();
-
-/// if you change the path to the .env file,
-/// you can pass it as a [filePath] parameter. Remember to use the
-/// absolute path to the file. .env file must be in the root of your project build file if
-/// not you can pass the path to the file as a parameter to the [readENVFile] function.
-
-print(envSetup.readENVFile('your_project/build_root_path/.env'));
-
-/// Example .env file
-ID=123
-KEY=QWE
-
-/// returns a Future<Map<String, String>> with the following format.
-{ID: 123, KEY: QWE}
-
+  void updateProfile() {
+    name('Grace');                 // Callable shorthand for set().
+    age.set(21);                  // set() returns the updated value.
+    tags.add('flutter');          // Collection helpers notify listeners.
+    scores.addEntry(const MapEntry('completed', 1));
+  }
+}
 ```
 
-## Activity Validation Setup:
+A changed scalar emits when `oldValue != newValue`. `notifyChange: false`
+suppresses that notification. A standalone field must be attached to a controller
+before an operation that notifies; otherwise it throws
+`ActiveTypeNotAssignedException`.
 
-**Activity** has a first-class support for object data validation, it works by defining a scheme with rules and assigning an object to [SchemaValidator.validate] for validation.
+Mutating `tags.value` or `scores.value` directly bypasses notifications. Prefer
+wrapper methods or replace the entire value with a fresh collection. Collections
+and model reset values are not deep snapshots; use immutable nested objects.
+Wrappers use identity equality and stable identity hashes. Compare values with
+`field.equals(other)` or `field.value == expected`. List/map snapshots are shallow.
 
-> Just define the **validation schema** and validate your **object** against it.
+## Batch updates and resets
 
-**SchemaValidator** supports a number of data types like String, Numbers, bool, Date, Email and Phone validations, and apart from those, it also supports Max and Min checks with optional and mandatory fields.
+Using the `ProfileController` above:
 
 ```dart
+final profile = ProfileController();
+profile.activateTypes([
+  {profile.name: 'Grace'},
+  {profile.age: 30},
+]);
 
-/// a sample json object to be validated, you can use any object.
-var sampleJSON = {
-   "email": "johndoegmail.com",
-   "phone": "2541234567",
-   "birthdate": "2020-01-01",
-   "address": "Area 254",
-   "name": "Test"
-};
+profile.name.set('Saved name', setAsOriginal: true);
+profile.name('Unsaved name');
+profile.name.reset(); // Restores 'Saved name'.
+profile.resetAllActiveTypes(); // Resets all registered values in one batch.
+```
 
-/// This is the schema definition.
-/// Activity allows String, Numbers, bool, Date, Email and Phone validations
-/// apart from those activity also supports max and Min with optional and
-/// mandatory fields.
-var registerSchema = {
+Each batch entry must contain exactly one field/value pair. A batch validates all dynamic assignments before applying them and emits one
+list of events. Prefer `activate` with typed `changeTo` assignments (below).
+Custom subclasses overriding setters must validate their own invariants; these
+APIs do not roll back arbitrary user-defined setter side effects.
 
-  /// you can use the required to make a field mandatory.
-  "name": {
-  "type": String,
-  "required": true,
-  "min": 2,
-  "max": 20
+`resetAllActiveTypes()` restores values. `dispose()` (also available as `resetActivities()`) permanently closes
+the controller's streams; it is cleanup, not a way to reset a form for reuse.
+
+## Async tasks and errors
+
+`activeAsync` marks a named task as running, awaits the operation, and clears the
+key in `finally`. It returns the task result and propagates exceptions.
+
+```dart
+class SearchController extends ActiveController {
+  final results = ActiveList<String>([]);
+  final message = ActiveString('');
+
+  @override
+  Iterable<ActiveType> get activities => [results, message];
+
+  Future<void> search(Future<List<String>> Function() fetch) async {
+    if (isTaskRunning(isRunningKey: 'search')) return;
+    try {
+      final items = await activeAsync(fetch, isRunningKey: 'search');
+      if (isDisposed) return;
+      results.set(List<String>.from(items));
+      message('');
+    } on Exception catch (error) {
+      message('Search failed: $error');
+    }
+  }
+}
+```
+
+An `ActiveState` can display
+`ifRunning(const CircularProgressIndicator(), otherwise: content)` or inspect
+`activeController.isTaskRunning(isRunningKey: 'search')`. Overlapping operations, including calls with the same key, are reference counted.
+`activeTasks` is an unmodifiable snapshot of distinct keys. Disposing prevents new
+work immediately. Pending tasks continue and preserve their result or original
+exception; final busy notifications are skipped after disposal. Your async code
+should check `isDisposed` after awaiting work before writing controller values.
+
+`activeAsync` does not automatically emit `ErrorEvent`s. Controllers expose
+`onActiveError` and `onActiveErrorListener` for explicit error reporting. Custom
+listeners return subscriptions; release them with
+`await controller.cancelSubscription(subscription)` when their owner finishes.
+
+## Models
+
+`ActiveModel<T>` extends `ActiveType<T>` and can appear in `activities`. It
+supports the same typed updates, resets, selection, and automatic registration:
+
+```dart
+class Person {
+  const Person(this.name);
+  final String name;
+}
+
+class PersonController extends ActiveController {
+  final person = ActiveModel<Person>(const Person('Kenzy'));
+
+  @override
+  Iterable<ActiveType> get activities => [person];
+
+  void rename(String name) => person(Person(name));
+}
+```
+
+Replace objects rather than mutating them in place so comparisons and resets
+have meaningful values.
+
+## Validation
+
+`SchemaValidator` checks a map synchronously. Results contain `valid`, `data`
+(a shallow copy of the input), `schema` (input with invalid or absent optional
+fields removed), and `errors` (the first message for each failing field).
+
+```dart
+final validator = SchemaValidator({
+  'email': {'type': String, 'required': true, 'email': true},
+  'age': {'type': int, 'min': 18},
+  'password': {'type': String, 'required': true, 'minLength': 8},
+  'confirmation': {'required': true, 'equalsTo': 'password'},
+}, customErrors: {
+  'email.required': 'Enter your email address.',
+  'age.min': 'You must be at least 18.',
+});
+
+final result = validator.validate({
+  'email': 'itskenzylimon@gmail.com',
+  'age': 28,
+  'password': 'example-password',
+  'confirmation': 'example-password',
+});
+if (result.valid) {
+  // Use result.schema as input for your next application step.
+} else {
+  printError(result.errors.toString());
+}
+```
+
+Additional rules include `notEmpty`, `requiredIf`, `requiredWhen`, `max`,
+`maxLength`, `minItems`, `maxItems`, `pattern`, `in`, `date`, `before`, `after`,
+`url`, `phone`, `uuid`, `ipv4`, and `ipv6`. Custom error precedence is
+`field.rule`, then `field`, then `rule`, then the built-in message.
+
+Custom rules return `String?`: return null or an empty string for success and an
+error message for failure. Unknown keys are retained by default; pass
+`allowUnknownKeys: false` to keep only declared, valid fields in `schema`.
+The response maps are unmodifiable shallow copies. URLs require HTTP(S) and a
+host. Dates require an ISO date prefix with a valid calendar day. IP checks are
+syntactic checks; they do not establish address reachability.
+
+```dart
+final usernames = SchemaValidator({
+  'username': {
+    'type': String,
+    'custom': (dynamic value, Map<String, dynamic> data) =>
+        value == 'admin' ? 'Reserved username' : null,
   },
-
-   /// you can also use the email to validate the email address.
-  "email": {
-  "type": String,
-  "required": true,
-  "email": true,
- },
-
-   /// you can also use the phone to validate the phone number.
-"phone": {
-  "type": String,
-  "required": true,
-  "phone": true,
- },
-
-   /// you can also use the date to validate the date format.
-"birthdate": {
-  "type": String,
-  "required": true,
-  "date": true,
- },
-
-   /// you can also use the min and max to validate the length of a string.
-"address": {
-  "type": String,
-  "required": true,
-  "min": 5,
-  "max": 100
-}
-};
-
-/// to validate the object against the schema, just pass the schema and the object to be validated.
-/// returns a SchemaResponse object with the following format.
-/// SchemaResponse({required this.valid, required this.schema, required this.errors});
-
-/// Example validation function. that validates the sampleJSON against the registerSchema above.
-validateJSON() async {
-   SchemaValidator schemaValidator = SchemaValidator(registerSchema);
-   // schemaValidator.customErrors = customErrorMessage;
-
-   /// returns a SchemaResponse object with the following format.
-   /// SchemaResponse({required this.valid, required this.schema, required this.errors});
-   SchemaResponse schemaResponse = schemaValidator.validate(sampleJSON);
-   if (schemaResponse.valid == false) {
-     /// do something with the errors.
-   } else {
-     /// do something with the schema. at this point the schema is valid.
-   }
-}
-
-
+  'code': {'pattern': r'^ABC\d+$'},
+}, allowUnknownKeys: false);
+final checked = usernames.validate({'username': 'ada', 'code': 'ABC123', 'extra': 1});
+// checked.schema contains username and code; extra is omitted.
 ```
 
-**SchemaValidator** returns a **SchemaResponse** response Model that contains the need fields for your next steps, be it, database insert or parsing to the server.
+## Environment configuration
 
-##### Example Schema Response Model.
+`ENVSetup` loads strings and provides typed getters. For local configuration:
 
 ```dart
-SchemaResponse({
-  required this.valid,// boolean, a flag for checking valididty
-  required this.schema,// dynamic Object, returns validated entries
-  required this.errors,// dynamic Object, returns error entries
+final env = ENVSetup();
+env.merge({
+  'API_URL': 'https://example.com',
+  'RETRIES': '3',
+  'ENABLED': 'true',
+  'TIMEOUT': '30s',
 });
+final apiUrl = env.getUri('API_URL');
+final retries = env.getInt('RETRIES');
+final enabled = env.getBool('ENABLED');
+final timeout = env.getDuration('TIMEOUT');
+printInfo('$apiUrl; retries=$retries; enabled=$enabled; timeout=$timeout');
 ```
 
-##### Custom Error Messages.
+`await env.loadFile('/absolute/path/.env')` loads a native file.
+`await env.loadAsset('assets/.env')` loads a declared Flutter asset after binding
+initialization. Getters also support defaults, for example
+`env.getInt('RETRIES', defaultValue: 3)`.
 
-**SchemaValidator** also accepts passing your own **custom error messages**, this might help to make the responses a bit friendly than the generic ones.
+Values bundled with an app are readable by its users; keep production secrets
+on a server. Native file access and process environment are isolated with conditional imports.
+Web apps can use `loadAsset`, `loadString`, and `merge`; `loadFile` logs a warning
+and does nothing on web. A URI getter accepts relative URIs; enforce a scheme and
+host in application code when you need an absolute endpoint.
+
+You can also parse text directly, which is convenient for existing configuration
+services and tests. Parsing completes before merging, so malformed quoted input
+leaves existing values intact:
 
 ```dart
-/// You can pass your own [customErrorMessage] custom error messages to make
-/// the return errors more readable and friendlier.
-/// Keys have to match the ones on [Schema] and You [Object] Payload.
-var customErrorMessage = {
-  'name': 'Kindly Enter your Full Names',
-  'birthdate': 'Enter a valid date',
-};
+final textEnv = ENVSetup();
+textEnv.loadString('''
+HOST="example.com" # inline comments may follow quotes
+API_URL=https://\${HOST}/api
+TIMEOUT=30s
+''');
+final endpoint = textEnv.getUri('API_URL');
+final requestTimeout = textEnv.getDuration('TIMEOUT');
 ```
 
-In the bellow example we can see how easy it is to validate an object and get the right response to handle on your end, failed checks will still return a failed **SchemaResponse** with the specific errors and valid flag as false.
+Expansion supports `${NAME}` and `${NAME:-default}`; unresolved references become
+empty strings unless a default is supplied. Native process environment is a
+secondary lookup source, while browsers only use supplied values. Cycles stop
+expanding rather than recursing indefinitely. Single quotes preserve escape
+characters; double quotes interpret common escapes. `expand: false` leaves
+references intact. Default getters apply to missing keys; invalid present values
+still throw `FormatException`.
+
+## Other utilities
+
+- **Strings:** exported extensions include `capitalize()`, `title()`,
+  `toCamelCase()`, `containsAll(...)`, and `containsAny(...)`.
+- **Logging:** `printInfo`, `printWarning`, `printError`, and `printSuccess` use
+  the configurable `Logger.instance`. Release logging defaults to off. Set
+  `Logger.instance.printInRelease = true` to opt in.
+- **Localization:** `ActiveLocalization.delegate` loads
+  `assets/language/<languageCode>.json`. Register the delegate and supported locales
+  in your app and declare those asset files. `getTranslated(context, key)` can
+  return null for missing keys. The default supported language codes are `en`
+  and `sw`; Flutter's Material localization delegates are configured separately.
+- **Navigation:** `Nav.to`, `pushNamed`, and `off` wrap Flutter navigation.
+  `offAll` clears the whole stack; `replace` replaces the top route.
+  `pushUntil` accepts a real Flutter `RoutePredicate`. Results are typed.
+- **Event bus:** `Deamon` is exported by `activity.dart`; its direct import also
+  remains supported.
 
 ```dart
-validateJSON(){
-  SchemaValidator schemaValidator = SchemaValidator(registerSchema);
-  // schemaValidator.customErrors = customErrorMessage;
+import 'package:activity/core/events/deamon.dart';
 
-  SchemaResponse schemaResponse = schemaValidator.validate(sampleJSON);
-  if (schemaResponse.valid == false) {
-  printError(schemaResponse.toString());
- } else {
-  printSuccess(schemaResponse.toString());
- }}
+Future<void> eventExample() async {
+  final bus = Deamon();
+  final nextMessage = bus.next<String>(); // Subscribe before emitting.
+  bus.emit('Ready');
+  final message = await nextMessage;
+  printInfo(message);
+  await bus.close();
+}
 ```
 
-Using a **SchemaValidator** is very easy and straight forward, you can use it to validate your **JSON** objects before sending them to the server, or before inserting them to the database.
+`on<T>()` filters events by type; `emitSticky<T>()` caches a value for
+`onSticky<T>()`. Every subscriber gets the latest cached value at subscription time, then live
+events in order. Sticky cache lookup uses the exact generic type passed to
+`emitSticky<T>`; live filtering includes subtypes. Use `emitSticky<Base>(child)`
+if base-type subscribers should receive cached children. Each bus is local to
+its Dart isolate; communicate between isolates explicitly. Injected controllers
+must be broadcast and are owned/closed by the bus. Cancel subscriptions when
+their consumers finish; `close` clears the cache and closes the source.
 
-#### Example Process Flow.
+## Typed updates and helper reference
 
-```mermaid
-graph LR
-A[Define A Schema with Payload] -- Pass Payload --> B((SchemaResponse))
-B -- bool --> C(valid)
-B -- valid Payload objects --> D{ schema }
-B -- invalid Payload objects --> E{ errors }
+Import `package:activity/activity.dart` for every API below. Fields that notify
+must belong to a live controller. To experiment with standalone values, call
+`set(..., notifyChange: false)` or explicitly register them with `controller.register`.
+Registration attaches a late-created field; include it in `activities` too if it
+should participate in `resetAllActiveTypes`.
+
+```dart
+final profile = ProfileController();
+profile.activate([
+  profile.name.changeTo('Grace'), // Requires String at compile time.
+  profile.age.changeTo(30),      // Requires int at compile time.
+]);
+profile.age.updateValue((age) => age + 2);
+profile.name.setIfChanged('Grace'); // Returns false and emits nothing.
+final label = profile.age.select((age) => 'Age: $age');
+profile.tags.replaceAll(['flutter', 'dart']);
+profile.tags.addIfAbsent('dart'); // false, no duplicate.
+profile.tags.sort();
+final grouped = profile.tags.groupBy((tag) => tag.length);
+final first = profile.tags.firstOrNull;
+final page = profile.tags.paginate(pageNumber: 20, pageSize: 10); // []
+profile.scores.putIfAbsent('completed', () => 0);
+profile.scores.setEntry('completed', 2);
+final frozenScores = profile.scores.snapshotValue;
 ```
 
-# Example Apps
+`updateValue` gives collection transforms a shallow copy, then emits one event
+when committing the returned collection. Throwing inside the transform leaves
+the original collection unchanged unless the callback mutates shared nested
+objects. `setAsOriginal`, `setToOriginal`, and `setOriginalValueToCurrent()` copy
+list/map originals. Every reset copies again. Override `snapshot` for a custom
+copy policy; immutable models usually need no override.
 
-- [Example App](https://github.com/itskenzylimon/Taskan/example)
+| Type | Read helpers | Mutating helpers |
+| --- | --- | --- |
+| Any `ActiveType<T>` | `value`, `originalValue`, `equals`, `select`, `isNull` | `set`, call syntax, `updateValue`, `setIfChanged`, `reset`, `changeTo` |
+| `ActiveBool` | `isTrue`, `isFalse` | `setTrue`, `setFalse`, `toggle` |
+| Numeric types | `isPositive`, `isNegative`, `isZero`, `isBetween`, `asInt`, `asDouble` | `clampTo`, integer/decimal increment and decrement |
+| `ActiveInt` / `ActiveDouble` | `add`, `subtract`, `multiply`, `divide`, `mod` calculate without mutation | `set`, `updateValue` |
+| `ActiveType<String>` | `isBlank`, `tryInt`, `tryDouble` | `trimValue`, `append`, `prepend`, `replaceText` |
+| Nullable values | `valueOr` | `setIfNull` lazily initializes only missing values |
+| Lists | `firstOrNull`, `lastOrNull`, `where`, `firstWhereOrNull`, `any`, `every`, `fold`, `groupBy`, `paginate`, `snapshotValue` | `add`, `addAll`, `insert`, `insertAll`, `insertAllAtEnd`, `remove`, `removeAt`, `clear`, `replaceAt`, `replaceAll`, `sort`, `retainWhere`, `removeWhere`, `addIfAbsent` |
+| Maps | `containsKey`, `containsValue`, `entries`, `keys`, `values`, `valueOr`, `mapEntries`, `snapshotValue` | `addAll`, `addEntry`, `addEntries`, `update`, `updateAll`, `remove`, `removeWhere`, `clear`, `putIfAbsent`, `setEntry` |
+| Date/time | `startOfDay`, `isSameDay` | `addDuration`, `subtractDuration` |
 
-> **ProTip:** You can use **Activity** with your prefered router package **It will still work**.
+Existing `ActiveInt.increment` and `decrement` increment by one and accept the
+`notifyChange` flag. To add an arbitrary amount use `updateValue((n) => n + 5)`.
+`startOfDay` preserves local/UTC construction; `isSameDay` compares calendar
+components as represented, without converting time zones. Duration arithmetic
+uses elapsed time and can cross local daylight saving boundaries.
 
-## Features Request & Bug Reports
+A collection's `.value` remains mutable for compatibility. Direct mutation bypasses
+notifications and disposal guards. Use `snapshotValue` for a read-only shallow
+snapshot. Events for insertion/removal contain the affected elements; replacement
+and reset events contain old/new collection snapshots. All snapshots remain
+shallow: nested models need immutable fields or application-specific copies.
 
-Feature requests and bugs at the [issue tracker](https://github.com/itskenzylimon/Activity/issues).
+## Selective rebuilding
 
-## Contributing
+Use a selector for a small subtree. The selector runs on controller notifications;
+its builder runs when the selection changes under `==`. Selecting a Dart record
+is useful when a widget depends on several scalar fields:
 
-Activity is an open source project, and thus contributions to this project are welcome - please feel free to [create a new issue](https://github.com/itskenzylimon/Taskan/issues/new/choose) if you encounter any problems, or [submit a pull request](https://github.com/itskenzylimon/Taskan/pulls). For community contribution guidelines, please review the [Code of Conduct](CODE_OF_CONDUCT.md).
+```dart
+ActivitySelector<ProfileController, (String, int)>(
+  controller: profile,
+  select: (controller) => (controller.name.value, controller.age.value),
+  child: const Icon(Icons.person),
+  builder: (context, selected, child) => Row(children: [
+    child!,
+    Text('${selected.$1}, ${selected.$2}'),
+  ]),
+);
+```
 
-If submitting a pull request, please ensure the following standards are met:
+Keep selectors free of side effects. Select immutable values or records of
+scalars. A mutable collection selected by reference will compare equal to itself
+after in-place changes. `ActivitySelector` rebinds on controller replacement and
+cancels its listener on disposal. Its optional child can remain independent of
+selected state.
 
-1. Code files must be well formatted (run `flutter format .`).
+## Localization integration
 
-2. Tests must pass (run `flutter test`). New test cases to validate your changes are highly recommended.
+Create one application-owned delegate. No global language list needs editing.
+Add it alongside your existing delegates and pass its locale list to your app:
 
-3. Implementations must not add any project dependencies.
+```dart
+import 'package:activity/activity.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-4. Project must contain zero warnings. Running `flutter analyze` must return zero issues.
+final translations = ActiveLocalizationDelegate(
+  supportedLocales: const [Locale('en'), Locale('sw')],
+  fallbackLocale: const Locale('en'),
+  assetPath: 'assets/i18n',
+);
 
-5. Ensure docstrings are kept up-to-date. New feature additions must include docstrings.
+MaterialApp(
+  supportedLocales: translations.supportedLocales,
+  localizationsDelegates: [
+    translations,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  home: const Scaffold(body: Text('Home')),
+);
+```
 
-### Additional information
+For a runnable
+example with Flutter SDK localization delegates, see
+`example/lib/gallery/app.dart` and `example/assets/i18n/`.
+For Flutter's built-in controls in languages other than English, add Flutter's
+`flutter_localizations` SDK dependency and its global delegates. Activity does
+not replace Material/Widgets/Cupertino translations.
 
-This package has **NO** dependencies.
+Declare the Flutter SDK localization dependency and translation directory in the
+consuming app's `pubspec.yaml`:
 
-© 2023
-Developed by: [Kenzy Limon](https://kenzylimon.com)
+```yaml
+dependencies:
+  flutter_localizations:
+    sdk: flutter
 
-Top Contributors: [Contributors](), [Contributors](), [Contributors](), [Contributors](), [Contributors]()
+flutter:
+  assets:
+    - assets/i18n/
+```
 
-### Articles and videos
+`assets/i18n/en.json`:
 
-[Flutter Articles](https://medium.com/@itskenzylimon) - Medium Article
+```json
+{"welcome": "Hello {name}", "save": "Save"}
+```
 
-## Found this project useful? ❤️
+`assets/i18n/sw.json`:
 
-If you found this project useful, then please consider giving it a ⭐️ on Github and sharing it with your friends via social media.
+```json
+{"welcome": "Habari {name}"}
+```
+
+```dart
+Text(context.tr('welcome', parameters: {'name': 'Kenzy'}));
+Text(context.tr('save')); // Uses English fallback if the active locale is sw.
+Text(context.tr('unknown', fallback: 'Default text'));
+```
+
+Files use BCP 47 locale tags: `en.json`, `en-GB.json`, `zh-Hant.json`, etc.
+The delegate uses exact supported locale matching; Flutter resolves the requested
+locale against the list. Configure `fallbackLocale` explicitly for missing keys
+and missing primary assets. Malformed JSON, non-string translation values, and
+missing fallback assets remain visible errors. The fallback is loaded before the
+primary locale. Unresolved keys return the key (or the supplied fallback).
+Interpolation replaces `{name}` once; inserted text is never recursively expanded.
+ICU cardinal plural and select syntax is described below.
+
+To integrate an existing translation repository or generated map, supply a loader:
+
+```dart
+final embeddedTranslations = ActiveLocalizationDelegate(
+  supportedLocales: const [Locale('en')],
+  loader: (locale) async => {'welcome': 'Hello {name}'},
+);
+```
+
+The loader receives the full `Locale`; its errors propagate. It should implement
+its own missing-resource policy. An injected `AssetBundle` supports existing asset
+systems and isolated tests. `ActiveLocalization.delegate` and `getTranslated`
+remain available for legacy language-code assets; new code should use the
+configurable delegate and `context.tr`.
+
+## ICU pluralization and select messages
+
+Translation values can be ICU MessageFormat 1 patterns. Pass numbers as numbers;
+Activity selects locale cardinal categories through `intl`, then formats `#` in
+that locale. Exact `=number` branches take precedence over language categories.
+
+`assets/i18n/en.json`:
+
+```json
+{
+  "tasks": "{count, plural, =0{No tasks} one{# task} other{# tasks}}",
+  "guests": "{count, plural, offset:1 =0{Nobody} =1{Just you} one{You and # guest} other{You and # guests}}",
+  "owner": "{gender, select, female{Her tasks} male{His tasks} other{Their tasks}}",
+  "summary": "{gender, select, female{{count, plural, one{She has # task} other{She has # tasks}}} other{{count, plural, one{They have # task} other{They have # tasks}}}}"
+}
+```
+
+```dart
+Text(context.tr('tasks', parameters: {'count': 3})); // 3 tasks
+Text(context.tr('guests', parameters: {'count': 3})); // You and 2 guests
+Text(context.tr('owner', parameters: {'gender': 'female'})); // Her tasks
+Text(context.tr('summary', parameters: {'gender': 'female', 'count': 2}));
+```
+
+| Pattern | Contract |
+| --- | --- |
+| `{name}` | String interpolation; a missing simple argument remains `{name}` |
+| `{count, plural, ...}` | Requires a finite num and an `other` branch |
+| `zero`, `one`, `two`, `few`, `many`, `other` | Locale categories, not fixed numeric comparisons |
+| `=0`, `=1`, `=1.5` | Exact numeric matches before applying an offset |
+| `offset:1` | Subtracts one for category selection and `#`, not for exact matches |
+| `{gender, select, ...}` | Matches a string value; unknown values use the required `other` branch |
+| Nested plural/select | Inner plurals own their `#`; surrounding `#` retains the outer value |
+| Apostrophe quoting | `'{'` prints a brace; `'#'` prints a literal pound inside a plural; `''` prints an apostrophe |
+
+For example, French 0 uses the `one` category, Russian 2 uses `few`, and Arabic
+0/2 use `zero`/`two`. An English message's `zero{...}` is not an exact zero test;
+use `=0{...}` for that behavior. Numeric inputs do not preserve source precision
+such as the difference between textual `1` and `1.00`.
+
+Parameters are inserted as literal text and are never parsed as another message.
+Ordinary apostrophes in words such as `Don't` remain literal. A malformed pattern,
+duplicate branch, missing `other` or unsupported format raises FormatException.
+Missing/non-numeric complex arguments raise ArgumentError. Patterns are parsed
+once per localization instance/template and then reused. Nesting is bounded to
+64 levels. A fallback translation uses the fallback language's plural rules.
+
+For formatter use outside a widget:
+
+```dart
+final message = IcuMessage('{count, plural, one{# file} other{# files}}');
+final text = message.format(locale: 'en', parameters: {'count': 2}); // 2 files
+```
+
+The supported scope is MessageFormat 1 placeholders, **cardinal** plurals and
+select. `selectordinal`, date/time/number skeleton arguments, rich text and
+MessageFormat 2 are explicitly unsupported; format those values with an
+application formatter before interpolating them. There is no generated ARB code
+or build_runner step.
+
+## Nested routes and named navigation
+
+`ActivityRouter` owns a Flutter `RouterDelegate` and `RouteInformationParser`.
+Use Activity route types throughout the tree. Its native Flutter APIs are exposed
+as `routerDelegate`, `routeInformationParser`, `routeInformationProvider` and
+`config`; `context.activityRouter` and `context.activityRoute` provide scoped access.
+
+```dart
+final router = ActivityRouter(
+  initialLocation: '/teams/7',
+  routes: [
+    ActivityRoute(
+      path: '/teams/:team', name: 'team',
+      builder: (_, state) => Scaffold(body: Text('Team ${state.pathParameters['team']}')),
+      routes: [
+        ActivityRoute(
+          path: 'members/:member', name: 'member',
+          builder: (_, state) => Scaffold(
+            appBar: AppBar(title: const Text('Member')),
+            body: Text('Team ${state.pathParameters['team']}, '
+                'member ${state.pathParameters['member']}'),
+          ),
+        ),
+      ],
+    ),
+  ],
+);
+
+MaterialApp.router(routerConfig: router.config);
+router.goNamed('member', pathParameters: {'team': '7', 'member': '9'},
+    queryParameters: {'tab': 'posts'});
+```
+
+Top-level paths start with `/`; child paths are relative. A direct link to
+`/teams/7/members/9` builds both pages, so Back reveals team 7. Child builders
+receive inherited path parameters. Register static paths before overlapping
+parameter paths. Route names must be globally unique.
+
+| Action | Behavior |
+| --- | --- |
+| `go(location)` / `goNamed(name, ...)` | Replaces the matched hierarchy for the destination |
+| `push<T>(location)` / `pushNamed<T>(name, ...)` | Adds a page and returns a `Future<T?>` completed when it is popped |
+| `replace<T>(location)` | Replaces the top page and completes its previous result with null |
+| `pop<T>(result)` | Returns false at the root, otherwise requests a pop and supplies the result |
+| `canPop` | Checks the active declarative page stack (dialogs remain Flutter routes) |
+| `namedLocation(...)` | Encodes full nested paths, repeated query values and optional fragments |
+| `ActivityRouter.of(context)` | Retrieves the Activity owner from a route widget |
+| `ActivityRouteState.of(context)` | Reads the current route's parameters, query, extra and page key |
+| `router.routerDelegate` / `routeInformationParser` | Exposes Flutter Router integration without an external routing package |
+
+```dart
+final selected = await router.pushNamed<int>('member',
+    pathParameters: {'team': '7', 'member': '9'});
+// Inside that page: ActivityRouter.of(context).pop<int>(42);
+```
+
+`ActivityRouteState` exposes `uri`, `pathParameters`, `queryParameters`,
+`queryParametersAll`, `name`, `fullPath`, `extra`, `pageKey`, and `error`.
+Use `pageBuilder` for custom transitions or Cupertino pages. When supplying a
+custom page, provide a stable `restorationId` if that page needs restoration.
+Unknown routes and guard errors reach `errorBuilder`; guard errors are reported
+asynchronously through the mounted Router.
+
+## Shell layouts and independent tabs
+
+A shell keeps shared UI outside its nested Navigator:
+
+```dart
+final rootKey = GlobalKey<NavigatorState>();
+final shellRouter = ActivityRouter(navigatorKey: rootKey, initialLocation: '/items', routes: [
+  ActivityShellRoute(
+    restorationScopeId: 'items_shell',
+    builder: (_, state, child) => Scaffold(
+      appBar: AppBar(title: const Text('Workspace')),
+      body: child,
+    ),
+    routes: [
+      ActivityRoute(path: '/items', builder: (_, state) => const Text('Items'), routes: [
+        ActivityRoute(
+          path: 'preview', parentNavigatorKey: rootKey,
+          builder: (_, state) => const Scaffold(body: Text('Full-screen preview')),
+        ),
+      ]),
+    ],
+  ),
+]);
+```
+
+The preview targets the root Navigator, above the shared shell. Without
+`parentNavigatorKey`, it stays inside the shell. Nested shells can each own their
+own Navigator key and layout.
+
+Use an indexed stateful shell when tabs need independent navigation histories:
+
+```dart
+final tabs = ActivityRouter(initialLocation: '/feed', restorationScopeId: 'router', routes: [
+  ActivityStatefulShellRoute.indexedStack(
+    restorationScopeId: 'main_tabs',
+    branches: [
+      ActivityShellBranch(restorationScopeId: 'feed_branch', routes: [
+        ActivityRoute(path: '/feed', builder: (_, state) => const Text('Feed'), routes: [
+          ActivityRoute(path: 'detail/:id', builder: (_, state) => Text('Post ${state.pathParameters['id']}')),
+        ]),
+      ]),
+      ActivityShellBranch(restorationScopeId: 'settings_branch', routes: [
+        ActivityRoute(path: '/settings', builder: (_, state) => const Text('Settings')),
+      ]),
+    ],
+    builder: (_, state, shell) => Scaffold(
+      body: shell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: shell.currentIndex,
+        onDestinationSelected: (index) => shell.goBranch(index),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'Feed'),
+          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
+        ],
+      ),
+    ),
+  ),
+]);
+```
+
+The builder receives an `ActivityNavigationShell`: put it in the widget tree and
+use `currentIndex`/`goBranch`. Returning to a tab restores its last route; pass
+`initialLocation: true` to reset that tab to its initial location. Widget state
+in other tabs stays mounted in the IndexedStack. Each visited branch retains its
+page stack and pending result futures. Restored routes run guards again; a future
+awaited before process death cannot survive into the restarted process.
+
+## State restoration and browser URLs
+
+Enable restoration at the application, router, shell and branch levels:
+
+```dart
+MaterialApp.router(
+  restorationScopeId: 'my_app',
+  routerConfig: tabs.config, // The tabs configuration above already has scope IDs.
+);
+```
+
+| State | How it survives |
+| --- | --- |
+| Nested destination and selected tab | Router serializes the complete match configuration |
+| Visited tab histories | Activity registers a restorable history for each branch |
+| Form fields, scroll offsets and other widget state | Use Flutter `RestorationMixin` and `RestorableProperty` APIs with stable IDs |
+| JSON-compatible `extra` | Encoded by the navigation engine |
+| Custom objects in `extra` | Supply a matching `extraCodec: Codec<Object?, Object?>` to `ActivityRouter` |
+| Controller values and network data | Application persistence/reloading; routing does not persist controllers |
+
+Keep scope IDs unique and stable between launches, and own each router outside
+`build`. Activity shell wrappers supply stable restorable MaterialPages. Custom page builders need stable page keys and restoration IDs. Use
+`MaterialPage`, `ActivityTransitionPage` or `ActivityNoTransitionPage`; these
+page types participate in route-state scoping and asynchronous exit guards.
+
+URL path/query values remain the portable source for reloadable destinations.
+A platform deep link takes precedence over `initialLocation`; set
+`overridePlatformDefaultLocation: true` when explicitly overriding it is intended.
+Browser Back/Forward goes through the normal parser and guards. When using path
+URL strategy, configure the host to serve the app for deep-link paths. Browser
+reload and OS state restoration have different lifecycles; ordinary controller
+fields do not automatically survive either.
+
+Regression tests restart with a **new router instance**, restore the active tab,
+return to an inactive tab's nested route, and verify RestorableInt values. This
+is stronger than retaining the same router instance across a widget rebuild.
+
+## Async guards and Activity integration
+
+Top-level, page and shell redirects accept `FutureOr<String?>`. Return null to
+allow a destination or a location to redirect. Async work completes before the
+protected page builder runs; the current page remains visible while a navigation
+guard is pending.
+
+```dart
+class SessionController extends ActiveController {
+  final signedIn = ActiveBool(false);
+  @override
+  Iterable<ActiveType> get activities => [signedIn];
+  Future<bool> hasSession() async => signedIn.value; // Replace with your session service.
+}
+
+final session = SessionController();
+final guarded = ActivityRouter(
+  refreshController: session,
+  routes: [
+    ActivityRoute(path: '/', builder: (_, state) => const Scaffold(body: Text('Home'))),
+    ActivityRoute(path: '/login', builder: (_, state) => const Scaffold(body: Text('Sign in'))),
+    ActivityRoute(
+      path: '/account',
+      redirect: (state) async => await session.hasSession() ? null : '/login',
+      builder: (_, state) => const Scaffold(body: Text('Account')),
+    ),
+  ],
+  errorBuilder: (_, state) => Scaffold(body: Text('Navigation failed: ${state.error}')),
+);
+
+Activity(session, child: MaterialApp.router(routerConfig: guarded.config));
+```
+
+Controller notifications trigger re-evaluation, including after sign-out. A newer
+navigation supersedes a pending parse, so an old guard cannot later send the user
+to its destination. Redirect cycles and excessive redirects reach the error
+builder. The guard adapter forwards async exceptions to that error page rather
+than leaving an unresolved parse across the engine's error-zone boundary.
+
+Use `ActivityRoute.onExit` for asynchronous leave confirmation:
+
+```dart
+ActivityRoute(
+  path: '/edit',
+  builder: (_, state) => const Scaffold(body: Text('Editor')),
+  onExit: (context, state) async {
+    final leave = await showDialog<bool>(context: context, builder: (dialogContext) => AlertDialog(
+      title: const Text('Discard changes?'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Stay')),
+        TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Leave')),
+      ],
+    ));
+    return leave ?? false;
+  },
+);
+```
+
+A veto can prevent completion of a requested pop, so `pop` returning true means a
+pop was requested, not that an exit guard has already approved it. Keep guard
+side effects idempotent: redirects may run again on refresh or restoration.
+Dispose the router from its owner; it only cancels its own controller listener.
+
+## Imperative navigation
+
+`Nav` stays available for ordinary Navigator apps, dialogs and typed page results:
+
+```dart
+final answer = await Nav.to<int>(context,
+    () => const Scaffold(body: Text('Choose an answer')));
+if (!context.mounted) return;
+// From that page: Nav.off<int>(context, 42);
+Nav.pushUntil<void>(context, () => const Scaffold(body: Text('Dashboard')),
+    ModalRoute.withName('/home'));
+Nav.offAll<void>(context, () => const Scaffold(body: Text('Login')));
+```
+
+`offAll` clears the whole stack; `replace` replaces the top. `getArguments` is
+nullable outside a modal route; `argumentsOf<T>` casts the supplied arguments.
+Named imperative routes still need Flutter's routes/onGenerateRoute configuration.
+Use router APIs for URL-driven screens rather than mixing independently managed
+stacks without an explicit navigation policy.
+
+## Migrating from 1.x
+
+Version 2.0 intentionally changes the following contracts:
+
+- Legacy `ActiveMemory`, `Memory`, HTTP request and WebSocket exports from 1.x
+  are no longer included. Migrate persistent data and keys before upgrading; use
+  dedicated storage/network packages. The gallery's QuickeyDB integration is an
+  optional application recipe, not a drop-in replacement for the old storage API.
+
+- `field == other` uses wrapper identity. Use `.equals(...)` for value comparison.
+  Hashes remain stable after updates, allowing wrappers as batch/map keys.
+- `Nav.pushUntil` takes a `RoutePredicate`, such as `ModalRoute.withName('/home')`.
+  The old widget predicate never correctly matched routes.
+- `Nav.offAll` clears the entire stack. Use `Nav.replace` for the old top-only behavior.
+- `ActiveState.resetActivities()` restores values. Dispose the controller explicitly
+  from its owner; Flutter owns disposal of mounted State objects.
+- `ActiveModel` now extends `ActiveType`; register it with other fields.
+- Injected Deamon controllers must be broadcast. Sticky replay is per subscriber
+  with an exact generic cache key. The bus owns injected controllers.
+- Logger release output defaults to disabled; opt in explicitly when required.
+- Strict URL/date validation can reject previously accepted relative URLs and
+  overflowing calendar dates. Custom rule callbacks may return null for success.
+
+Additional changes from the first 2.0 development checkout:
+
+- ActivityRouter now owns its Flutter delegate/parser instead of itself being a RouterDelegate<Uri>.
+  Use `MaterialApp.router(routerConfig: router.config)` and
+  `ActivityRouter.of(context)`; do not cast Router.of(context).routerDelegate.
+- Redirects settle asynchronously. Observe navigation/errorBuilder after the
+  Router processes a location, rather than expecting go() to throw guard errors.
+- push and replace return typed result futures. Constructors for ActivityRoute
+  are not const because route trees are validated and copied.
+- Stateful shell builders receive ActivityNavigationShell. Its goBranch retains
+  and restores Activity's per-branch history. Use ActivityShellBranch for branches.
+- ICU braces are syntax. Quote literal syntax characters in translation patterns;
+  simple interpolation and missing-key fallbacks remain supported.
+- intl is the runtime dependency; the former external routing dependency and its native exports have been removed. Replace raw GoRoute/ShellRoute types with ActivityRoute/ActivityShellRoute, and context.go/push with context.activityRouter.go/push.
+
+The SDK language baseline remains Dart 3.7.2. Dart records, typed callbacks,
+immutable snapshots, and explicit resource ownership address the observed issues
+without forcing consumers onto newer language syntax. See the official
+[Dart language evolution](https://dart.dev/resources/language/evolution) and
+[Flutter Router API](https://api.flutter.dev/flutter/widgets/Router-class.html)
+for version and navigation contracts.
+
+## Lifecycle and troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Field update throws an assignment exception | Return that exact field instance from `activities`. |
+| View does not rebuild | Update through the wrapper; check registration and notification flags. |
+| Scoped consumer stays stale | Use the matching generic controller type; omit the optional revision callback. |
+| Two views show different data | Pass the same controller instance; do not create controllers inside `build`. |
+| Reset does not restore nested data | Use immutable values; originals are references or shallow collection copies. |
+| Controller throws after cleanup | `resetActivities()` closes it permanently; create a new controller. |
+
+Have one owner dispose a controller. Views and scopes subscribe synchronously,
+cancel their own subscriptions, and never dispose a shared controller.
+`ActiveState.resetActivities()` now restores values and leaves the mounted state
+usable. `ActiveController.resetActivities()` is the legacy terminal cleanup alias.
+`dispose()` is idempotent and marks the controller disposed before awaiting any
+cleanup. Mutating attached values after disposal throws before mutation.
+
+The example compiles for web; regression tests run on the Flutter host VM and Chrome.
+See Observations for exact validation results; desktop/mobile device coverage is
+separate from compilation and unit tests.
+
+## Example, testing, and contribution
+
+Run from the package directory:
+
+```sh
+flutter pub get
+dart format lib test
+flutter analyze
+flutter test
+flutter test --platform chrome test/events test/helpers test/navigation test/localization test/state/regressions_test.dart
+```
+
+See [Observations.md](https://github.com/itskenzylimon/Activity/blob/main/Observations.md) for the review baseline, test results,
+priorities, and Dart modernization plan. New Dart syntax must respect the minimum
+SDK declared in `pubspec.yaml`; upgrading your installed SDK alone does not raise
+the package language version.
+
+Report bugs or propose features in the
+[Activity issue tracker](https://github.com/itskenzylimon/Activity/issues).
+Contributions should include relevant regression tests and updated API docs.
+See the [Code of Conduct](https://github.com/itskenzylimon/Activity/blob/main/CODE_OF_CONDUCT.md) and [Apache 2.0 license](https://github.com/itskenzylimon/Activity/blob/main/LICENSE).
+
+## Support, gifts and community
+
+Help fund and sustain open-source work.
+[GitHub community](https://github.com/itskenzylimon) ·
+[Report an issue](https://github.com/itskenzylimon/Activity/issues) ·
+[Blog & Articles](https://medium.com/@itskenzylimon) ·
+[Activity on pub.dev](https://pub.dev/packages/activity).

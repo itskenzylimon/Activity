@@ -1,11 +1,57 @@
 part of 'package:activity/core/types/active_type.dart';
 
-/// [ActiveDateTime]
-/// ordinary dart DateTime. When an update is done an [ActiveStateChanged]
-/// event is triggered which in-turn makes a UI rebuild of that widget.
+/// Observable dates; UTC versus local time remains an application choice.
 ///
-/// Has similar characteristics as DateTime and The value cannot be null
-
+/// Register fields in the owning controller before notifying updates. Mutating collection `.value` directly bypasses notifications; snapshots are shallow.
+///
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Move a date
+///
+/// <!-- activity-snippet: class-activedatetime-extends-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveDateTime(DateTime.utc(2026, 10, 23, 9));
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value.addDuration(const Duration(days: 1));
+///     assert(controller.value.value.day == 24);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Derive a day boundary
+///
+/// <!-- activity-snippet: class-activedatetime-extends-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActiveDateTime(DateTime.utc(2026, 10, 23, 9));
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     assert(controller.value.startOfDay == DateTime.utc(2026, 10, 23));
+///     assert(controller.value.isSameDay(DateTime.utc(2026, 10, 23, 18)));
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
 class ActiveDateTime extends ActiveType<DateTime> {
   ActiveDateTime(super.value, {super.typeName});
 
@@ -83,8 +129,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
   /// To detect and reject invalid component values, use
   /// [DateFormat.parseStrict](https://pub.dev/documentation/intl/latest/intl/DateFormat/parseStrict.html)
   /// from the [intl](https://pub.dev/packages/intl) package.
-  static ActiveDateTime parse(String formattedString,
-      {String? typeName}) {
+  static ActiveDateTime parse(String formattedString, {String? typeName}) {
     final dateTime = DateTime.parse(formattedString);
 
     return ActiveDateTime(dateTime, typeName: typeName);
@@ -203,7 +248,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
   /// UTC.
   Duration get timeZoneOffset => _value.timeZoneOffset;
 
-  /// Returns true if [this] occurs before [other].
+  /// Returns true if `this` occurs before [other].
   ///
   /// The comparison is independent
   /// of whether the time is in UTC or in the local time zone.
@@ -223,7 +268,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
   /// ```
   bool isBefore(DateTime other) => _value.isBefore(other);
 
-  /// Returns true if [this] occurs after [other].
+  /// Returns true if `this` occurs after [other].
   ///
   /// The comparison is independent
   /// of whether the time is in UTC or in the local time zone.
@@ -243,7 +288,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
   /// ```
   bool isAfter(DateTime other) => _value.isAfter(other);
 
-  /// Returns true if [this] occurs at the same moment as [other].
+  /// Returns true if `this` occurs at the same moment as [other].
   ///
   /// The comparison is independent of whether the time is in UTC or in the local
   /// time zone.
@@ -285,7 +330,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
 
   /// Returns this DateTime value in the local time zone.
   ///
-  /// Returns [this] if it is already in the local time zone.
+  /// Returns `this` if it is already in the local time zone.
   DateTime toLocal() => _value.toLocal();
 
   /// Returns this DateTime value in the UTC time zone.
@@ -317,7 +362,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
   /// ```
   String toIso8601String() => _value.toIso8601String();
 
-  /// Returns a new [DateTime] instance with [duration] added to [this].
+  /// Returns a new [DateTime] instance with [duration] added to `this`.
   ///
   /// ```dart
   /// final today = DateTime.now();
@@ -325,7 +370,7 @@ class ActiveDateTime extends ActiveType<DateTime> {
   /// ```
   DateTime add(Duration duration) => _value.add(duration);
 
-  /// Returns a new [DateTime] instance with [duration] subtracted from [this].
+  /// Returns a new [DateTime] instance with [duration] subtracted from `this`.
   ///
   /// ```dart
   /// final today = DateTime.now();
@@ -334,9 +379,9 @@ class ActiveDateTime extends ActiveType<DateTime> {
   DateTime subtract(Duration duration) => _value.subtract(duration);
 
   // Returns a [Duration] with the difference when subtracting [other] from
-  /// [this].
+  /// `this`.
   ///
-  /// The returned [Duration] will be negative if [other] occurs after [this].
+  /// The returned [Duration] will be negative if [other] occurs after `this`.
   ///
   /// ```dart
   /// final berlinWallFell = DateTime.utc(1989, DateTime.november, 9);
@@ -348,16 +393,63 @@ class ActiveDateTime extends ActiveType<DateTime> {
   Duration difference(DateTime other) => _value.difference(other);
 }
 
-///An [ActiveType] with similar characteristics as a an
-///ordinary dart bool object.
+/// Optional reactive values; constructors use named `value:` arguments.
 ///
-///Then underlying bool value *CAN* be null
+/// Check for null before calling operations requiring a value. The owner disposes the controller, not each wrapper.
 ///
-///When the value of this changes, it will send a [ActiveStateChanged] event by default. This includes
-///automatically triggering a UI rebuild.
+/// [Gallery walkthrough](https://github.com/itskenzylimon/Activity/blob/main/example/README.md#values) · browser route `/#/values`.
+/// These examples use the current checkout; published 1.x APIs can differ.
+///
+/// ### Initialize absent data
+///
+/// <!-- activity-snippet: class-activitynullabledatetimeproperty-extends-1 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActivityNullableDateTimeProperty();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     assert(controller.value.isNull);
+///     controller.value.setIfNull(() => DateTime.utc(2026, 10, 23));
+///     assert(controller.value.value!.isUtc);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
+///
+/// ### Clear and restore absence
+///
+/// <!-- activity-snippet: class-activitynullabledatetimeproperty-extends-2 -->
+/// ```dart
+/// import 'package:activity/activity.dart';
+///
+/// class SampleController extends ActiveController {
+///   final value = ActivityNullableDateTimeProperty();
+///   @override
+///   Iterable<ActiveType> get activities => [value];
+/// }
+///
+/// Future<void> main() async {
+///   final controller = SampleController(); // This function owns it.
+///   try {
+///     controller.value(DateTime.utc(2026, 10, 23));
+///     controller.value.reset();
+///     assert(controller.value.value == null);
+///   } finally {
+///     await controller.dispose(); // Views borrowing it must not dispose it.
+///   }
+/// }
+/// ```
 class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   ActivityNullableDateTimeProperty({DateTime? value, super.typeName})
-      : super(value);
+    : super(value);
 
   ///Factory constructor for initializing an [ActivityNullableDateTimeProperty] to the current Date/Time.
   ///
@@ -438,8 +530,10 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// To detect and reject invalid component values, use
   /// [DateFormat.parseStrict](https://pub.dev/documentation/intl/latest/intl/DateFormat/parseStrict.html)
   /// from the [intl](https://pub.dev/packages/intl) package.
-  static ActivityNullableDateTimeProperty parse(String formattedString,
-      {String? typeName}) {
+  static ActivityNullableDateTimeProperty parse(
+    String formattedString, {
+    String? typeName,
+  }) {
     final dateTime = DateTime.parse(formattedString);
 
     return ActivityNullableDateTimeProperty(
@@ -452,8 +546,10 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   ///
   /// Works like [parse] except that this function returns `null`
   /// where [parse] would throw a [FormatException].
-  static ActivityNullableDateTimeProperty tryParse(String formattedString,
-      {String? typeName}) {
+  static ActivityNullableDateTimeProperty tryParse(
+    String formattedString, {
+    String? typeName,
+  }) {
     final dateTime = DateTime.tryParse(formattedString);
     return ActivityNullableDateTimeProperty(
       value: dateTime,
@@ -467,7 +563,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The year.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final flutterRelease = DateTime.parse('1969-07-20 20:18:04Z');
@@ -477,7 +573,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The month `[1..12]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final flutterRelease = DateTime.parse('1969-07-20 20:18:04Z');
@@ -488,7 +584,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The day of the month `[1..31]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final flutterRelease = DateTime.parse('1969-07-20 20:18:04Z');
@@ -498,7 +594,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The hour of the day, expressed as in a 24-hour clock `[0..23]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final flutterRelease = DateTime.parse('1969-07-20 20:18:04Z');
@@ -508,7 +604,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The minute `[0...59]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final flutterRelease = DateTime.parse('1969-07-20 20:18:04Z');
@@ -518,7 +614,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The second `[0...59]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final flutterRelease = DateTime.parse('1969-07-20 20:18:04Z');
@@ -529,7 +625,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// The number of milliseconds since
   /// the "Unix epoch" 1970-01-01T00:00:00Z (UTC).
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// This value is independent of the time zone.
   int? get millisecondsSinceEpoch => _value?.millisecondsSinceEpoch;
@@ -537,14 +633,14 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// The number of microseconds since
   /// the "Unix epoch" 1970-01-01T00:00:00Z (UTC).
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// This value is independent of the time zone.
   int? get microsecondsSinceEpoch => _value?.microsecondsSinceEpoch;
 
   /// The microsecond `[0...999]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final date = DateTime.parse('1970-01-01 05:01:01.234567Z');
@@ -554,7 +650,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The millisecond `[0...999]`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final date = DateTime.parse('1970-01-01 05:01:01.234567Z');
@@ -564,7 +660,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The day of the week monday..sunday.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// In accordance with ISO 8601
   /// a week starts with Monday, which has the value 1.
@@ -578,7 +674,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// True if this [DateTime] is set to UTC time.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final dDay = DateTime.utc(1944, 6, 6);
@@ -591,7 +687,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// The time zone name.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// This value is provided by the operating system and may be an
   /// abbreviation or a full name.
@@ -600,7 +696,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// The time zone offset, which
   /// is the difference between local time and UTC.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// The offset is positive for time zones east of UTC.
   ///
@@ -609,9 +705,9 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// UTC.
   Duration? get timeZoneOffset => _value?.timeZoneOffset;
 
-  /// Returns true if [this] occurs before [other].
+  /// Returns true if `this` occurs before [other].
   ///
-  /// Returns false if [this] is null
+  /// Returns false if `this` is null
   ///
   /// The comparison is independent
   /// of whether the time is in UTC or in the local time zone.
@@ -631,9 +727,9 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// ```
   bool isBefore(DateTime other) => _value?.isBefore(other) ?? false;
 
-  /// Returns true if [this] occurs after [other].
+  /// Returns true if `this` occurs after [other].
   ///
-  /// Returns false if [this] is null
+  /// Returns false if `this` is null
   ///
   /// The comparison is independent
   /// of whether the time is in UTC or in the local time zone.
@@ -653,9 +749,9 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// ```
   bool isAfter(DateTime other) => _value?.isAfter(other) ?? false;
 
-  /// Returns true if [this] occurs at the same moment as [other].
+  /// Returns true if `this` occurs at the same moment as [other].
   ///
-  /// Returns false if [this] is null
+  /// Returns false if `this` is null
   ///
   /// The comparison is independent of whether the time is in UTC or in the local
   /// time zone.
@@ -679,7 +775,7 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// Compares this DateTime object to [other],
   /// returning zero if the values are equal.
   ///
-  /// Returns -1 if [this] is null
+  /// Returns -1 if `this` is null
   ///
   /// A [compareTo] function returns:
   ///  * a negative value if this DateTime [isBefore] [other].
@@ -700,19 +796,19 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
 
   /// Returns this DateTime value in the local time zone.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
-  /// Returns [this] if it is already in the local time zone.
+  /// Returns `this` if it is already in the local time zone.
   DateTime? toLocal() => _value?.toLocal();
 
   /// Returns this DateTime value in the UTC time zone.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   DateTime? toUtc() => _value?.toUtc();
 
   /// Returns an ISO-8601 full-precision extended format representation.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// The format is `yyyy-MM-ddTHH:mm:ss.mmmuuuZ` for UTC time, and
   /// `yyyy-MM-ddTHH:mm:ss.mmmuuu` (no trailing "Z") for local/non-UTC time,
@@ -738,9 +834,9 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// ```
   String? toIso8601String() => _value?.toIso8601String();
 
-  /// Returns a new [DateTime] instance with [duration] added to [this].
+  /// Returns a new [DateTime] instance with [duration] added to `this`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final today = DateTime.now();
@@ -748,9 +844,9 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   /// ```
   DateTime? add(Duration duration) => _value?.add(duration);
 
-  /// Returns a new [DateTime] instance with [duration] subtracted from [this].
+  /// Returns a new [DateTime] instance with [duration] subtracted from `this`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
   /// ```dart
   /// final today = DateTime.now();
@@ -759,11 +855,11 @@ class ActivityNullableDateTimeProperty extends ActiveType<DateTime?> {
   DateTime? subtract(Duration duration) => _value?.subtract(duration);
 
   // Returns a [Duration] with the difference when subtracting [other] from
-  /// [this].
+  /// `this`.
   ///
-  /// Returns null if [this] is null
+  /// Returns null if `this` is null
   ///
-  /// The returned [Duration] will be negative if [other] occurs after [this].
+  /// The returned [Duration] will be negative if [other] occurs after `this`.
   ///
   /// ```dart
   /// final berlinWallFell = DateTime.utc(1989, DateTime.november, 9);

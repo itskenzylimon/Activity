@@ -17,13 +17,11 @@ class BoolNullTestController extends ActiveController {
 }
 
 class BoolTestView extends ActiveView<BoolTestController> {
-  const BoolTestView({
-    Key? key,
-    required BoolTestController activeController,
-  }) : super(key: key, activeController: activeController);
+  const BoolTestView({Key? key, required BoolTestController activeController})
+    : super(key: key, activeController: activeController);
 
   @override
-  ActiveState<ActiveView<ActiveController>, BoolTestController> createActivity() =>
+  ActiveState<BoolTestView, BoolTestController> createActivity() =>
       _BoolTestState(activeController);
 }
 
@@ -37,11 +35,7 @@ class _BoolTestState extends ActiveState<BoolTestView, BoolTestController> {
         body: Builder(
           builder: (innerContext) {
             return Center(
-              child: Column(
-                children: [
-                  Text('${activeController.switchCase}'),
-                ],
-              ),
+              child: Column(children: [Text('${activeController.switchCase}')]),
             );
           },
         ),
@@ -59,8 +53,9 @@ void main() {
       boolTestView = BoolTestView(activeController: activeController);
     });
 
-    testWidgets('[switchCase] value changes and widget updates.',
-            (tester) async {
+    testWidgets('[switchCase] value changes and widget updates.', (
+      tester,
+    ) async {
       await tester.pumpWidget(boolTestView);
 
       expect(find.text("true"), findsOneWidget);
